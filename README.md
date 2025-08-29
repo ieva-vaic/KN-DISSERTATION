@@ -1,9 +1,9 @@
 # KN-DISSERTATION
 This repository holds scripts form my dissertation figures and analyses
 
-METE_XPRS relates to gene expression (NOTCH, WNT, ARID1A), mehtlation (HOX genes HOPX, ALX and CDX2 and ARID1A) analysis in ovarian tissues
+METE_XPRS relates to gene expression (NOTCH, WNT, ARID1A), methylation (HOX genes HOPX, ALX and CDX2 and ARID1A) analysis in ovarian tissues
 
-Gene mutation relates to CTNNB1 and ARID1A analysis in relation to gene expression and methylation (in the case of ARID1A) analysis  in ovarian tissues
+Gene mutation relates to CTNNB1 and ARID1A mutation analysis in relation to gene expression and methylation (in the case of ARID1A) in ovarian tissues
 
 10 gene panel relates to ovarian tissue analysis of 10 genes selected via analysis of TCGA-OV and GTEx ovarian tissue gene expression data
 
