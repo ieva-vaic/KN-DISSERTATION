@@ -1,0 +1,148 @@
+#KN-DISSERTATION project. Genes selection via statistical analysis of TCGA and GTEx data 
+#(only scripts producing lithuanian figures, included in the dissertation)
+#THIS IS TCGA-OV-RISK-GENES project script No. 14
+#Describe main genes
+# Load packages ##########################################
+Sys.setenv(LANG = "en")
+library(org.Hs.eg.db)
+library(dplyr)
+library(clusterProfiler)
+library(enrichplot)
+library(msigdbr)
+library(tidyverse)
+#set directory of the data
+setwd("../TCGA-OV-RISK-PROJECT/Public data RDSs/")
+# Load train data ###################################
+gtex_counts_train <- readRDS("train_gtcga_normcounts_prot_2025.RDS")
+#filter for lasso genes
+gtex_genes <- readRDS("gtcga_elastic_2025.RDS")
+gtex_filtered_counts_train <- gtex_counts_train[colnames(gtex_counts_train) %in% gtex_genes] 
+
+# Get annotations for 214 genes ##########################
+gene_info <- AnnotationDbi::select(org.Hs.eg.db,
+                                   keys = gtex_genes,
+                                   keytype = "SYMBOL",
+                                   columns = c("SYMBOL", "GENENAME", "ENTREZID", "ENSEMBL"))
+
+head(gene_info)
+# Get annotations for main 10 genes ##########################
+#get genes of interest
+expression <- c( "EXO1",   "RAD50",  "PPT2",   "LUC7L2", "PKP3",
+                 "CDCA5",  "ZFPL1" , "VPS33B", "GRB7",   "TCEAL4")
+gene_info10 <- AnnotationDbi::select(org.Hs.eg.db,
+                                   keys = expression,
+                                   keytype = "SYMBOL",
+                                   columns = c("SYMBOL", "GENENAME", "ENTREZID", "ENSEMBL"))
+
+head(gene_info10)
+
+#Functional enrichment 214 genes#################################
+# Get Entrez IDs
+entrez_ids <- gene_info$ENTREZID
+
+# GO enrichment (Biological Process)
+ego <- enrichGO(gene = entrez_ids,
+                OrgDb = org.Hs.eg.db,
+                ont = "BP",
+                pAdjustMethod = "BH",
+                pvalueCutoff = 0.05,
+                readable = TRUE)
+
+dotplot <- dotplot(ego, showCategory =15) +
+  ggtitle("GO Enrichment for Elastic net selected genes") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+#save dotplot
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/gene_enrichment_20250902.png",
+    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
+dotplot #
+dev.off() # Close the PNG device
+
+
+#Functional enrichment top 10 genes#################################
+# Get Entrez IDs
+entrez_ids2 <- gene_info10$ENTREZID
+
+# GO enrichment (Biological Process)
+ego2 <- enrichGO(gene = entrez_ids2,
+                OrgDb = org.Hs.eg.db,
+                ont = "BP",
+                pAdjustMethod = "BH",
+                pvalueCutoff = 0.05,
+                readable = TRUE)
+#0 enriched terms
+
+#KEGG for 214 LASSO genes ########################
+ekegg <- enrichKEGG(gene = entrez_ids, organism = "hsa")
+dotplot(ekegg, showCategory = 10) +
+  ggtitle("KEGG Enrichment for LASSO selected genes") +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#Get MSigDB gene sets (HALLMARK)##############
+# Use Hallmark (category "H"), or you can change this to C2, C5, etc.
+msig_hallmark <- msigdbr(species = "Homo sapiens", category = "H")
+
+# Prepare TERM2GENE format for enricher()
+msig_term2gene <- msig_hallmark[, c("gs_name", "entrez_gene")]
+
+#enrichment
+enrich_res <- enricher(gene = entrez_ids,
+                       TERM2GENE = msig_term2gene,
+                       pAdjustMethod = "BH",
+                       pvalueCutoff = 0.05)
+dotplot(enrich_res, showCategory = 10) +
+  ggtitle("MSigDB Hallmark Enrichment for LASSO selected genes") +
+  theme_minimal()
+
+#Get MSigDB gene sets from other collections (C4)##############
+View(msigdbr_collections())
+# C4 - 	Oncogenic modules
+msig_hallmark <- msigdbr(species = "Homo sapiens", category = "C4")
+
+# Prepare TERM2GENE format for enricher()
+msig_term2gene <- msig_hallmark[, c("gs_name", "entrez_gene")]
+
+#enrichment
+enrich_res <- enricher(gene = entrez_ids,
+                       TERM2GENE = msig_term2gene,
+                       pAdjustMethod = "BH",
+                       pvalueCutoff = 0.05)
+dotplot(enrich_res, showCategory = 10) +
+  ggtitle("MSigDB Cancer Modules Enrichment for LASSO selected genes") +
+  theme_minimal()
+head(enrich_res@result)
+
+#Get MSigDB gene sets from other collections (C2)##############
+# C2 - 	Kegg
+msig_hallmark <- msigdbr(species = "Homo sapiens", category = "C2")
+
+# Prepare TERM2GENE format for enricher()
+msig_term2gene <- msig_hallmark[, c("gs_name", "entrez_gene")]
+
+#enrichment
+enrich_res <- enricher(gene = entrez_ids,
+                       TERM2GENE = msig_term2gene,
+                       pAdjustMethod = "BH",
+                       pvalueCutoff = 0.05)
+dotplot(enrich_res, showCategory = 10) +
+  ggtitle("MSigDB Cancer Modules Enrichment for LASSO selected genes") +
+  theme_minimal()
+head(enrich_res@result)
+
+# Get annotations for main 10 genes (KEGG) ##########################
+# C2 - 	Kegg
+#get genes of interest
+expression <- c( "EXO1",   "RAD50",  "PPT2",   "LUC7L2", "PKP3",
+                 "CDCA5",  "ZFPL1" , "VPS33B", "GRB7",   "TCEAL4")
+entrez_ids10 <- gene_info10$ENTREZID
+#enrichment
+msig_hallmark <- msigdbr(species = "Homo sapiens", category = "C2")
+enrich_res <- enricher(gene = entrez_ids10,
+                       TERM2GENE = msig_term2gene,
+                       pAdjustMethod = "BH",
+                       pvalueCutoff = 0.05)
+dotplot(enrich_res, showCategory = 10) +
+  ggtitle("MSigDB KEGG Enrichment for 10 selected genes") +
+  theme_minimal()
+head(enrich_res@result)
