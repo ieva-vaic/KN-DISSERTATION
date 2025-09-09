@@ -40,7 +40,7 @@ roc_plot <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor[["EXO1"]], print.auc = F, col = "#dcbeff",
            cex.main=0.8, 
-           main ="Gerybinių patologijų atskyrimas nuo HGSOC",
+           main ="Gerybinių pokyčių atskyrimas nuo HGSOC",
            xlab = "Specifiškumas", 
            ylab = "Jautrumas") #title
   lines(roc_results_tumor[["RAD50"]], col = "#911eb4", lwd =2) 
@@ -103,7 +103,7 @@ gt_table_tumor <- results_tumor %>%
   gt() %>%
   tab_header(
     title = "ROC kriterijai", 
-    subtitle = "Gerybinių patologijų atskyrimas nuo HGSOC") %>%
+    subtitle = "Gerybinių pokyčių atskyrimas nuo HGSOC") %>%
   fmt_number(
     columns = everything(),
     decimals = 3
@@ -137,7 +137,7 @@ table_image1_padded <- image_extent(table_image1, geometry = geometry_area(max_w
 combined_image1 <- image_append(c(roc_image1_padded, table_image1_padded), stack = T)
 # Save the combined image
 image_write(combined_image1, 
-            "10_genes_roc_combined_hgsoc_benign_202507.png")
+            "10_genes_roc_combined_hgsoc_benign_20250909.png")
 
 
 ##CA125 ROC HGSOC vs benign for comparison###################################
@@ -321,7 +321,7 @@ roc_plot3 <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor_OC[["EXO1"]], print.auc = F, col = "#dcbeff",
            cex.main=0.8, 
-           main ="Gerybinių patologijų atskyrimas nuo KV atvejų", 
+           main ="Gerybinių pokyčių atskyrimas nuo KV atvejų", 
            xlab = "Specifiškumas", 
            ylab = "Jautrumas") #title
   lines(roc_results_tumor_OC[["RAD50"]], col = "#911eb4", lwd =2) 
@@ -407,7 +407,7 @@ gt_table_tumor_OC <- results_tumor_OC %>%
   gt() %>%
   tab_header(
     title = "ROC kriterijai",
-    subtitle = "Gerybinių patologijų atskyrimas nuo KV atvejų") %>%
+    subtitle = "Gerybinių pokyčių atskyrimas nuo KV atvejų") %>%
   fmt_number(
     columns = everything(),
     decimals = 3
@@ -431,7 +431,7 @@ combined_image3 <- image_append(c(roc_image3, table_image3), stack = F)
 
 # Save the combined image
 image_write(combined_image3, 
-"10_genes_roc_combined_OC_20250623.png")
+"10_genes_roc_combined_OC_2025060909.png")
 
 #combine HGSOC vs benign ####################################################
 #2 best genes is GRB7 and TCEAL4

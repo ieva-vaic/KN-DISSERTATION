@@ -84,7 +84,7 @@ roc.test(roc_curve_tceal4, roc_curve2)#0.2758
 roc_plot_custom <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_curve2, print.auc = F, col = "deeppink", 
-           cex.main=0.8, main ="Gerybinių patologijų atskyrimas HGSOC atvejų",
+           cex.main=0.8, main ="Gerybinių pokyčių atskyrimas HGSOC atvejų",
            xlab = "Specifiškumas",   # Custom x-axis label 
            ylab = "Jautrumas") #7
   lines(roc_curve10, col = "blue", lwd =2, lty = 2 ) #6
@@ -128,7 +128,7 @@ gt_table_cut <- results_roc_custom %>%
   gt() %>%
   tab_header(
     title = "ROC kriterijai",
-    subtitle = "Gerybinių patologijų atskyrimas nuo HGSOC atvejų",
+    subtitle = "Gerybinių pokyčių atskyrimas nuo HGSOC atvejų",
   ) %>%
   fmt_number(
     columns = everything(),
@@ -163,7 +163,7 @@ combined_image2 <- image_append(c(roc_image2_padded, table_image2_padded), stack
 
 # Save the combined image
 image_write(combined_image2, 
-            "FIG_COMBINED_best3_HGSOC_BENIGN20250718.png")
+            "FIG_COMBINED_best3_HGSOC_BENIGN20250909.png")
 
 #OVCa vs BENIGN MODELS################################################################
 ##manually make combination of the best two OVCa vs benign#####
@@ -210,7 +210,7 @@ coords_ca2Xx
 roc_plot_customx <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_curve2, print.auc = F, col = "lightpink", 
-           cex.main=0.8, main ="Gerybinių patologijų atskyrimas KV atvejų",
+           cex.main=0.8, main ="Gerybinių pokyčių atskyrimas KV atvejų",
            xlab = "Specifiškumas",   # Custom x-axis label 
            ylab = "Jautrumas") #7
   lines(roc_curve10, col = "darkgreen", lwd =2, lty = 2 ) #6
@@ -255,7 +255,7 @@ gt_table_cutx <- results_roc_customx %>%
   gt() %>%
   tab_header(
     title = "ROC kriterijai",
-    subtitle = "Gerybinių patologijų atskyrimas nuo KV atvejų",
+    subtitle = "Gerybinių pokyčių atskyrimas nuo KV atvejų",
   ) %>%
   fmt_number(
     columns = everything(),
@@ -290,7 +290,7 @@ combined_image2x <- image_append(c(roc_image2_paddedx, table_image2_paddedx), st
 
 # Save the combined image
 image_write(combined_image2x, 
-            "FIG_COMBINED_forOC_full_genes20250718.png")
+            "FIG_COMBINED_forOC_full_genes20250909.png")
 
 #HGSOC vs OTHERS MODELS###############################
 ##combination of the best 6 HGSOC vs others#####
