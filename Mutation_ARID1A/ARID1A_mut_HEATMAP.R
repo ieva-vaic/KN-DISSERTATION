@@ -47,6 +47,7 @@ ARID1A_df$ARID1A_tumor_type2 <- ifelse(ARID1A_df$ARID1A_tumor_type == "frameshif
                                       ARID1A_df$ARID1A_tumor_type )
 ARID1A_df$ARID1A_tumor_type2 <- ifelse(ARID1A_df$ARID1A_tumor_type2 == "NA", "Be mutacijų",
                                        ARID1A_df$ARID1A_tumor_type2 )
+ARID1A_df$ARID1A_tumor_type2[is.na(ARID1A_df$ARID1A_tumor_type2)] <- "NA"
 #histology to lt version
 ARID1A_df$Histology <- ifelse(ARID1A_df$Histology %in% c("Endometrial", "Endometriod"), "Endometrioidinis",
                               ARID1A_df$Histology )
@@ -140,9 +141,9 @@ heatmap_raiska <- Heatmap(as.matrix(Heat_data),cluster_columns = TRUE,
                             labels = labels, title_gp = gpar(fontface = "italic")
                           )     # Adjusted labels
 )
-heatmap_raiska
+heatmap_raiska #show
 #save png
-png("heatmap_mut20250711_longwise.png", width = 2000, height = 2500,
+png("heatmap_mut20250909_longwise.png", width = 2000, height = 2500,
     res = 300, units = "px", pointsize = 12) # width and height in pixels, resolution in dpi
 draw(heatmap_raiska)# Render the heatmap
 dev.off() # Close the PNG device
