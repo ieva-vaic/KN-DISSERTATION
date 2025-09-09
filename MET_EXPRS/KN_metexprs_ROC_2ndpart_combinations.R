@@ -134,7 +134,7 @@ coords_ca
 roc_plot_3 <- function() {
 par(pty = "s") #sets square
 plot.roc(roc_curve1, print.auc = F, col = "#911eb4",
-         cex.main=0.8, main ="Gerybinių patologijų atskyrimas nuo KV atvejų",
+         cex.main=0.8, main ="Gerybinių pokyčių atskyrimas nuo KV atvejų",
          xlab = "Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
          ylab = "Jautrumas") #7
 lines(roc_curve1.2, col = "#dcbeff", lwd =2, ) #6
@@ -197,7 +197,7 @@ gt_table <- results_roc1 %>%
   gt() %>%
   tab_header(
     title = "ROC kriterijai",
-    subtitle = "Gerybinių patologijų atskyrimas nuo KV atvejų"
+    subtitle = "Gerybinių pokyčių atskyrimas nuo KV atvejų"
   ) %>%
   fmt_number(
     columns = everything(),
@@ -233,12 +233,18 @@ roc_image2_padded <- image_extent(roc_image2, geometry = geometry_area(max_width
 table_image2_padded <- image_extent(table_image2, geometry = geometry_area(max_width, table_info$height), gravity = "center", color = "white")
 
 # Now append vertically
-combined_image2 <- image_append(c(roc_image2_padded, table_image2_padded), stack = TRUE)
+combined_image2 <- image_append(c(roc_image2_padded, table_image2_padded), stack = T)
 
 # Save the combined image
 image_write(combined_image2, 
-            "metexprs_roc_combinations_OVCa_v2_output20250625.png")
+            "metexprs_roc_combinations_OVCa_v2_output20250909.png")
 
+#non staked version
+combined_image2.2 <- image_append(c(roc_image2, table_image2), stack = F)
+
+# Save the combined image
+image_write(combined_image2.2, 
+            "metexprs_roc_combinations_OVCa_v1_output20250909.png")
 ##delong tests with CA125 OVCa#################################
 roc.test(roc_curve_CA, roc_curve1)#0.03112 10 genes
 roc.test(roc_curve_CA, roc_curve1.2)#0.3226 4 methyl
@@ -341,7 +347,7 @@ coords_ca2
 roc_plot_4 <- function() {
 par(pty = "s") #sets square
 plot.roc(roc_curve2, print.auc = F, col = "#911eb4", lty = 2,
-         cex.main=0.8, main ="Gerybinių patologijų atskyrimas nuo HGSOC atvejų",
+         cex.main=0.8, main ="Gerybinių pokyčių atskyrimas nuo HGSOC atvejų",
          xlab = "Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
          ylab = "Jautrumas") #7
 lines(roc_curve2.2, col = "#dcbeff", lwd =2 ) #6
@@ -401,7 +407,7 @@ gt_table2 <- results_roc2 %>%
   gt() %>%
   tab_header(
     title = "ROC kriterijai", 
-    subtitle = "Gerybinių patologijų atskyrimas nuo HGSOC atvejų",
+    subtitle = "Gerybinių pokyčių atskyrimas nuo HGSOC atvejų",
   ) %>%
   fmt_number(
     columns = everything(),
@@ -437,7 +443,7 @@ combined_image2 <- image_append(c(roc_image2_padded, table_image2_padded), stack
 
 # Save the combined image
 image_write(combined_image2, 
-            "metexprs_Roctable_HGSOC_output20250623.png")
+            "metexprs_Roctable_HGSOC_output20250909.png")
 
 ##delong tests with CA125 HGSOC##########################
 roc.test(roc_curve_CA2, roc_curve2)#0.0397 10 genes

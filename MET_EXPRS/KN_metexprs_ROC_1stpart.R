@@ -76,7 +76,7 @@ roc_plot <- function() {
 par(pty = "s") #sets square
 plot.roc(roc_results_tumor[["NOTCH1"]], print.auc = F, col = "#dcbeff",
          cex.main=0.8,
-         main ="Gerybinių patologijų atskyrimas nuo visų KV atvejų", 
+         main ="Gerybinių pokyčių atskyrimas nuo visų KV atvejų", 
          xlab = "Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
          ylab = "Jautrumas") #7
 lines(roc_results_tumor[["NOTCH2"]], col = "#911eb4", lwd =2) #6
@@ -167,7 +167,7 @@ gt_table_tumor <- tumor_lentele_atskiru %>%
   gt() %>%
   tab_header(
     title = "ROC kriterijai", 
-    subtitle = "Gerybinių patologijų atskyrimas nuo KV atvejų") %>%
+    subtitle = "Gerybinių pokyčių atskyrimas nuo KV atvejų") %>%
   fmt_number(
     columns = everything(),
     decimals = 3
@@ -183,9 +183,9 @@ gt_table_tumor
 gtsave(gt_table_tumor,
        filename = "met_exprs_roctable_OC_output20250623.png")
 
-#Combine the images
-roc_image2<- image_read("met_exprs_roctable_OC_output20250623.png")
-table_image2 <- image_read("met_exprs_roc_OC_output20250623.png")
+#Combine the images 
+roc_image2<- image_read("met_exprs_roc_OC_output20250623.png")
+table_image2 <- image_read("met_exprs_roctable_OC_output20250623.png")
 
 combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
 
@@ -244,7 +244,7 @@ auc_values_tumor_bh #extracted aucs
 roc_plot2 <- function() {
 par(pty = "s") #sets square
 plot.roc(roc_results_tumor_bh[["NOTCH1"]], print.auc = F, col = "#dcbeff",
-         cex.main=0.8, main ="Gerybinių patologijų atskyrimas nuo HGSOC atvejų", 
+         cex.main=0.8, main ="Gerybinių pokyčių atskyrimas nuo HGSOC atvejų", 
          xlab = "Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
          ylab = "Jautrumas") #7
 lines(roc_results_tumor_bh[["NOTCH2"]], col = "#911eb4", lwd =2) #6
@@ -334,7 +334,7 @@ gt_table_tumor_bh <- tumor_lentele_atskiru_bh %>%
   gt() %>%
   tab_header(
     title = "ROC kriterijai", 
-    subtitle = "Gerybinių patologijų atskyrimas nuo HGSOC atvejų") %>%
+    subtitle = "Gerybinių pokyčių atskyrimas nuo HGSOC atvejų") %>%
   fmt_number(
     columns = everything(),
     decimals = 3
@@ -349,9 +349,9 @@ gt_table_tumor_bh
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_tumor_bh, filename = "met_exprs_roctable_HGSOC_output20250623.png")
 
-#Combine the images
-roc_image2<- image_read("met_exprs_roctable_HGSOC_output20250623.png")
-table_image2 <- image_read("met_exrs_roc_HGSOC_output20250530.png")
+#Combine the images 
+roc_image2<- image_read("met_exrs_roc_HGSOC_output20250530.png")
+table_image2 <- image_read("met_exprs_roctable_HGSOC_output20250623.png")
 
 # Find the max width to align both
 roc_info <- image_info(roc_image2)
