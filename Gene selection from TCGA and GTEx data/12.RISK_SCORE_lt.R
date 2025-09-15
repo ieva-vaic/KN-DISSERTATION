@@ -704,10 +704,10 @@ odds1 <- p +geom_text(aes(y = term, x = 50, label = sprintf("%0.2f", round(estim
   labs(title = "Hazard Ratios for Mortality")
 
 
-odds1 # RCC forest plot
+odds1 # forest plot
 
 
-#TCGA - stage, boxplt #############################
+#TCGA - stage, boxplot #############################
 #CREATE GROUPINGS ACCORDING TO DATA#
 table(clin_df_joined$clinicalstage2, useNA ="a")
 
@@ -1036,3 +1036,121 @@ png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_res_barplot_20250619.png",
     width = 2450, height = 1300, res = 170) # width and height in pixels, resolution in dpi
 res_plot #
 dev.off() # Close the PNG device
+
+
+
+#Kaplan-meier plot, sepratae genes##################################
+colnames(clin_df_joined) 
+genes <-  c("EXO1", "RAD50", "PPT2", "LUC7L2", 
+            "PKP3", "CDCA5", "ZFPL1", "VPS33B", 
+            "GRB7", "TCEAL4")
+genes_f <-  paste0(genes, "_f")
+# Calculate the median expressions
+clin_df_joined2 <- clin_df_joined %>%
+  mutate(
+    across(all_of(genes),
+           ~ factor(if_else(. > median(., na.rm = TRUE), "High", "Low")),
+           .names = "{.col}_f")
+  )
+colnames(clin_df_joined2)
+
+##COX REGRESION, UNIVARIATE, using continuous variables######################
+univ_results <- lapply(genes, function(gene) {
+  formula <- as.formula(paste("Surv(overall_survival, deceased) ~", gene))
+  cox_model <- coxph(formula, data = clin_df_joined2)
+  sum_cox <- summary(cox_model)
+  
+  # Extract hazard ratio, 95% CI, and p-value
+  if (!is.null(sum_cox$conf.int)) {
+    data.frame(
+      HR = sum_cox$conf.int[,"exp(coef)"],
+      lower95 = sum_cox$conf.int[,"lower .95"],
+      upper95 = sum_cox$conf.int[,"upper .95"],
+      pvalue = sum_cox$coefficients[,"Pr(>|z|)"]
+    )
+  } else {
+    data.frame(HR = NA, lower95 = NA, upper95 = NA, pvalue = NA)
+  }
+})
+
+# Combine results
+univ_df <- do.call(rbind, univ_results)
+univ_df$Gene <- genes_f
+univ_df <- univ_df[, c("Gene", "HR", "lower95", "upper95", "pvalue")]
+print(univ_df)
+
+##plot KM, separate ###################
+plots_met <- list()
+
+for (gene in genes_f) {
+  # Clean gene name: remove "_f" suffix if present
+  gene_clean <- gsub("_f$", "", gene)
+  
+  # Fit KM survival curve
+  fit <- survfit(as.formula(paste("Surv(overall_survival, deceased) ~", gene)), data = clin_df_joined2)
+  
+  ## --- Extract univariable Cox HR + CI from univ_df ---
+  hr_row_uni <- univ_df[univ_df$Gene == gene, ]
+  if (nrow(hr_row_uni) == 0 || any(is.na(hr_row_uni$HR))) {
+    hr_text_uni <- bquote("HR = NA")
+  } else {
+    hr_text_uni <- bquote("HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f)", 
+                                              hr_row_uni$HR, hr_row_uni$lower95, hr_row_uni$upper95)))
+  }
+  
+  ## --- KM log-rank p-value ---
+  survdiff_res <- survdiff(as.formula(paste("Surv(overall_survival, deceased) ~", gene)), 
+                           data = clin_df_joined2)
+  pval_km <- 1 - pchisq(survdiff_res$chisq, length(survdiff_res$n) - 1)
+  if (pval_km < 0.05) {
+    pval_expr <- bquote(bold("Log-rank p = " ~ .(sprintf("%.3f", pval_km))))
+  } else {
+    pval_expr <- bquote("Log-rank p = " ~ .(sprintf("%.3f", pval_km)))
+  }
+  
+  ## --- Combine HR and log-rank p-value in subtitle ---
+  subtitle_expr <- bquote(.(hr_text_uni) ~ "\n" ~ .(pval_expr))
+  
+  ## --- Legend labels ---
+  legend_labels <- c("Low", "High")
+  
+  ## --- KM plot ---
+  p <- ggsurvplot(
+    fit,
+    data = clin_df_joined2,
+    pval = FALSE,
+    risk.table = TRUE,
+    legend.title = "",
+    palette = c("blue", "red")
+  )$plot +
+    scale_color_manual(
+      values = c("blue", "red"),
+      labels = legend_labels
+    ) +
+    labs(
+      title = bquote(italic(.(gene_clean))),
+      subtitle = subtitle_expr
+    ) +
+    theme(
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      plot.subtitle = element_text(size = 10, hjust = 0.5, lineheight = 1.1)
+    )
+  
+  plots_met[[gene_clean]] <- p  # save using cleaned name
+}
+
+# Combine plots with overall title
+combined_plot <- wrap_plots(plots_met, ncol = 5) +
+  plot_annotation(
+    title = "Survival analysis of train data",
+    theme = theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
+  )
+
+# Save to file
+ggsave(
+  filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/KM_combined_TRAIN_data.png",
+  plot = combined_plot,
+  width = 25,
+  height = 7,
+  dpi = 300
+)
