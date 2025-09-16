@@ -1979,3 +1979,226 @@ png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_TCGA_COEF_hgsoc_2015091
     width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
 test_survplotctga3 #
 dev.off() # Close the PNG device
+
+#TIME ROC, ALL, NOTCH WNT Genes#################
+surv_df_tx <- ALL_SURV_EXPRESSION[, colnames(ALL_SURV_EXPRESSION) %in%
+                                    c("OS", "STATUS", genes_notch, "RiskScore", "patient_id_aud")]
+
+##time rocs for separate NOTCH biomarkers######################################
+coxdf2 <- surv_df_tx[, (colnames(surv_df_tx) %in% genes_notch)]
+dim(coxdf2)
+#make surf df but only of my genes!
+rez_list2 <- apply(coxdf2, 2, timeROC,
+                   T = surv_df_tx$OS,       # Survival time from df
+                   delta =  surv_df_tx$STATUS,# Event indicator from df
+                   #marker  # Predictor already in the df
+                   cause = 1,         # Event of interest
+                   times = t_eval,    # Time points for ROC
+                   iid = TRUE )        # Compute confidence intervals)
+
+auc_table2 <- map_dfr(names(rez_list2), function(gene) {
+  roc <- rez_list2[[gene]]
+  
+  tibble(
+    gene = gene,
+    time = roc$times,
+    cases = roc$cases,
+    survivors = roc$survivors,
+    censored = roc$censored,
+    auc = roc$AUC,
+    se = roc$inference$vect_sd_1
+  )
+})
+
+auc_table2
+
+##plot at year 1  with plotting###############
+# Choose target time
+target_time <- 12        
+time_index2 <- which(rez_list2[[1]]$times == target_time)
+
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_NOTCHtimeROC_12_test20250618.png",
+    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
+# Set up base plot with gene 1
+par(pty="s")
+# Set up base plot with gene 1
+plot(
+  rez_list2[[1]]$FP[, time_index2],
+  rez_list2[[1]]$TP[, time_index2],
+  type = "l",
+  col = 1,
+  lwd = 2,
+  xlab = "Specifiškumas",
+  ylab = "Jautrumas",
+  main = paste("Nuo laiko priklausomos ROC kreivės,
+1 metai po diagnozės audinių imtyje"),
+  xlim = c(0, 1),
+  ylim = c(0, 1),
+  asp = 1
+)
+
+# Add ROC lines for all genes
+for (i in 2:length(rez_list2)) {
+  lines(
+    rez_list2[[i]]$FP[, time_index2],
+    rez_list2[[i]]$TP[, time_index2],
+    col = i,
+    lwd = 2
+  )
+}
+
+
+# Add diagonal reference line
+abline(0, 1, lty = 2, col = "gray")
+
+# Build legend names: italic gene names + "risk score"
+legend_labels <- c(
+  parse(text = paste0("italic('", names(rez_list2), "')")),
+  "Risk Score"
+)
+
+# Get AUCs for each gene at time_index2
+auc_list <- sapply(rez_list2, function(x) x$AUC[time_index2])
+auc_risk <- roc_result$AUC[time_index2]
+
+# Build gene labels with italic names and AUCs
+legend_labels <- mapply(function(name, auc) {
+  paste0("italic('", name, "')~'(AUC = ", sprintf("%.3f", auc), ")'")
+}, names(rez_list2), auc_list)
+
+# Add legend
+legend(
+  "bottomright",
+  legend = parse(text = legend_labels),
+  col = c(1:length(rez_list2), "maroon"),
+  lwd = c(rep(2, length(rez_list2)), 3),
+  cex = 0.6,
+  bty = "n"
+)
+#add A label during png
+#mtext("D", side = 3, line = 2.5, adj = -0.2, font = 2, cex = 1.5)
+
+#run plot
+dev.off() # Close the PNG device
+
+
+##plot at year 3  with plotting###############
+# Choose target time
+target_time <- 36        
+time_index2 <- which(rez_list2[[1]]$times == target_time)
+
+# Choose target time
+target_time <- 36        
+time_index2 <- which(rez_list2[[1]]$times == target_time)
+
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_NOTCHtimeROC_36_test20250618.png",
+    width = 1500, height = 1200, res = 200)
+par(pty="s")
+
+# Base plot with the first gene
+plot(
+  rez_list2[[1]]$FP[, time_index2],
+  rez_list2[[1]]$TP[, time_index2],
+  type = "l",
+  col = 1,
+  lwd = 2,
+  xlab = "Specifiškumas",
+  ylab = "Jautrumas",
+  main = paste("Nuo laiko priklausomos ROC kreivės,\n3 metai po diagnozės audinių imtyje"),
+  xlim = c(0, 1),
+  ylim = c(0, 1),
+  asp = 1
+)
+
+# Add ROC lines for remaining genes
+if(length(rez_list2) > 1){
+  for (i in 2:length(rez_list2)) {
+    lines(
+      rez_list2[[i]]$FP[, time_index2],
+      rez_list2[[i]]$TP[, time_index2],
+      col = i,
+      lwd = 2
+    )
+  }
+}
+
+# Diagonal reference line
+abline(0, 1, lty = 2, col = "gray")
+
+# Build legend labels with italic gene names and AUCs
+auc_list <- sapply(rez_list2, function(x) x$AUC[time_index2])
+legend_labels <- mapply(function(name, auc) {
+  paste0("italic('", name, "')~'(AUC = ", sprintf("%.3f", auc), ")'")
+}, names(rez_list2), auc_list)
+
+# Add legend (no Risk Score)
+legend(
+  "bottomright",
+  legend = parse(text = legend_labels),
+  col = 1:length(rez_list2),
+  lwd = 2,
+  cex = 0.6,
+  bty = "n"
+)
+
+dev.off()
+
+
+##plot at year 5  with plotting###############
+# Choose target time
+target_time <- 60        
+time_index2 <- which(rez_list2[[1]]$times == target_time)
+
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_NOTCH_timeROC_test20250618.png",
+    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
+# Set up base plot with gene 1
+par(pty="s")
+# Set up base plot with gene 1
+plot(
+  rez_list2[[1]]$FP[, time_index2],
+  rez_list2[[1]]$TP[, time_index2],
+  type = "l",
+  col = 1,
+  lwd = 2,
+  xlab = "Specifiškumas",
+  ylab = "Jautrumas",
+  main = paste("Nuo laiko priklausomos ROC kreivės,
+5 metai po diagnozės audinių imtyje"),
+  xlim = c(0, 1),
+  ylim = c(0, 1),
+  asp = 1
+)
+# Add ROC lines for all genes
+for (i in 2:length(rez_list2)) {
+  lines(
+    rez_list2[[i]]$FP[, time_index2],
+    rez_list2[[i]]$TP[, time_index2],
+    col = i,
+    lwd = 2
+  )
+}
+# Add diagonal reference line
+abline(0, 1, lty = 2, col = "gray")
+# Build legend names: italic gene names + "risk score"
+legend_labels <- c(
+  parse(text = paste0("italic('", names(rez_list2), "')")),
+  "Risk Score"
+)
+# Get AUCs for each gene at time_index2
+auc_list <- sapply(rez_list2, function(x) x$AUC[time_index2])
+auc_risk <- roc_result$AUC[time_index2]
+# Build gene labels with italic names and AUCs
+legend_labels <- mapply(function(name, auc) {
+  paste0("italic('", name, "')~'(AUC = ", sprintf("%.3f", auc), ")'")
+}, names(rez_list2), auc_list)
+# Add legend
+legend(
+  "bottomright",
+  legend = parse(text = legend_labels),
+  col = c(1:length(rez_list2), "maroon"),
+  lwd = c(rep(2, length(rez_list2)), 3),
+  cex = 0.6,
+  bty = "n"
+)
+#run plot
+dev.off() # Close the PNG device
