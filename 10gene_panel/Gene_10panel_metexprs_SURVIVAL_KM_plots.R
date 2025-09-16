@@ -15,6 +15,7 @@ library(survivalROC)
 library(purrr)
 library(broom)
 library(dplyr)
+library(timeROC)
 #set wd for plots
 setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
 #get one file for all data
@@ -403,9 +404,8 @@ for (gene in genes_f) {
 
 # Combine plots
 combined_plot3 <- wrap_plots(plots3, ncol = 4)
-#combined_plot3
 
-# Now save
+# save
 ggsave(
   filename = "KM_combined_plot_HGSOC_only_w_HR.png",
   plot = combined_plot3,
@@ -976,9 +976,7 @@ summary(cox_model2)
 summary(cox_model3)
 summary(cox_model4)
 # Run Cox models for all methylation genes
-genes <- c("ARID1A_met", "CDX2", "ALX4", "HOPX")
-
-cox_results <- lapply(genes, function(gene) {
+cox_results <- lapply(methylation, function(gene) {
   formula <- as.formula(paste0("Surv(OS, STATUS) ~ ", gene, " + Age + CA125"))
   model <- coxph(formula, data = ALL_SURV_EXPRESSION)
   s <- summary(model)
@@ -1092,8 +1090,6 @@ ggsave(
   dpi = 300
 )
 #METHYLATION, HGSOC cases#################################
-#methylation genes
-methylation <- c("HOPX", "ALX4", "CDX2", "ARID1A_met")
 str(HGSOC_SURV_EXPRESSION[, colnames(HGSOC_SURV_EXPRESSION) %in% methylation])
 #change methylation back to factor variable
 HGSOC_SURV_EXPRESSION[, methylation] <- lapply(HGSOC_SURV_EXPRESSION[, methylation], function(x) {
@@ -1243,8 +1239,6 @@ ggsave(
 )
 
 #METHYLATION, OC cases#################################
-#methylation genes
-methylation <- c("HOPX", "ALX4", "CDX2", "ARID1A_met")
 str(OC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in% methylation])
 #change methylation back to factor variable
 OC_SURV_EXPRESSION[, methylation] <- lapply(OC_SURV_EXPRESSION[, methylation], function(x) {
@@ -1443,41 +1437,41 @@ test_survplot #
 dev.off() # Close the PNG device
 
 
-#ALL 10 GENES, ALL#####################################################
-gene_data <- ALL_SURV_EXPRESSION[, colnames(ALL_SURV_EXPRESSION) %in% genes10]
+#ALL 10 GENES, HGSOC#####################################################
+gene_dataH <- HGSOC_SURV_EXPRESSION[, colnames(HGSOC_SURV_EXPRESSION) %in% genes10]
 # Example with 3 biomarkers + clinical variables
-cox_model_ALL <- coxph(
+cox_model_HGSOC <- coxph(
   Surv(OS, STATUS) ~ EXO1 + RAD50 + PPT2 + LUC7L2 + PKP3 + CDCA5 + ZFPL1 + VPS33B + GRB7 + TCEAL4,
-  data = ALL_SURV_EXPRESSION
+  data = HGSOC_SURV_EXPRESSION
 )
-summary(cox_model_ALL)
+summary(cox_model_HGSOC)
 #get coeficients
-coefs <- coef(cox_model_ALL)
+coefs <- coef(cox_model_HGSOC)
 # Risk score = sum( gene_expression * coefficient )
-risk_scores_test <- rowSums(sweep(gene_data, 2, coefs, "*"))
+risk_scores_test_h <- rowSums(sweep(gene_dataH, 2, coefs, "*"))
 # View the risk scores
-print(risk_scores_test) # now I have some risk scores
+print(risk_scores_test_h) # now I have some risk scores
 #add risk scores to the clin_df_joined_test
-ALL_SURV_EXPRESSION$RiskScore <- risk_scores_test
+HGSOC_SURV_EXPRESSION$RiskScore <- risk_scores_test_h
 #create df wih survival data
-surv_df_test <- ALL_SURV_EXPRESSION[, colnames(ALL_SURV_EXPRESSION) %in%
+surv_df_test_h <- HGSOC_SURV_EXPRESSION[, colnames(HGSOC_SURV_EXPRESSION) %in%
                                       c("OS", "STATUS", genes10, "RiskScore", "patient_id_aud")]
 
-rownames(surv_df_test) <- surv_df_test$patient_id_aud
+rownames(surv_df_test_h) <- surv_df_test_h$patient_id_aud
 
 # Calculate the median risk score
-median_risk <- median(surv_df_test$RiskScore, na.rm = TRUE) #-7.700461
+median_risk_h <- median(surv_df_test_h$RiskScore, na.rm = TRUE) #-7.700461
 # Create a new factor column based on the median value
-surv_df_test$RiskGroup <- ifelse(surv_df_test$RiskScore <= median_risk,
+surv_df_test_h$RiskGroup <- ifelse(surv_df_test_h$RiskScore <= median_risk_h,
                                         "Low Risk", "High Risk")
 #Create a survival object
-surv_object <- Surv(time = surv_df_test$OS,
-                    event = surv_df_test$STATUS )
+surv_object <- Surv(time = surv_df_test_h$OS,
+                    event = surv_df_test_h$STATUS )
 
 # Fit a Kaplan-Meier model
-km_fit <- survfit(surv_object ~ RiskGroup, data = surv_df_test)
+km_fitH <- survfit(surv_object ~ RiskGroup, data = surv_df_test_h)
 # Plot the Kaplan-Meier curve using ggsurvplot
-test_survplot <- ggsurvplot(km_fit, data = surv_df_test, 
+test_survplotH <- ggsurvplot(km_fitH, data = surv_df_test_h, 
                             pval = TRUE,  # Show p-value of the log-rank test
                             risk.table = TRUE,  # Add risk table below the plot
                             title = "Kaplan-Meier kreivė: Didelės vs. mažos rizikos atvejai KV audinių imtyje",
@@ -1488,9 +1482,9 @@ test_survplot <- ggsurvplot(km_fit, data = surv_df_test,
                             legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
 test_survplot
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_sig_20150915.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_hgsocsig_20150915.png",
     width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
-test_survplot #
+test_survplotH #
 dev.off() # Close the PNG device
 
 
@@ -1855,4 +1849,133 @@ legend(
 #mtext("D", side = 3, line = 2.5, adj = -0.2, font = 2, cex = 1.5)
 
 #run plot
+dev.off() # Close the PNG device
+
+#USE COEFS FROM TCGA FOR RISK SCORE#####################
+coef_tcga <- readRDS("C:/Users/Ieva/rprojects/TCGA-OV-RISK-PROJECT/Public data RDSs/coefs.RDS")
+
+##OC only - genedata2##################################
+# Risk score = sum( gene_expression * coefficient )
+risk_scores_tcga_type2 <- rowSums(sweep(gene_data2, 2, coef_tcga, "*"))
+# View the risk scores
+print(risk_scores_tcga_type2) # now I have some risk scores
+#add risk scores to the clin_df_joined_test
+OC_SURV_EXPRESSION$RiskScore_tcga <- risk_scores_tcga_type2
+#create df wih survival data
+surv_df_tcga_type2 <- OC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in%
+                                           c("OS", "STATUS", genes10, "RiskScore_tcga", "patient_id_aud")]
+
+rownames(surv_df_tcga_type2) <- surv_df_tcga_type2$patient_id_aud
+
+# Calculate the median risk score
+median_risktcga2 <- median(surv_df_tcga_type2$RiskScore_tcga, na.rm = TRUE) #-7.396536
+# Create a new factor column based on the median value
+surv_df_tcga_type2$RiskGrouptcga <- ifelse(surv_df_tcga_type2$RiskScore_tcga <= median_risktcga2,
+                                           "Low Risk", "High Risk")
+#Create a survival object
+surv_objecttcga2 <- Surv(time = surv_df_tcga_type2$OS,
+                         event = surv_df_tcga_type2$STATUS )
+
+# Fit a Kaplan-Meier model
+km_fitctga2 <- survfit(surv_objecttcga2 ~ RiskGrouptcga, data = surv_df_tcga_type2)
+# Plot the Kaplan-Meier curve using ggsurvplot
+test_survplotctga2 <- ggsurvplot(km_fitctga2, data = surv_df_tcga_type2, 
+                                 pval = TRUE,  # Show p-value of the log-rank test
+                                 risk.table = TRUE,  # Add risk table below the plot
+                                 title = "Kaplan-Meier kreivė: Didelės vs. mažos rizikos atvejai KV audinių imtyje",
+                                 xlab = "Bendras išgyvenamumo laikas",
+                                 ylab = "Išgyvenamumo tikimybė",
+                                 palette = c("darkblue", "maroon"),  # Color palette for groups
+                                 legend.title = "Rizikos grupė", 
+                                 legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
+test_survplotctga2
+
+#save
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_TCGA_COEF_OCa_20150915.png",
+    width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
+test_survplotctga2 #
+dev.off() # Close the PNG device
+
+##ALL CASES - genedata#############################
+# Risk score = sum( gene_expression * coefficient )
+risk_scores_tcga_type1 <- rowSums(sweep(gene_data, 2, coef_tcga, "*"))
+# View the risk scores
+print(risk_scores_tcga_type1) # now I have some risk scores
+#add risk scores to the clin_df_joined_test
+ALL_SURV_EXPRESSION$RiskScore_tcga <- risk_scores_tcga_type1
+#create df wih survival data
+surv_df_tcga_type1 <- ALL_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in%
+                                            c("OS", "STATUS", genes10, "RiskScore_tcga", "patient_id_aud")]
+
+rownames(surv_df_tcga_type1) <- surv_df_tcga_type1$patient_id_aud
+
+# Calculate the median risk score
+median_risktcga1 <- median(surv_df_tcga_type1$RiskScore_tcga, na.rm = TRUE) #-7.396536
+# Create a new factor column based on the median value
+surv_df_tcga_type1$RiskGrouptcga <- ifelse(surv_df_tcga_type1$RiskScore_tcga <= median_risktcga1,
+                                           "Low Risk", "High Risk")
+#Create a survival object
+surv_objecttcga1 <- Surv(time = surv_df_tcga_type1$OS,
+                         event = surv_df_tcga_type1$STATUS )
+
+# Fit a Kaplan-Meier model
+km_fitctga1 <- survfit(surv_objecttcga1 ~ RiskGrouptcga, data = surv_df_tcga_type1)
+# Plot the Kaplan-Meier curve using ggsurvplot
+test_survplotctga1 <- ggsurvplot(km_fitctga1, data = surv_df_tcga_type1, 
+                                 pval = TRUE,  # Show p-value of the log-rank test
+                                 risk.table = TRUE,  # Add risk table below the plot
+                                 title = "Kaplan-Meier kreivė: Didelės vs. mažos rizikos atvejai KV audinių imtyje",
+                                 xlab = "Bendras išgyvenamumo laikas",
+                                 ylab = "Išgyvenamumo tikimybė",
+                                 palette = c("darkblue", "maroon"),  # Color palette for groups
+                                 legend.title = "Rizikos grupė", 
+                                 legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
+test_survplotctga1
+
+#save
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_TCGA_COEF_ALL_20150915.png",
+    width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
+test_survplotctga1 #
+dev.off() # Close the PNG device
+
+##HGOSOC CASES - genedataH#############################
+# Risk score = sum( gene_expression * coefficient )
+risk_scores_tcga_type3 <- rowSums(sweep(gene_dataH, 2, coef_tcga, "*"))
+# View the risk scores
+print(risk_scores_tcga_type3) # now I have some risk scores
+#add risk scores to the clin_df_joined_test
+HGSOC_SURV_EXPRESSION$RiskScore_tcga <- risk_scores_tcga_type3
+#create df wih survival data
+surv_df_tcga_type3 <- HGSOC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in%
+                                              c("OS", "STATUS", genes10, "RiskScore_tcga", "patient_id_aud")]
+
+rownames(surv_df_tcga_type3) <- surv_df_tcga_type3$patient_id_aud
+
+# Calculate the median risk score
+median_risktcga3 <- median(surv_df_tcga_type3$RiskScore_tcga, na.rm = TRUE) #-7.396536
+# Create a new factor column based on the median value
+surv_df_tcga_type3$RiskGrouptcga <- ifelse(surv_df_tcga_type3$RiskScore_tcga <= median_risktcga3,
+                                           "Low Risk", "High Risk")
+#Create a survival object
+surv_objecttcga3 <- Surv(time = surv_df_tcga_type3$OS,
+                         event = surv_df_tcga_type3$STATUS )
+
+# Fit a Kaplan-Meier model
+km_fitctga3 <- survfit(surv_objecttcga3 ~ RiskGrouptcga, data = surv_df_tcga_type3)
+# Plot the Kaplan-Meier curve using ggsurvplot
+test_survplotctga3 <- ggsurvplot(km_fitctga3, data = surv_df_tcga_type3, 
+                                 pval = TRUE,  # Show p-value of the log-rank test
+                                 risk.table = TRUE,  # Add risk table below the plot
+                                 title = "Kaplan-Meier kreivė: Didelės vs. mažos rizikos atvejai KV audinių imtyje",
+                                 xlab = "Bendras išgyvenamumo laikas",
+                                 ylab = "Išgyvenamumo tikimybė",
+                                 palette = c("darkblue", "maroon"),  # Color palette for groups
+                                 legend.title = "Rizikos grupė", 
+                                 legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
+test_survplotctga3
+
+#save
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_TCGA_COEF_hgsoc_20150915.png",
+    width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
+test_survplotctga3 #
 dev.off() # Close the PNG device
