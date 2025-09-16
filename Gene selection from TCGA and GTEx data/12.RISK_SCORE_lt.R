@@ -148,9 +148,9 @@ train_surv <- ggsurvplot(km_fit, data = clin_df_joined,
            ylab = "Išgyvenamumo tikimybė",
            palette = c("turquoise", "deeppink"),  # Color palette for groups
            legend.title = "Rizikos grupė", 
-           legend.labs = c("Žema rizika", "Didelė rizika"))
+           legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
 #save km plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_train20250618.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_train20250916.png",
     width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
 train_surv #
 dev.off() # Close the PNG device

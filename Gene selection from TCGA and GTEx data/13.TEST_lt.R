@@ -344,7 +344,7 @@ legend(
 target_time <- 1825        
 time_index <- which(rez_list[[1]]$times == target_time)
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test20250618.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test20250916.png",
     width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
 # Set up base plot with gene 1
 par(pty="s")
@@ -439,9 +439,9 @@ test_survplot <- ggsurvplot(km_fit, data = clin_df_joined_test,
            ylab = "Išgyvenamumo tikimybė",
            palette = c("turquoise", "deeppink"),  # Color palette for groups
            legend.title = "Rizikos grupė", 
-           legend.labs = c("Žema rizika", "Didelė rizika"))
+           legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_test.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_test0916.png",
     width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
 test_survplot #
 dev.off() # Close the PNG device
