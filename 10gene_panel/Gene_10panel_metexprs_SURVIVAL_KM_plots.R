@@ -37,11 +37,31 @@ rownames(ALL_SURV_EXPRESSION) <- ALL_SURV_EXPRESSION$patient_id_aud
 ALL_SURV_EXPRESSION <- ALL_SURV_EXPRESSION%>%
   filter(!is.na(OS), !is.na(STATUS)) #58 observations
 #SURVIVAL DATA##############################################
-#time
-ALL_SURV_EXPRESSION$OS
-#event
+#get descriptive statistics on STATUS
 table(ALL_SURV_EXPRESSION$STATUS, useNA = "a") #19 was dead
-table(ALL_SURV_EXPRESSION$Grupė_Ieva, ALL_SURV_EXPRESSION$STATUS, useNA = "a")
+table(ALL_SURV_EXPRESSION$tumor
+      , ALL_SURV_EXPRESSION$STATUS, useNA = "a")
+fisher.test(table(ALL_SURV_EXPRESSION$tumor
+                  , ALL_SURV_EXPRESSION$STATUS, useNA = "a"))
+
+#get descriptive statistics on OS
+shapiro.test(ALL_SURV_EXPRESSION$OS) #not normal
+median(ALL_SURV_EXPRESSION$OS)
+min(ALL_SURV_EXPRESSION$OS)
+max(ALL_SURV_EXPRESSION$OS)
+ALL_SURV_EXPRESSION %>%
+  filter(tumor != "Benign") %>%
+  pull(OS) %>%
+  median(na.rm = TRUE)
+# t test
+benign_os <- ALL_SURV_EXPRESSION %>%
+  filter(tumor == "Benign") %>%
+  pull(OS)
+malignant_os <- ALL_SURV_EXPRESSION %>%
+  filter(tumor == "OC") %>%
+  pull(OS)
+wilcox.test(benign_os, malignant_os)
+
 #make levels of my gene expression data
 genes <- c("NOTCH1", "NOTCH2", "NOTCH3", "NOTCH4",
            "ARID1A", "CTNNB1", "FBXW7",
@@ -572,7 +592,6 @@ combined_plot_genes_notch_3x <- wrap_plots(plots_genes_notch_3x, ncol = 5)+
       plot.title = element_text(size = 18, face = "bold", hjust = 0.5)
     )
   )
-
 
 #save 10 gene
 ggsave(
@@ -1388,7 +1407,7 @@ ggsave(
 
 #ALL 10 GENES#####################################################
 gene_data <- ALL_SURV_EXPRESSION[, colnames(ALL_SURV_EXPRESSION) %in% genes10]
-# Example with 3 biomarkers + clinical variables
+# Example with 10 biomarkers
 cox_model_ALL <- coxph(
   Surv(OS, STATUS) ~ EXO1 + RAD50 + PPT2 + LUC7L2 + PKP3 + CDCA5 + ZFPL1 + VPS33B + GRB7 + TCEAL4,
   data = ALL_SURV_EXPRESSION
@@ -1439,7 +1458,7 @@ dev.off() # Close the PNG device
 
 #ALL 10 GENES, HGSOC#####################################################
 gene_dataH <- HGSOC_SURV_EXPRESSION[, colnames(HGSOC_SURV_EXPRESSION) %in% genes10]
-# Example with 3 biomarkers + clinical variables
+# Example with 10 biomarkers
 cox_model_HGSOC <- coxph(
   Surv(OS, STATUS) ~ EXO1 + RAD50 + PPT2 + LUC7L2 + PKP3 + CDCA5 + ZFPL1 + VPS33B + GRB7 + TCEAL4,
   data = HGSOC_SURV_EXPRESSION
@@ -1490,7 +1509,7 @@ dev.off() # Close the PNG device
 
 #ALL 10 GENES, OC ONLY#####################################################
 gene_data2 <- OC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in% genes10]
-# Example with 3 biomarkers + clinical variables
+# Example with 10 biomarkers
 cox_model_OC <- coxph(
   Surv(OS, STATUS) ~ EXO1 + RAD50 + PPT2 + LUC7L2 + PKP3 + CDCA5 + ZFPL1 + VPS33B + GRB7 + TCEAL4,
   data = OC_SURV_EXPRESSION
@@ -2202,3 +2221,253 @@ legend(
 )
 #run plot
 dev.off() # Close the PNG device
+
+#LITHUANIAN plot OC METHYLATION ##########################
+plots_met3 <- list()
+
+for (gene in methylation) {
+  # Clean gene name
+  gene_clean <- gene
+  
+  # Fit KM survival curve
+  fit <- survfit(as.formula(paste("Surv(OS, STATUS) ~", gene)), data = OC_SURV_EXPRESSION)
+  
+  ## --- Extract univariable Cox HR + CI from met_univ_df ---
+  hr_row_uni <- met_univ_df3[met_univ_df3$Gene == gene, ]
+  if (nrow(hr_row_uni) == 0 || any(is.na(hr_row_uni$HR))) {
+    hr_text_uni <- bquote("Uni HR = NA")
+  } else {
+    hr_text_uni <- bquote("Uni HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f)", 
+                                                  hr_row_uni$HR, hr_row_uni$lower95, hr_row_uni$upper95)))
+  }
+  
+  ## --- Extract multivariable Cox HR + CI from cox_results_df ---
+  hr_row_multi <- cox_results_df3[cox_results_df3$Gene == gene, ]
+  if (nrow(hr_row_multi) == 0 || any(is.na(hr_row_multi$HR))) {
+    hr_text_multi <- bquote("Multi HR = NA")
+  } else {
+    hr_text_multi <- bquote("Multi HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f)", 
+                                                      hr_row_multi$HR, hr_row_multi$Lower95, hr_row_multi$Upper95)))
+  }
+  
+  ## --- KM log-rank p-value ---
+  survdiff_res <- survdiff(as.formula(paste("Surv(OS, STATUS) ~", gene)), 
+                           data = OC_SURV_EXPRESSION)
+  pval_km <- 1 - pchisq(survdiff_res$chisq, length(survdiff_res$n) - 1)
+  if (pval_km < 0.05) {
+    pval_expr <- bquote(bold("Log-rank p = " ~ .(sprintf("%.3f", pval_km))))
+  } else {
+    pval_expr <- bquote("Log-rank p = " ~ .(sprintf("%.3f", pval_km)))
+  }
+  
+  ## --- Combine Uni HR, Multi HR, and log-rank p-value in subtitle ---
+  subtitle_expr <- bquote(.(hr_text_uni) ~ "; " ~ .(hr_text_multi) ~ "\n" ~ .(pval_expr))
+  
+  ## --- Legend labels ---
+  legend_labels <- c("nemetilintas", "metilintas")
+  
+  ## --- KM plot ---
+  p <- ggsurvplot(
+    fit,
+    data = OC_SURV_EXPRESSION,
+    pval = FALSE,
+    risk.table = TRUE,
+    legend.title = "",
+    palette = c("blue", "red")
+  )$plot +
+    scale_color_manual(
+      values = c("blue", "red"),
+      labels = legend_labels
+    ) +
+    labs(
+      title = bquote(italic(.(gene_clean))),
+      subtitle = subtitle_expr,
+      y = "Išgyvenamumas",
+      x = "Laikas, mėnesiais"
+    ) +
+    theme(
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      plot.subtitle = element_text(size = 10, hjust = 0.5, lineheight = 1.1)
+    )
+  plots_met3[[gene]] <- p
+}
+
+# Combine plots with overall title
+combined_met_plot3 <- wrap_plots(plots_met3, ncol = 4) +
+  plot_annotation(
+    title = "Išgyvenamumo analizė kiaušidžių vėžio grupėje",
+    theme = theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
+  )
+
+# Add a single big "B" at top-left
+bcombined_met_plot3 <- ggdraw(combined_met_plot3) +
+  draw_plot_label(
+    label = "B",
+    x = 0, y = 1,        # top-left corner
+    hjust = -0.2, vjust = 1.2, # adjust to position near title
+    size = 20,
+    fontface = "bold"
+  )
+
+bcombined_met_plot3
+
+# Save to file
+ggsave(
+  filename = "KM_combined_methylation_OC_w_HR_multi0922.png",
+  plot = bcombined_met_plot3,
+  width = 25,
+  height = 5,
+  dpi = 300
+)
+
+#LITHUANIAN PLOT, GENES#################################
+#plot with multi
+plots2x <- list()
+
+for (gene in genes_f) {
+  gene_clean <- sub("_f$", "", gene)
+  
+  # Fit KM survival curve
+  fit <- survfit(as.formula(paste("Surv(OS, STATUS) ~", gene)), 
+                 data = OC_SURV_EXPRESSION)
+  
+  ## --- Univariate HR ---
+  hr_row <- univ_df2[univ_df2$Gene == gene, ]
+  if (nrow(hr_row) == 0 || any(is.na(hr_row$HR))) {
+    hr_text_expr <- bquote("Uni HR = NA")
+  } else {
+    hr_text_expr <- bquote("Uni HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f)", 
+                                  hr_row$HR, hr_row$lower95, hr_row$upper95)))
+  }
+  
+  ## --- KM log-rank p-value ---
+  survdiff_res <- survdiff(as.formula(paste("Surv(OS, STATUS) ~", gene)), 
+                           data = OC_SURV_EXPRESSION)
+  pval_km <- 1 - pchisq(survdiff_res$chisq, length(survdiff_res$n) - 1)
+  if (pval_km < 0.05) {
+    pval_expr <- bquote(bold("Log-rank p = " ~ .(sprintf("%.3f", pval_km))))
+  } else {
+    pval_expr <- bquote("Log-rank p = " ~ .(sprintf("%.3f", pval_km)))
+  }
+  
+  ## --- Multivariable HR (Age + CA125) ---
+  multi_row <- multi_df2[multi_df2$Gene == gene, ]
+  if (nrow(multi_row) == 0 || any(is.na(multi_row$HR))) {
+    hr_multi_expr <- bquote("Multiv HR = NA")
+  } else {
+    # Bold if p < 0.05
+    if (!is.na(multi_row$pvalue) && multi_row$pvalue < 0.05) {
+      hr_multi_expr <- bquote(bold("Multi HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f, N=%d)", 
+                                                              multi_row$HR, multi_row$lower95, 
+                                                              multi_row$upper95, multi_row$N))))
+    } else {
+      hr_multi_expr <- bquote("Multi HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f, N=%d)", 
+                               multi_row$HR, multi_row$lower95, 
+                                                         multi_row$upper95, multi_row$N)))
+    }
+  }
+  
+  ## --- Combine 3 lines in subtitle ---
+  subtitle_expr <- bquote(.(hr_text_expr) ~ "\n" ~ .(pval_expr) ~ "\n" ~ .(hr_multi_expr))
+  
+  ## --- Legend labels ---
+  legend_labels <- c(
+    bquote(italic(.(gene_clean)) ~ " Maža raiška"),
+    bquote(italic(.(gene_clean)) ~ " Didelė raiška")
+  )
+  
+  ## --- KM plot ---
+  p <- ggsurvplot(
+    fit,
+    data = OC_SURV_EXPRESSION,
+    pval = FALSE,
+    risk.table = TRUE,
+    legend.title = "",
+    palette = c("blue", "red")
+  )$plot +
+    scale_color_manual(
+      values = c("blue", "red"),
+      labels = legend_labels
+    ) +
+    labs(
+      title = bquote(italic(.(gene_clean))),
+      subtitle = subtitle_expr,
+      y = "Išgyvenamumas",
+      x = "Laikas, mėnesiais"
+    ) +
+    theme(
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      plot.subtitle = element_text(size = 10, hjust = 0.5, lineheight = 1.1)
+    )
+  
+  plots2x[[gene]] <- p
+}
+
+# Combine plots and add overall title
+combined_plotx2 <- wrap_plots(plots2x, ncol = 4) +
+  plot_annotation(
+    title = "Išgyvenamumo analizė KV grupėje",
+    theme = theme(
+      plot.title = element_text(size = 18, face = "bold", hjust = 0.5)
+    )
+  )
+
+
+###separate the 10 gene expression plot form the notch and wnt ##########
+# Subset plots for the two gene sets
+plots_genes10_2x <- plots2x[names(plots2x) %in% genes10_f]
+plots_genes_notch_2x <- plots2x[names(plots2x) %in% genes_notch_f]
+
+# Combine separately
+combined_plot_genes10_2x <- wrap_plots(plots_genes10_2x, ncol = 5)+
+  plot_annotation(
+    title = "Išgyvenamumo analizė KV grupėje",
+    theme = theme(
+      plot.title = element_text(size = 18, face = "bold", hjust = 0.5)
+    )
+  )
+
+combined_plot_genes_notch_2x <- wrap_plots(plots_genes_notch_2x, ncol = 5)+
+  plot_annotation(
+    title = "Išgyvenamumo analizė KV grupėje",
+    theme = theme(
+      plot.title = element_text(size = 18, face = "bold", hjust = 0.5)
+    )
+  )
+library(cowplot)
+
+# Combine your patchwork plots
+combined_plot <- wrap_plots(plots_genes_notch_2x, ncol = 5) +
+  plot_annotation(
+    title = "Išgyvenamumo analizė KV grupėje",
+    theme = theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
+  )
+
+# Add a single big "A" in the top-left of the whole figure
+final_plot <- ggdraw(combined_plot) +
+  draw_plot_label(
+    label = "A",
+    x = 0, y = 1,      # top-left corner
+    hjust = -0.2, vjust = 1.2,  # adjust position relative to plot
+    size = 20,
+    fontface = "bold"
+  )
+
+final_plot
+
+#save 10 gene
+ggsave(
+  filename = "KM_combined_plot_w_HR_OC_10_gene_20250922LT.png",  # output file name
+  plot = combined_plot_genes10_2x,               # the patchwork plot object
+  width = 35,                         # width in inches
+  height = 10,                        # height in inches
+  dpi = 300                           # resolution
+)
+#save notch
+ggsave(
+  filename = "KM_combined_plot_w_HR_OC_notch_20250922LTXX.png",  # output file name
+  plot = final_plot,               # the patchwork plot object
+  width = 35,                         # width in inches
+  height = 10,                        # height in inches
+  dpi = 300                           # resolution
+)

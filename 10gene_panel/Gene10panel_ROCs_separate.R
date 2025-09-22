@@ -1,6 +1,7 @@
 #KN-DISSERTATION project. 10 gene panel - genes selected via statistical analysis of TCGA and GTEx data
 #KN 10 gene analysis data (cv 2 %, one threshold, 65 cases!, restored KN-59) 2025-02-17
 #ROCs
+Sys.setenv(LANG = "en")
 #libraries:
 library(tidyverse)
 library(pROC)
@@ -158,8 +159,9 @@ roc.test(roc_curve_CA2X, roc_results_tumor[["LUC7L2"]])#0.4331
 roc.test(roc_curve_CA2X, roc_results_tumor[["CDCA5"]]) #0.3579
 roc.test(roc_curve_CA2X, roc_results_tumor[["ZFPL1"]]) #0.6487
 roc.test(roc_curve_CA2X, roc_results_tumor[["VPS33B"]]) #0.5084
-roc.test(roc_curve_CA2X, roc_results_tumor[["GRB7"]]) #0.02912
-roc.test(roc_curve_CA2X, roc_results_tumor[["TCEAL4"]]) # 0.05818
+roc.test(roc_curve_CA2X, roc_results_tumor[["GRB7"]],  method= "b"
+         ) #0.02912
+roc.test(roc_curve_CA2X, roc_results_tumor[["TCEAL4"]], method= "b") # 0.05818
 
 #ROC HGSOC vs OTHERS#########################################################
 #make sure the levels are correct 
@@ -627,3 +629,136 @@ png("10_genes_roc_model10_oc_2025_0305.png",
     width = 500, height = 500, res = 100)
 roc_plot_10oc()
 dev.off()
+
+#HGSOC benign roc plot EN ###########################
+#ROC HGSOC vs BENIGN########################################################
+roc_results_tumor<- lapply(expression, function(col) {
+  roc(response = OC_HGSOC_BENIGN$tumor, predictor = OC_HGSOC_BENIGN[[col]])})
+names(roc_results_tumor) <- expression
+roc_results_tumor
+#extract the aucs
+auc_values_tumor <- sapply(roc_results_tumor, function(roc_obj) {auc(roc_obj)})
+auc_values_tumor #extracted aucs
+
+KN_CA2X <- OC_HGSOC_BENIGN[!is.na(OC_HGSOC_BENIGN$CA125_f), ] #remove empty
+table(KN_CA2X$tumor)
+KN_CA2X$CA125_fN <- as.numeric(factor(KN_CA2X$CA125_f))- 1
+roc_curve_CA2X <- roc(KN_CA2X$tumor, KN_CA2X$CA125_fN , direction = ">")
+plot(roc_curve_CA2X) #auc = 0.765
+auc(roc_curve_CA2X)
+coords_ca2X <- coords(roc_curve_CA2X, "best", ret=c("threshold", "accuracy", "sensitivity", "specificity", "precision", "npv",
+                                                    "tpr", "fpr"), transpose = FALSE)
+coords_ca2X
+
+##PLOT roc HGSOC vs BENIGN #############################################
+roc_plot_en <- function() {
+  par(pty = "s") #sets square
+  plot.roc(roc_results_tumor[["EXO1"]], print.auc = F, col = "#dcbeff",
+           cex.main=0.8, 
+           main ="Separation of Benign ovarian tumors form HGSOC",
+           xlab = "Specificity", 
+           ylab = "Sensitivity") #title
+  lines(roc_results_tumor[["RAD50"]], col = "#911eb4", lwd =2) 
+  lines(roc_results_tumor[["PPT2"]], col ="#ffd8b1", lwd =2) 
+  lines(roc_results_tumor[["LUC7L2"]], col = "#42d4f4", lwd =2) 
+  lines(roc_results_tumor[["PKP3"]], col = "#fabed4", lwd =2) 
+  lines(roc_results_tumor[["CDCA5"]], col = "#f032e6", lwd =2) 
+  lines(roc_results_tumor[["ZFPL1"]], col = "#f58231", lwd =2) 
+  lines(roc_results_tumor[["VPS33B"]], col = "#a9a9a9", lwd =2) 
+  lines(roc_results_tumor[["GRB7"]], col = "#469990", lwd =2) 
+  lines(roc_results_tumor[["TCEAL4"]], col = "#808000", lwd =2) 
+  lines(roc_curve_CA2X, col = "darkgrey", lwd =2) 
+  # Add legend
+  #SUDĖTA NE PAGAL PAVEIKLĄ BET PAGAL AUC DYDI
+  legend("bottomright", legend = c( expression(italic("EXO1")),
+                                    expression(italic("RAD50")),
+                                    expression(italic("PPT2")), 
+                                    expression(italic("LUC7L2")), 
+                                    expression(italic("PKP3")),
+                                    expression(italic("CDCA5")),
+                                    expression(italic("ZFPL1")), 
+                                    expression(italic("VPS33B")),
+                                    expression(italic("GRB7")),
+                                    expression(italic("TCEAL4")),
+                                    "CA125"
+  ),
+  
+  col = c("#dcbeff", "#911eb4", "#ffd8b1", "#42d4f4", "#fabed4",
+          "#f032e6", "#f58231", "#a9a9a9", "#469990", "#808000", "darkgrey"), lty = 1, 
+  cex = 0.7, lwd =3)
+}
+
+roc_plot_en()
+## Save the plot as a PNG file###################################
+png("10_genes_roc_hgsoc_benign_20250922_en.png",
+    width = 1000, height = 1000, res = 200)
+roc_plot_en()
+dev.off()
+
+
+##ROC table HGSOC vs BENIGN################################
+#get roc features
+coords_results_tumor_en <- lapply(roc_results_tumor, function(roc_obj) {
+  coords(roc_obj, "best", ret = c("threshold", "accuracy", "sensitivity",
+                                  "specificity", "precision", "npv", "tpr", "fpr"),
+         transpose = FALSE)
+})
+coords_results_tumor_en
+#create df
+results_tumor_en<- data.frame(
+  Predictor = expression,
+  AUC =  auc_values_tumor,
+  do.call(rbind,coords_results_tumor) 
+)
+
+# Create a new row for CA125
+ca125_row <- data.frame(
+  Predictor = "CA125",
+  AUC = roc_curve_CA2X$auc,
+  coords_ca2X
+)
+
+# Add the new row to the existing data frame
+results_tumor_en <- rbind(results_tumor_en, ca125_row)
+
+
+#nice formating of the Table metrics for ROC OC
+gt_table_tumor_en <- results_tumor %>%
+  gt() %>%
+  tab_header(
+    title = "ROC measures", 
+    subtitle = "Sepratation of Benign ovarian tumors form HGSOC") %>%
+  fmt_number(
+    columns = everything(),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Predictor))
+  )
+#show
+gt_table_tumor_en
+
+#there is no other convenient way to save gt outputs
+gtsave(gt_table_tumor_en,
+       filename = "10_genes_roc_table_hgsoc_benign_20250922en.png")
+
+#Combine the images
+roc_image1en <- image_read("10_genes_roc_hgsoc_benign_20250922_en.png")
+table_image1en <- image_read("10_genes_roc_table_hgsoc_benign_20250922en.png")
+
+combined_image1en <- image_append(c(roc_image1en, table_image1en), stack = F)
+
+# Find the max width to align both
+roc_infoen <- image_info(roc_image1en)
+table_infoen <- image_info(table_image1en)
+max_widthen <- max(roc_infoen$width, table_infoen$width)
+
+# Pad each image to the max width
+roc_image1_paddeden <- image_extent(roc_image1en, geometry = geometry_area(max_widthen, roc_infoen$height), gravity = "center", color = "white")
+table_image1_paddeden <- image_extent(table_image1en, geometry = geometry_area(max_widthen, table_infoen$height), gravity = "center", color = "white")
+#combine
+combined_image1en <- image_append(c(roc_image1_paddeden, table_image1_paddeden), stack = T)
+# Save the combined image
+image_write(combined_image1en, 
+            "10_genes_roc_combined_hgsoc_benign_20250922en.png")

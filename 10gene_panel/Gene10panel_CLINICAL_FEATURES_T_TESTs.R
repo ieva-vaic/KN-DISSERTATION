@@ -18,7 +18,7 @@ library(patchwork)
 #save wd for plots
 setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
 #data###################################################################
-OC_full <- readRDS("C:/Users/Ieva/rprojects/OTHER DATA/KN-DISSERTATION FILES//OC_10_genes_clean_2025_02_14.RDS")
+OC_full <- readRDS("C:/Users/Ieva/rprojects/OTHER DATA/KN-DISSERTATION FILES/OC_10_genes_clean_2025_02_14.RDS")
 #expression genes list
 expression <- c("EXO1", "RAD50","PPT2", "LUC7L2","PKP3", "CDCA5","ZFPL1","VPS33B", "GRB7","TCEAL4")
 
@@ -271,7 +271,7 @@ Stage_plot <- ggplot(Stage_table_hgsoc, aes(x=Stage4 , y=value, fill = variable)
 
 Stage_plot
 
-#EN VERSION STAGE HGOSC
+#EN VERSION STAGE HGSOC
 Stage_plot_EN <- ggplot(Stage_table_hgsoc, aes(x=Stage4 , y=value, fill = variable)) +
   geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = Stage4 )) +
   geom_jitter(aes(color = Stage4 ), size=1, alpha=0.5) +
