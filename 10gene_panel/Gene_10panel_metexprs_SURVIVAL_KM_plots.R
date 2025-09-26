@@ -16,6 +16,7 @@ library(purrr)
 library(broom)
 library(dplyr)
 library(timeROC)
+library(cowplot)
 #set wd for plots
 setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
 #get one file for all data
@@ -27,7 +28,7 @@ SURV <- SURVIVAL_KN[, c(2, 3,20, 21)]
 head(SURV)
 #join with main data
 ALL_SURV_EXPRESSION <- left_join(ALL_EXPRESSION_DF, SURV, by = "patient_id_aud")
-#remove slightly random colums or rename
+#remove random columns or rename
 ALL_SURV_EXPRESSION <-  ALL_SURV_EXPRESSION[, -c(1, 15, 32)]
 ALL_SURV_EXPRESSION <- ALL_SURV_EXPRESSION %>%
   rename(tumor = tumor.y ,
@@ -36,6 +37,51 @@ rownames(ALL_SURV_EXPRESSION) <- ALL_SURV_EXPRESSION$patient_id_aud
 #remove NA from new surv data
 ALL_SURV_EXPRESSION <- ALL_SURV_EXPRESSION%>%
   filter(!is.na(OS), !is.na(STATUS)) #58 observations
+#make levels of my gene expression data
+methylation <- c("ARID1A_met", "CDX2", "ALX4", "HOPX")
+genes <- c("NOTCH1", "NOTCH2", "NOTCH3", "NOTCH4",
+           "ARID1A", "CTNNB1", "FBXW7",
+           "JAG2", "DLL1", "HES1",
+           "EXO1", "RAD50", "PPT2", "LUC7L2", 
+           "PKP3", "CDCA5", "ZFPL1", "VPS33B", 
+           "GRB7", "TCEAL4")
+genes_f <- paste0(genes, "_f")
+genes10 <- c("EXO1", "RAD50", "PPT2", "LUC7L2", 
+             "PKP3", "CDCA5", "ZFPL1", "VPS33B", 
+             "GRB7", "TCEAL4")
+genes_notch <- genes[!genes %in% genes10]  #notch genes
+#in plots i use names with _f so add it
+genes10_f <- paste0(genes10, "_f")
+genes_notch_f <- paste0(genes_notch, "_f")
+
+#make levels of gene expresssion data
+ALL_SURV_EXPRESSION <- ALL_SURV_EXPRESSION %>%
+  mutate(
+    across(all_of(genes),
+           ~ factor(if_else(. > median(., na.rm = TRUE), "High", "Low")),
+           .names = "{.col}_f")
+  )
+
+#rename AGE (comes up later in multivariable cox)
+ALL_SURV_EXPRESSION <- ALL_SURV_EXPRESSION %>%
+  rename(Age = Amžius )
+colnames(ALL_SURV_EXPRESSION)
+
+#make factors
+ALL_SURV_EXPRESSION$Stage2 <- factor(ALL_SURV_EXPRESSION$Stage2)
+ALL_EXPRESSION_DF$Stage4 <- factor(ALL_EXPRESSION_DF$Stage4)
+ALL_EXPRESSION_DF$Grade2 <- factor(ALL_EXPRESSION_DF$Grade2)
+ALL_EXPRESSION_DF$CA125_f <- factor(ALL_EXPRESSION_DF$CA125_f)
+
+#remove non-OC (benign) cases#############################
+OC_SURV_EXPRESSION <- ALL_SURV_EXPRESSION %>%
+  filter(Grupė_Ieva != "Benign") #55 left#
+
+#HGSOC ONLY##########################
+HGSOC_SURV_EXPRESSION <- ALL_SURV_EXPRESSION %>%
+  filter(Grupė_Ieva == "HGSOC") #41 left#
+table(HGSOC_SURV_EXPRESSION$STATUS, useNA = "a") #17 dead
+
 #SURVIVAL DATA##############################################
 #get descriptive statistics on STATUS
 table(ALL_SURV_EXPRESSION$STATUS, useNA = "a") #19 was dead
@@ -61,29 +107,6 @@ malignant_os <- ALL_SURV_EXPRESSION %>%
   filter(tumor == "OC") %>%
   pull(OS)
 wilcox.test(benign_os, malignant_os)
-
-#make levels of my gene expression data
-genes <- c("NOTCH1", "NOTCH2", "NOTCH3", "NOTCH4",
-           "ARID1A", "CTNNB1", "FBXW7",
-           "JAG2", "DLL1", "HES1",
-           "EXO1", "RAD50", "PPT2", "LUC7L2", 
-           "PKP3", "CDCA5", "ZFPL1", "VPS33B", 
-           "GRB7", "TCEAL4")
-genes_f <- paste0(genes, "_f")
-genes10 <- c("EXO1", "RAD50", "PPT2", "LUC7L2", 
-             "PKP3", "CDCA5", "ZFPL1", "VPS33B", 
-             "GRB7", "TCEAL4")
-ALL_SURV_EXPRESSION <- ALL_SURV_EXPRESSION %>%
-  mutate(
-    across(all_of(genes),
-           ~ factor(if_else(. > median(., na.rm = TRUE), "High", "Low")),
-           .names = "{.col}_f")
-  )
-
-#rename AGE (comes up later in multivariable cox)
-ALL_SURV_EXPRESSION <- ALL_SURV_EXPRESSION %>%
-  rename(Age = Amžius )
-colnames(ALL_SURV_EXPRESSION)
 #SURVIVAL OBJECT #####################################################
 # Create a survival object
 surv_obj <- Surv(time = ALL_SURV_EXPRESSION$OS, event = ALL_SURV_EXPRESSION$STATUS)
@@ -191,12 +214,6 @@ ggsave(
 )
 
 ##separate the 10 gene expression plot form the notch and wnt ##########
-genes10 #10 genes
-genes_notch <- genes[!genes %in% genes10]  #notch genes
-#in the plot i use names with _f so add it
-genes10_f <- paste0(genes10, "_f")
-genes_notch_f <- paste0(genes_notch, "_f")
-
 # Subset plots for the two gene sets
 plots_genes10 <- plots[names(plots) %in% genes10_f]
 plots_genes_notch <- plots[names(plots) %in% genes_notch_f]
@@ -225,9 +242,7 @@ ggsave(
   dpi = 300                           # resolution
 )
 
-#remove non-OC (benign) cases#############################
-OC_SURV_EXPRESSION <- ALL_SURV_EXPRESSION %>%
-  filter(Grupė_Ieva != "Benign") #55 left#
+
 ##COX REGRESION, UNIVARIATE, only OC#################################
 univ_results2 <- lapply(genes, function(gene) {
   formula <- as.formula(paste("Surv(OS, STATUS) ~", gene))
@@ -250,7 +265,7 @@ univ_results2 <- lapply(genes, function(gene) {
 # Combine results
 univ_df2 <- do.call(rbind, univ_results2)
 univ_df2$Gene <- genes_f
-univ_df2 <- univ_df[, c("Gene", "HR", "lower95", "upper95", "pvalue")]
+univ_df2 <- univ_df2[, c("Gene", "HR", "lower95", "upper95", "pvalue")]
 print(univ_df2)
 
 ##LONG RANK, KM PLOTS, only OC#############
@@ -329,11 +344,6 @@ ggsave(
   dpi = 300
 )
 
-#HGSOC ONLY##########################
-HGSOC_SURV_EXPRESSION <- ALL_SURV_EXPRESSION %>%
-  filter(Grupė_Ieva == "HGSOC") #41 left#
-table(HGSOC_SURV_EXPRESSION$STATUS, useNA = "a") #17 dead
-
 ##COX REGRESION, UNIVARIATE, HGSOC only ###################
 univ_results3 <- lapply(genes_f, function(gene) {
   formula <- as.formula(paste("Surv(OS, STATUS) ~", gene))
@@ -356,7 +366,7 @@ univ_results3 <- lapply(genes_f, function(gene) {
 # Combine results
 univ_df3 <- do.call(rbind, univ_results3)
 univ_df3$Gene <- genes_f
-univ_df3 <- univ_df[, c("Gene", "HR", "lower95", "upper95", "pvalue")]
+univ_df3 <- univ_df3[, c("Gene", "HR", "lower95", "upper95", "pvalue")]
 print(univ_df3)
 
 ##LONG RANK, KM PLOTS, only HGSOC#############
@@ -438,7 +448,7 @@ ggsave(
 table(ALL_SURV_EXPRESSION$Stage4, ALL_SURV_EXPRESSION$STATUS, useNA = "a") #3 na in stage have status 0
 table(ALL_SURV_EXPRESSION$Grade2, ALL_SURV_EXPRESSION$STATUS, useNA = "a") #grade 11, has status
 table(ALL_SURV_EXPRESSION$CA125_f, ALL_SURV_EXPRESSION$STATUS, useNA = "a") #8 na
-hist(ALL_SURV_EXPRESSION$Age)
+hist(HGSOC_SURV_EXPRESSION$Age) 
 
 ##Multivariable cox, HGSOC only CA125 and AGE#############################
 multi_results <- lapply(genes, function(gene) {
@@ -765,19 +775,19 @@ combined_plot_genes_notch_2x <- wrap_plots(plots_genes_notch_2x, ncol = 5)+
 
 #save 10 gene
 ggsave(
-  filename = "KM_combined_plot_w_HR_OC_10_gene_20250915.png",  # output file name
+  filename = "KM_combined_plot_w_HR_OC_10_gene_20250925.png",  # output file name
   plot = combined_plot_genes10_2x,               # the patchwork plot object
   width = 35,                         # width in inches
   height = 10,                        # height in inches
-  dpi = 300                           # resolution
+  dpi = 400                           # resolution
 )
 #save notch
 ggsave(
-  filename = "KM_combined_plot_w_HR_OC_notch_20250915.png",  # output file name
+  filename = "KM_combined_plot_w_HR_OC_notch_20250925.png",  # output file name
   plot = combined_plot_genes_notch_2x,               # the patchwork plot object
   width = 35,                         # width in inches
   height = 10,                        # height in inches
-  dpi = 300                           # resolution
+  dpi = 400                           # resolution
 )
 
 
@@ -950,8 +960,6 @@ ggsave(
 )
 
 #METHYLATION, all cases#################################
-#methylation genes
-methylation <- c("HOPX", "ALX4", "CDX2", "ARID1A_met")
 str(ALL_SURV_EXPRESSION[, colnames(ALL_SURV_EXPRESSION) %in% methylation])
 #change methylation back to factor variable
 ALL_SURV_EXPRESSION[, methylation] <- lapply(ALL_SURV_EXPRESSION[, methylation], function(x) {
@@ -1405,920 +1413,6 @@ ggsave(
   dpi = 300
 )
 
-#ALL 10 GENES#####################################################
-gene_data <- ALL_SURV_EXPRESSION[, colnames(ALL_SURV_EXPRESSION) %in% genes10]
-# Example with 10 biomarkers
-cox_model_ALL <- coxph(
-  Surv(OS, STATUS) ~ EXO1 + RAD50 + PPT2 + LUC7L2 + PKP3 + CDCA5 + ZFPL1 + VPS33B + GRB7 + TCEAL4,
-  data = ALL_SURV_EXPRESSION
-)
-summary(cox_model_ALL)
-#get coeficients
-coefs <- coef(cox_model_ALL)
-# Risk score = sum( gene_expression * coefficient )
-risk_scores_test <- rowSums(sweep(gene_data, 2, coefs, "*"))
-# View the risk scores
-print(risk_scores_test) # now I have some risk scores
-#add risk scores to the clin_df_joined_test
-ALL_SURV_EXPRESSION$RiskScore <- risk_scores_test
-#create df wih survival data
-surv_df_test <- ALL_SURV_EXPRESSION[, colnames(ALL_SURV_EXPRESSION) %in%
-                                      c("OS", "STATUS", genes10, "RiskScore", "patient_id_aud")]
-
-rownames(surv_df_test) <- surv_df_test$patient_id_aud
-
-# Calculate the median risk score
-median_risk <- median(surv_df_test$RiskScore, na.rm = TRUE) #-7.700461
-# Create a new factor column based on the median value
-surv_df_test$RiskGroup <- ifelse(surv_df_test$RiskScore <= median_risk,
-                                        "Low Risk", "High Risk")
-#Create a survival object
-surv_object <- Surv(time = surv_df_test$OS,
-                    event = surv_df_test$STATUS )
-
-# Fit a Kaplan-Meier model
-km_fit <- survfit(surv_object ~ RiskGroup, data = surv_df_test)
-# Plot the Kaplan-Meier curve using ggsurvplot
-test_survplot <- ggsurvplot(km_fit, data = surv_df_test, 
-                            pval = TRUE,  # Show p-value of the log-rank test
-                            risk.table = TRUE,  # Add risk table below the plot
-                            title = "Kaplan-Meier kreivė: Didelės vs. mažos rizikos atvejai KV audinių imtyje",
-                            xlab = "Bendras išgyvenamumo laikas",
-                            ylab = "Išgyvenamumo tikimybė",
-                            palette = c("turquoise", "deeppink"),  # Color palette for groups
-                            legend.title = "Rizikos grupė", 
-                            legend.labs = c("Žema rizika", "Didelė rizika"))
-test_survplot
-#save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_sig_20150915.png",
-    width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
-test_survplot #
-dev.off() # Close the PNG device
-
-
-#ALL 10 GENES, HGSOC#####################################################
-gene_dataH <- HGSOC_SURV_EXPRESSION[, colnames(HGSOC_SURV_EXPRESSION) %in% genes10]
-# Example with 10 biomarkers
-cox_model_HGSOC <- coxph(
-  Surv(OS, STATUS) ~ EXO1 + RAD50 + PPT2 + LUC7L2 + PKP3 + CDCA5 + ZFPL1 + VPS33B + GRB7 + TCEAL4,
-  data = HGSOC_SURV_EXPRESSION
-)
-summary(cox_model_HGSOC)
-#get coeficients
-coefs <- coef(cox_model_HGSOC)
-# Risk score = sum( gene_expression * coefficient )
-risk_scores_test_h <- rowSums(sweep(gene_dataH, 2, coefs, "*"))
-# View the risk scores
-print(risk_scores_test_h) # now I have some risk scores
-#add risk scores to the clin_df_joined_test
-HGSOC_SURV_EXPRESSION$RiskScore <- risk_scores_test_h
-#create df wih survival data
-surv_df_test_h <- HGSOC_SURV_EXPRESSION[, colnames(HGSOC_SURV_EXPRESSION) %in%
-                                      c("OS", "STATUS", genes10, "RiskScore", "patient_id_aud")]
-
-rownames(surv_df_test_h) <- surv_df_test_h$patient_id_aud
-
-# Calculate the median risk score
-median_risk_h <- median(surv_df_test_h$RiskScore, na.rm = TRUE) #-7.700461
-# Create a new factor column based on the median value
-surv_df_test_h$RiskGroup <- ifelse(surv_df_test_h$RiskScore <= median_risk_h,
-                                        "Low Risk", "High Risk")
-#Create a survival object
-surv_object <- Surv(time = surv_df_test_h$OS,
-                    event = surv_df_test_h$STATUS )
-
-# Fit a Kaplan-Meier model
-km_fitH <- survfit(surv_object ~ RiskGroup, data = surv_df_test_h)
-# Plot the Kaplan-Meier curve using ggsurvplot
-test_survplotH <- ggsurvplot(km_fitH, data = surv_df_test_h, 
-                            pval = TRUE,  # Show p-value of the log-rank test
-                            risk.table = TRUE,  # Add risk table below the plot
-                            title = "Kaplan-Meier kreivė: Didelės vs. mažos rizikos atvejai KV audinių imtyje",
-                            xlab = "Bendras išgyvenamumo laikas",
-                            ylab = "Išgyvenamumo tikimybė",
-                            palette = c("turquoise", "deeppink"),  # Color palette for groups
-                            legend.title = "Rizikos grupė", 
-                            legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
-test_survplot
-#save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_hgsocsig_20150915.png",
-    width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
-test_survplotH #
-dev.off() # Close the PNG device
-
-
-#ALL 10 GENES, OC ONLY#####################################################
-gene_data2 <- OC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in% genes10]
-# Example with 10 biomarkers
-cox_model_OC <- coxph(
-  Surv(OS, STATUS) ~ EXO1 + RAD50 + PPT2 + LUC7L2 + PKP3 + CDCA5 + ZFPL1 + VPS33B + GRB7 + TCEAL4,
-  data = OC_SURV_EXPRESSION
-)
-summary(cox_model_OC)
-#get coeficients
-coefs2 <- coef(cox_model_OC)
-# Risk score = sum( gene_expression * coefficient )
-risk_scores_test2 <- rowSums(sweep(gene_data2, 2, coefs2, "*"))
-# View the risk scores
-print(risk_scores_test2) # now I have some risk scores
-#add risk scores to the clin_df_joined_test
-OC_SURV_EXPRESSION$RiskScore <- risk_scores_test2
-#create df wih survival data
-surv_df_test2 <- OC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in%
-                                      c("OS", "STATUS", genes10, "RiskScore", "patient_id_aud")]
-
-rownames(surv_df_test2) <- surv_df_test2$patient_id_aud
-
-# Calculate the median risk score
-median_risk2 <- median(surv_df_test2$RiskScore, na.rm = TRUE) #-7.396536
-# Create a new factor column based on the median value
-surv_df_test2$RiskGroup <- ifelse(surv_df_test2$RiskScore <= median_risk2,
-                                  "Low Risk", "High Risk")
-#Create a survival object
-surv_object2 <- Surv(time = surv_df_test2$OS,
-                     event = surv_df_test2$STATUS )
-
-# Fit a Kaplan-Meier model
-km_fit2 <- survfit(surv_object2 ~ RiskGroup, data = surv_df_test2)
-# Plot the Kaplan-Meier curve using ggsurvplot
-test_survplot2 <- ggsurvplot(km_fit2, data = surv_df_test2, 
-                             pval = TRUE,  # Show p-value of the log-rank test
-                             risk.table = TRUE,  # Add risk table below the plot
-                             title = "Kaplan-Meier kreivė: Didelės vs. mažos rizikos atvejai KV audinių imtyje",
-                             xlab = "Bendras išgyvenamumo laikas",
-                             ylab = "Išgyvenamumo tikimybė",
-                             palette = c("turquoise", "deeppink"),  # Color palette for groups
-                             legend.title = "Rizikos grupė", 
-                             legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
-test_survplot2
-#save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_OCa_20150915.png",
-    width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
-test_survplot2 #
-dev.off() # Close the PNG device
-
-
-#TIME ROC, Risk score,ALL #######################
-surv_df_test_x <- surv_df_test[!is.na(surv_df_test$RiskScore),] #remove NA
-#create features for timeroc
-nobs <- NROW(surv_df_test_x)
-#make surf df but only of my genes!
-time <- surv_df_test_x$OS
-event <- surv_df_test_x$STATUS
-
-#time roc
-t_eval <- c(12, 36, 60)  # time points
-roc_result <- timeROC(
-  T = time,       # Survival time from df
-  delta = event, # Event indicator from df
-  marker = surv_df_test_x$RiskScore, # Predictor or risk score from df
-  cause = 1,         # Event of interest
-  times = t_eval,    # Time points for ROC
-  iid = TRUE         # Compute confidence intervals
-)
-roc_result
-
-#TIME ROC, Risk score #######################
-surv_df_test_x <- surv_df_test[!is.na(surv_df_test$RiskScore),] #remove NA
-#create features for timeroc
-nobs <- NROW(surv_df_test_x)
-#make surf df but only of my genes!
-time <- surv_df_test_x$OS
-event <- surv_df_test_x$STATUS
-
-#time roc
-t_eval <- c(12, 36, 60)  # time points
-roc_result <- timeROC(
-  T = time,       # Survival time from df
-  delta = event, # Event indicator from df
-  marker = surv_df_test_x$RiskScore, # Predictor or risk score from df
-  cause = 1,         # Event of interest
-  times = t_eval,    # Time points for ROC
-  iid = TRUE         # Compute confidence intervals
-)
-roc_result
-
-##time rocs for separate biomarkers######################################
-coxdf <- surv_df_test_x[, (colnames(surv_df_test_x) %in% genes10)]
-dim(coxdf)
-
-rez_list <- apply(coxdf, 2, timeROC,
-                  T = time,       # Survival time from df
-                  delta = event, # Event indicator from df
-                  #marker  # Predictor already in the df
-                  cause = 1,         # Event of interest
-                  times = t_eval,    # Time points for ROC
-                  iid = TRUE )        # Compute confidence intervals)
-
-auc_table <- map_dfr(names(rez_list), function(gene) {
-  roc <- rez_list[[gene]]
-  
-  tibble(
-    gene = gene,
-    time = roc$times,
-    cases = roc$cases,
-    survivors = roc$survivors,
-    censored = roc$censored,
-    auc = roc$AUC,
-    se = roc$inference$vect_sd_1
-  )
-})
-
-auc_table
-
-##plot at year 1  with plotting###############
-# Choose target time
-target_time <- 12        
-time_index <- which(rez_list[[1]]$times == target_time)
-
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_timeROC_12_test20250618.png",
-    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
-# Set up base plot with gene 1
-par(pty="s")
-# Set up base plot with gene 1
-plot(
-  rez_list[[1]]$FP[, time_index],
-  rez_list[[1]]$TP[, time_index],
-  type = "l",
-  col = 1,
-  lwd = 2,
-  xlab = "Specifiškumas",
-  ylab = "Jautrumas",
-  main = paste("Nuo laiko priklausomos ROC kreivės,
-1 metai po diagnozės audinių imtyje"),
-  xlim = c(0, 1),
-  ylim = c(0, 1),
-  asp = 1
-)
-
-# Add ROC lines for all genes
-for (i in 2:length(rez_list)) {
-  lines(
-    rez_list[[i]]$FP[, time_index],
-    rez_list[[i]]$TP[, time_index],
-    col = i,
-    lwd = 2
-  )
-}
-
-# Add risk score ROC line in bold black
-lines(
-  roc_result$FP[, time_index],
-  roc_result$TP[, time_index],
-  col = "maroon",
-  lwd = 3,
-  lty = 1
-)
-
-# Add diagonal reference line
-abline(0, 1, lty = 2, col = "gray")
-
-# Build legend names: italic gene names + "risk score"
-legend_labels <- c(
-  parse(text = paste0("italic('", names(rez_list), "')")),
-  "Risk Score"
-)
-
-# Get AUCs for each gene at time_index
-auc_list <- sapply(rez_list, function(x) x$AUC[time_index])
-auc_risk <- roc_result$AUC[time_index]
-
-# Build gene labels with italic names and AUCs
-legend_labels <- mapply(function(name, auc) {
-  paste0("italic('", name, "')~'(AUC = ", sprintf("%.3f", auc), ")'")
-}, names(rez_list), auc_list)
-
-# Add risk score with AUC
-legend_labels <- c(legend_labels,
-                   paste0("'Risk Score (AUC = ", sprintf("%.3f", auc_risk), ")'"))
-
-# Add legend
-legend(
-  "bottomright",
-  legend = parse(text = legend_labels),
-  col = c(1:length(rez_list), "maroon"),
-  lwd = c(rep(2, length(rez_list)), 3),
-  cex = 0.6,
-  bty = "n"
-)
-#add A label during png
-#mtext("D", side = 3, line = 2.5, adj = -0.2, font = 2, cex = 1.5)
-
-#run plot
-dev.off() # Close the PNG device
-
-
-##plot at year 3  with plotting###############
-# Choose target time
-target_time <- 36        
-time_index <- which(rez_list[[1]]$times == target_time)
-
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_timeROC_36_test20250618.png",
-    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
-# Set up base plot with gene 1
-par(pty="s")
-# Set up base plot with gene 1
-plot(
-  rez_list[[1]]$FP[, time_index],
-  rez_list[[1]]$TP[, time_index],
-  type = "l",
-  col = 1,
-  lwd = 2,
-  xlab = "Specifiškumas",
-  ylab = "Jautrumas",
-  main = paste("Nuo laiko priklausomos ROC kreivės,
-3 metai po diagnozės audinių imtyje"),
-  xlim = c(0, 1),
-  ylim = c(0, 1),
-  asp = 1
-)
-
-# Add ROC lines for all genes
-for (i in 2:length(rez_list)) {
-  lines(
-    rez_list[[i]]$FP[, time_index],
-    rez_list[[i]]$TP[, time_index],
-    col = i,
-    lwd = 2
-  )
-}
-
-# Add risk score ROC line in bold black
-lines(
-  roc_result$FP[, time_index],
-  roc_result$TP[, time_index],
-  col = "maroon",
-  lwd = 3,
-  lty = 1
-)
-
-# Add diagonal reference line
-abline(0, 1, lty = 2, col = "gray")
-
-# Build legend names: italic gene names + "risk score"
-legend_labels <- c(
-  parse(text = paste0("italic('", names(rez_list), "')")),
-  "Risk Score"
-)
-
-# Get AUCs for each gene at time_index
-auc_list <- sapply(rez_list, function(x) x$AUC[time_index])
-auc_risk <- roc_result$AUC[time_index]
-
-# Build gene labels with italic names and AUCs
-legend_labels <- mapply(function(name, auc) {
-  paste0("italic('", name, "')~'(AUC = ", sprintf("%.3f", auc), ")'")
-}, names(rez_list), auc_list)
-
-# Add risk score with AUC
-legend_labels <- c(legend_labels,
-                   paste0("'Risk Score (AUC = ", sprintf("%.3f", auc_risk), ")'"))
-
-# Add legend
-legend(
-  "bottomright",
-  legend = parse(text = legend_labels),
-  col = c(1:length(rez_list), "maroon"),
-  lwd = c(rep(2, length(rez_list)), 3),
-  cex = 0.6,
-  bty = "n"
-)
-#add A label during png
-#mtext("D", side = 3, line = 2.5, adj = -0.2, font = 2, cex = 1.5)
-
-#run plot
-dev.off() # Close the PNG device
-
-##plot at year 5  with plotting###############
-# Choose target time
-target_time <- 60        
-time_index <- which(rez_list[[1]]$times == target_time)
-
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_timeROC_test20250618.png",
-    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
-# Set up base plot with gene 1
-par(pty="s")
-# Set up base plot with gene 1
-plot(
-  rez_list[[1]]$FP[, time_index],
-  rez_list[[1]]$TP[, time_index],
-  type = "l",
-  col = 1,
-  lwd = 2,
-  xlab = "Specifiškumas",
-  ylab = "Jautrumas",
-  main = paste("Nuo laiko priklausomos ROC kreivės,
-5 metai po diagnozės audinių imtyje"),
-  xlim = c(0, 1),
-  ylim = c(0, 1),
-  asp = 1
-)
-
-# Add ROC lines for all genes
-for (i in 2:length(rez_list)) {
-  lines(
-    rez_list[[i]]$FP[, time_index],
-    rez_list[[i]]$TP[, time_index],
-    col = i,
-    lwd = 2
-  )
-}
-
-# Add risk score ROC line in bold black
-lines(
-  roc_result$FP[, time_index],
-  roc_result$TP[, time_index],
-  col = "maroon",
-  lwd = 3,
-  lty = 1
-)
-
-# Add diagonal reference line
-abline(0, 1, lty = 2, col = "gray")
-
-# Build legend names: italic gene names + "risk score"
-legend_labels <- c(
-  parse(text = paste0("italic('", names(rez_list), "')")),
-  "Risk Score"
-)
-
-# Get AUCs for each gene at time_index
-auc_list <- sapply(rez_list, function(x) x$AUC[time_index])
-auc_risk <- roc_result$AUC[time_index]
-
-# Build gene labels with italic names and AUCs
-legend_labels <- mapply(function(name, auc) {
-  paste0("italic('", name, "')~'(AUC = ", sprintf("%.3f", auc), ")'")
-}, names(rez_list), auc_list)
-
-# Add risk score with AUC
-legend_labels <- c(legend_labels,
-                   paste0("'Risk Score (AUC = ", sprintf("%.3f", auc_risk), ")'"))
-
-# Add legend
-legend(
-  "bottomright",
-  legend = parse(text = legend_labels),
-  col = c(1:length(rez_list), "maroon"),
-  lwd = c(rep(2, length(rez_list)), 3),
-  cex = 0.6,
-  bty = "n"
-)
-#add A label during png
-#mtext("D", side = 3, line = 2.5, adj = -0.2, font = 2, cex = 1.5)
-
-#run plot
-dev.off() # Close the PNG device
-
-#USE COEFS FROM TCGA FOR RISK SCORE#####################
-coef_tcga <- readRDS("C:/Users/Ieva/rprojects/TCGA-OV-RISK-PROJECT/Public data RDSs/coefs.RDS")
-
-##OC only - genedata2##################################
-# Risk score = sum( gene_expression * coefficient )
-risk_scores_tcga_type2 <- rowSums(sweep(gene_data2, 2, coef_tcga, "*"))
-# View the risk scores
-print(risk_scores_tcga_type2) # now I have some risk scores
-#add risk scores to the clin_df_joined_test
-OC_SURV_EXPRESSION$RiskScore_tcga <- risk_scores_tcga_type2
-#create df wih survival data
-surv_df_tcga_type2 <- OC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in%
-                                           c("OS", "STATUS", genes10, "RiskScore_tcga", "patient_id_aud")]
-
-rownames(surv_df_tcga_type2) <- surv_df_tcga_type2$patient_id_aud
-
-# Calculate the median risk score
-median_risktcga2 <- median(surv_df_tcga_type2$RiskScore_tcga, na.rm = TRUE) #-7.396536
-# Create a new factor column based on the median value
-surv_df_tcga_type2$RiskGrouptcga <- ifelse(surv_df_tcga_type2$RiskScore_tcga <= median_risktcga2,
-                                           "Low Risk", "High Risk")
-#Create a survival object
-surv_objecttcga2 <- Surv(time = surv_df_tcga_type2$OS,
-                         event = surv_df_tcga_type2$STATUS )
-
-# Fit a Kaplan-Meier model
-km_fitctga2 <- survfit(surv_objecttcga2 ~ RiskGrouptcga, data = surv_df_tcga_type2)
-# Plot the Kaplan-Meier curve using ggsurvplot
-test_survplotctga2 <- ggsurvplot(km_fitctga2, data = surv_df_tcga_type2, 
-                                 pval = TRUE,  # Show p-value of the log-rank test
-                                 risk.table = TRUE,  # Add risk table below the plot
-                                 title = "Kaplan-Meier kreivė: Didelės vs. mažos rizikos atvejai KV audinių imtyje",
-                                 xlab = "Bendras išgyvenamumo laikas",
-                                 ylab = "Išgyvenamumo tikimybė",
-                                 palette = c("darkblue", "maroon"),  # Color palette for groups
-                                 legend.title = "Rizikos grupė", 
-                                 legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
-test_survplotctga2
-
-#save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_TCGA_COEF_OCa_20150915.png",
-    width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
-test_survplotctga2 #
-dev.off() # Close the PNG device
-
-##ALL CASES - genedata#############################
-# Risk score = sum( gene_expression * coefficient )
-risk_scores_tcga_type1 <- rowSums(sweep(gene_data, 2, coef_tcga, "*"))
-# View the risk scores
-print(risk_scores_tcga_type1) # now I have some risk scores
-#add risk scores to the clin_df_joined_test
-ALL_SURV_EXPRESSION$RiskScore_tcga <- risk_scores_tcga_type1
-#create df wih survival data
-surv_df_tcga_type1 <- ALL_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in%
-                                            c("OS", "STATUS", genes10, "RiskScore_tcga", "patient_id_aud")]
-
-rownames(surv_df_tcga_type1) <- surv_df_tcga_type1$patient_id_aud
-
-# Calculate the median risk score
-median_risktcga1 <- median(surv_df_tcga_type1$RiskScore_tcga, na.rm = TRUE) #-7.396536
-# Create a new factor column based on the median value
-surv_df_tcga_type1$RiskGrouptcga <- ifelse(surv_df_tcga_type1$RiskScore_tcga <= median_risktcga1,
-                                           "Low Risk", "High Risk")
-#Create a survival object
-surv_objecttcga1 <- Surv(time = surv_df_tcga_type1$OS,
-                         event = surv_df_tcga_type1$STATUS )
-
-# Fit a Kaplan-Meier model
-km_fitctga1 <- survfit(surv_objecttcga1 ~ RiskGrouptcga, data = surv_df_tcga_type1)
-# Plot the Kaplan-Meier curve using ggsurvplot
-test_survplotctga1 <- ggsurvplot(km_fitctga1, data = surv_df_tcga_type1, 
-                                 pval = TRUE,  # Show p-value of the log-rank test
-                                 risk.table = TRUE,  # Add risk table below the plot
-                                 title = "Kaplan-Meier kreivė: Didelės vs. mažos rizikos atvejai KV audinių imtyje",
-                                 xlab = "Bendras išgyvenamumo laikas",
-                                 ylab = "Išgyvenamumo tikimybė",
-                                 palette = c("darkblue", "maroon"),  # Color palette for groups
-                                 legend.title = "Rizikos grupė", 
-                                 legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
-test_survplotctga1
-
-#save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_TCGA_COEF_ALL_20150915.png",
-    width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
-test_survplotctga1 #
-dev.off() # Close the PNG device
-
-##HGOSOC CASES - genedataH#############################
-# Risk score = sum( gene_expression * coefficient )
-risk_scores_tcga_type3 <- rowSums(sweep(gene_dataH, 2, coef_tcga, "*"))
-# View the risk scores
-print(risk_scores_tcga_type3) # now I have some risk scores
-#add risk scores to the clin_df_joined_test
-HGSOC_SURV_EXPRESSION$RiskScore_tcga <- risk_scores_tcga_type3
-#create df wih survival data
-surv_df_tcga_type3 <- HGSOC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in%
-                                              c("OS", "STATUS", genes10, "RiskScore_tcga", "patient_id_aud")]
-
-rownames(surv_df_tcga_type3) <- surv_df_tcga_type3$patient_id_aud
-
-# Calculate the median risk score
-median_risktcga3 <- median(surv_df_tcga_type3$RiskScore_tcga, na.rm = TRUE) #-7.396536
-# Create a new factor column based on the median value
-surv_df_tcga_type3$RiskGrouptcga <- ifelse(surv_df_tcga_type3$RiskScore_tcga <= median_risktcga3,
-                                           "Low Risk", "High Risk")
-#Create a survival object
-surv_objecttcga3 <- Surv(time = surv_df_tcga_type3$OS,
-                         event = surv_df_tcga_type3$STATUS )
-
-# Fit a Kaplan-Meier model
-km_fitctga3 <- survfit(surv_objecttcga3 ~ RiskGrouptcga, data = surv_df_tcga_type3)
-# Plot the Kaplan-Meier curve using ggsurvplot
-test_survplotctga3 <- ggsurvplot(km_fitctga3, data = surv_df_tcga_type3, 
-                                 pval = TRUE,  # Show p-value of the log-rank test
-                                 risk.table = TRUE,  # Add risk table below the plot
-                                 title = "Kaplan-Meier kreivė: Didelės vs. mažos rizikos atvejai KV audinių imtyje",
-                                 xlab = "Bendras išgyvenamumo laikas",
-                                 ylab = "Išgyvenamumo tikimybė",
-                                 palette = c("darkblue", "maroon"),  # Color palette for groups
-                                 legend.title = "Rizikos grupė", 
-                                 legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
-test_survplotctga3
-
-#save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_TCGA_COEF_hgsoc_20150915.png",
-    width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
-test_survplotctga3 #
-dev.off() # Close the PNG device
-
-#TIME ROC, ALL, NOTCH WNT Genes#################
-surv_df_tx <- ALL_SURV_EXPRESSION[, colnames(ALL_SURV_EXPRESSION) %in%
-                                    c("OS", "STATUS", genes_notch, "RiskScore", "patient_id_aud")]
-
-##time rocs for separate NOTCH biomarkers######################################
-coxdf2 <- surv_df_tx[, (colnames(surv_df_tx) %in% genes_notch)]
-dim(coxdf2)
-#make surf df but only of my genes!
-rez_list2 <- apply(coxdf2, 2, timeROC,
-                   T = surv_df_tx$OS,       # Survival time from df
-                   delta =  surv_df_tx$STATUS,# Event indicator from df
-                   #marker  # Predictor already in the df
-                   cause = 1,         # Event of interest
-                   times = t_eval,    # Time points for ROC
-                   iid = TRUE )        # Compute confidence intervals)
-
-auc_table2 <- map_dfr(names(rez_list2), function(gene) {
-  roc <- rez_list2[[gene]]
-  
-  tibble(
-    gene = gene,
-    time = roc$times,
-    cases = roc$cases,
-    survivors = roc$survivors,
-    censored = roc$censored,
-    auc = roc$AUC,
-    se = roc$inference$vect_sd_1
-  )
-})
-
-auc_table2
-
-##plot at year 1  with plotting###############
-# Choose target time
-target_time <- 12        
-time_index2 <- which(rez_list2[[1]]$times == target_time)
-
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_NOTCHtimeROC_12_test20250618.png",
-    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
-# Set up base plot with gene 1
-par(pty="s")
-# Set up base plot with gene 1
-plot(
-  rez_list2[[1]]$FP[, time_index2],
-  rez_list2[[1]]$TP[, time_index2],
-  type = "l",
-  col = 1,
-  lwd = 2,
-  xlab = "Specifiškumas",
-  ylab = "Jautrumas",
-  main = paste("Nuo laiko priklausomos ROC kreivės,
-1 metai po diagnozės audinių imtyje"),
-  xlim = c(0, 1),
-  ylim = c(0, 1),
-  asp = 1
-)
-
-# Add ROC lines for all genes
-for (i in 2:length(rez_list2)) {
-  lines(
-    rez_list2[[i]]$FP[, time_index2],
-    rez_list2[[i]]$TP[, time_index2],
-    col = i,
-    lwd = 2
-  )
-}
-
-
-# Add diagonal reference line
-abline(0, 1, lty = 2, col = "gray")
-
-# Build legend names: italic gene names + "risk score"
-legend_labels <- c(
-  parse(text = paste0("italic('", names(rez_list2), "')")),
-  "Risk Score"
-)
-
-# Get AUCs for each gene at time_index2
-auc_list <- sapply(rez_list2, function(x) x$AUC[time_index2])
-auc_risk <- roc_result$AUC[time_index2]
-
-# Build gene labels with italic names and AUCs
-legend_labels <- mapply(function(name, auc) {
-  paste0("italic('", name, "')~'(AUC = ", sprintf("%.3f", auc), ")'")
-}, names(rez_list2), auc_list)
-
-# Add legend
-legend(
-  "bottomright",
-  legend = parse(text = legend_labels),
-  col = c(1:length(rez_list2), "maroon"),
-  lwd = c(rep(2, length(rez_list2)), 3),
-  cex = 0.6,
-  bty = "n"
-)
-#add A label during png
-#mtext("D", side = 3, line = 2.5, adj = -0.2, font = 2, cex = 1.5)
-
-#run plot
-dev.off() # Close the PNG device
-
-
-##plot at year 3  with plotting###############
-# Choose target time
-target_time <- 36        
-time_index2 <- which(rez_list2[[1]]$times == target_time)
-
-# Choose target time
-target_time <- 36        
-time_index2 <- which(rez_list2[[1]]$times == target_time)
-
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_NOTCHtimeROC_36_test20250618.png",
-    width = 1500, height = 1200, res = 200)
-par(pty="s")
-
-# Base plot with the first gene
-plot(
-  rez_list2[[1]]$FP[, time_index2],
-  rez_list2[[1]]$TP[, time_index2],
-  type = "l",
-  col = 1,
-  lwd = 2,
-  xlab = "Specifiškumas",
-  ylab = "Jautrumas",
-  main = paste("Nuo laiko priklausomos ROC kreivės,\n3 metai po diagnozės audinių imtyje"),
-  xlim = c(0, 1),
-  ylim = c(0, 1),
-  asp = 1
-)
-
-# Add ROC lines for remaining genes
-if(length(rez_list2) > 1){
-  for (i in 2:length(rez_list2)) {
-    lines(
-      rez_list2[[i]]$FP[, time_index2],
-      rez_list2[[i]]$TP[, time_index2],
-      col = i,
-      lwd = 2
-    )
-  }
-}
-
-# Diagonal reference line
-abline(0, 1, lty = 2, col = "gray")
-
-# Build legend labels with italic gene names and AUCs
-auc_list <- sapply(rez_list2, function(x) x$AUC[time_index2])
-legend_labels <- mapply(function(name, auc) {
-  paste0("italic('", name, "')~'(AUC = ", sprintf("%.3f", auc), ")'")
-}, names(rez_list2), auc_list)
-
-# Add legend (no Risk Score)
-legend(
-  "bottomright",
-  legend = parse(text = legend_labels),
-  col = 1:length(rez_list2),
-  lwd = 2,
-  cex = 0.6,
-  bty = "n"
-)
-
-dev.off()
-
-
-##plot at year 5  with plotting###############
-# Choose target time
-target_time <- 60        
-time_index2 <- which(rez_list2[[1]]$times == target_time)
-
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_NOTCH_timeROC_test20250618.png",
-    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
-# Set up base plot with gene 1
-par(pty="s")
-# Set up base plot with gene 1
-plot(
-  rez_list2[[1]]$FP[, time_index2],
-  rez_list2[[1]]$TP[, time_index2],
-  type = "l",
-  col = 1,
-  lwd = 2,
-  xlab = "Specifiškumas",
-  ylab = "Jautrumas",
-  main = paste("Nuo laiko priklausomos ROC kreivės,
-5 metai po diagnozės audinių imtyje"),
-  xlim = c(0, 1),
-  ylim = c(0, 1),
-  asp = 1
-)
-# Add ROC lines for all genes
-for (i in 2:length(rez_list2)) {
-  lines(
-    rez_list2[[i]]$FP[, time_index2],
-    rez_list2[[i]]$TP[, time_index2],
-    col = i,
-    lwd = 2
-  )
-}
-# Add diagonal reference line
-abline(0, 1, lty = 2, col = "gray")
-# Build legend names: italic gene names + "risk score"
-legend_labels <- c(
-  parse(text = paste0("italic('", names(rez_list2), "')")),
-  "Risk Score"
-)
-# Get AUCs for each gene at time_index2
-auc_list <- sapply(rez_list2, function(x) x$AUC[time_index2])
-auc_risk <- roc_result$AUC[time_index2]
-# Build gene labels with italic names and AUCs
-legend_labels <- mapply(function(name, auc) {
-  paste0("italic('", name, "')~'(AUC = ", sprintf("%.3f", auc), ")'")
-}, names(rez_list2), auc_list)
-# Add legend
-legend(
-  "bottomright",
-  legend = parse(text = legend_labels),
-  col = c(1:length(rez_list2), "maroon"),
-  lwd = c(rep(2, length(rez_list2)), 3),
-  cex = 0.6,
-  bty = "n"
-)
-#run plot
-dev.off() # Close the PNG device
-
-#LITHUANIAN plot OC METHYLATION ##########################
-plots_met3 <- list()
-
-for (gene in methylation) {
-  # Clean gene name
-  gene_clean <- gene
-  
-  # Fit KM survival curve
-  fit <- survfit(as.formula(paste("Surv(OS, STATUS) ~", gene)), data = OC_SURV_EXPRESSION)
-  
-  ## --- Extract univariable Cox HR + CI from met_univ_df ---
-  hr_row_uni <- met_univ_df3[met_univ_df3$Gene == gene, ]
-  if (nrow(hr_row_uni) == 0 || any(is.na(hr_row_uni$HR))) {
-    hr_text_uni <- bquote("Uni HR = NA")
-  } else {
-    hr_text_uni <- bquote("Uni HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f)", 
-                                                  hr_row_uni$HR, hr_row_uni$lower95, hr_row_uni$upper95)))
-  }
-  
-  ## --- Extract multivariable Cox HR + CI from cox_results_df ---
-  hr_row_multi <- cox_results_df3[cox_results_df3$Gene == gene, ]
-  if (nrow(hr_row_multi) == 0 || any(is.na(hr_row_multi$HR))) {
-    hr_text_multi <- bquote("Multi HR = NA")
-  } else {
-    hr_text_multi <- bquote("Multi HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f)", 
-                                                      hr_row_multi$HR, hr_row_multi$Lower95, hr_row_multi$Upper95)))
-  }
-  
-  ## --- KM log-rank p-value ---
-  survdiff_res <- survdiff(as.formula(paste("Surv(OS, STATUS) ~", gene)), 
-                           data = OC_SURV_EXPRESSION)
-  pval_km <- 1 - pchisq(survdiff_res$chisq, length(survdiff_res$n) - 1)
-  if (pval_km < 0.05) {
-    pval_expr <- bquote(bold("Log-rank p = " ~ .(sprintf("%.3f", pval_km))))
-  } else {
-    pval_expr <- bquote("Log-rank p = " ~ .(sprintf("%.3f", pval_km)))
-  }
-  
-  ## --- Combine Uni HR, Multi HR, and log-rank p-value in subtitle ---
-  subtitle_expr <- bquote(.(hr_text_uni) ~ "; " ~ .(hr_text_multi) ~ "\n" ~ .(pval_expr))
-  
-  ## --- Legend labels ---
-  legend_labels <- c("nemetilintas", "metilintas")
-  
-  ## --- KM plot ---
-  p <- ggsurvplot(
-    fit,
-    data = OC_SURV_EXPRESSION,
-    pval = FALSE,
-    risk.table = TRUE,
-    legend.title = "",
-    palette = c("blue", "red")
-  )$plot +
-    scale_color_manual(
-      values = c("blue", "red"),
-      labels = legend_labels
-    ) +
-    labs(
-      title = bquote(italic(.(gene_clean))),
-      subtitle = subtitle_expr,
-      y = "Išgyvenamumas",
-      x = "Laikas, mėnesiais"
-    ) +
-    theme(
-      plot.title = element_text(hjust = 0.5, face = "bold"),
-      plot.subtitle = element_text(size = 10, hjust = 0.5, lineheight = 1.1)
-    )
-  plots_met3[[gene]] <- p
-}
-
-# Combine plots with overall title
-combined_met_plot3 <- wrap_plots(plots_met3, ncol = 4) +
-  plot_annotation(
-    title = "Išgyvenamumo analizė kiaušidžių vėžio grupėje",
-    theme = theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
-  )
-
-# Add a single big "B" at top-left
-bcombined_met_plot3 <- ggdraw(combined_met_plot3) +
-  draw_plot_label(
-    label = "B",
-    x = 0, y = 1,        # top-left corner
-    hjust = -0.2, vjust = 1.2, # adjust to position near title
-    size = 20,
-    fontface = "bold"
-  )
-
-bcombined_met_plot3
-
-# Save to file
-ggsave(
-  filename = "KM_combined_methylation_OC_w_HR_multi0922.png",
-  plot = bcombined_met_plot3,
-  width = 25,
-  height = 5,
-  dpi = 300
-)
 
 #LITHUANIAN PLOT, GENES#################################
 #plot with multi
@@ -2334,10 +1428,10 @@ for (gene in genes_f) {
   ## --- Univariate HR ---
   hr_row <- univ_df2[univ_df2$Gene == gene, ]
   if (nrow(hr_row) == 0 || any(is.na(hr_row$HR))) {
-    hr_text_expr <- bquote("Uni HR = NA")
+    hr_text_expr <- bquote("Uni PR = NA")
   } else {
-    hr_text_expr <- bquote("Uni HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f)", 
-                                  hr_row$HR, hr_row$lower95, hr_row$upper95)))
+    hr_text_expr <- bquote("Uni PR = " * .(sprintf("%.2f (95 %% PI: %.2f–%.2f)", 
+                                                   hr_row$HR, hr_row$lower95, hr_row$upper95)))
   }
   
   ## --- KM log-rank p-value ---
@@ -2353,22 +1447,31 @@ for (gene in genes_f) {
   ## --- Multivariable HR (Age + CA125) ---
   multi_row <- multi_df2[multi_df2$Gene == gene, ]
   if (nrow(multi_row) == 0 || any(is.na(multi_row$HR))) {
-    hr_multi_expr <- bquote("Multiv HR = NA")
+    hr_multi_expr <- bquote("Multiv PR = NA")
   } else {
     # Bold if p < 0.05
     if (!is.na(multi_row$pvalue) && multi_row$pvalue < 0.05) {
-      hr_multi_expr <- bquote(bold("Multi HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f, N=%d)", 
-                                                              multi_row$HR, multi_row$lower95, 
-                                                              multi_row$upper95, multi_row$N))))
+      hr_multi_expr <- bquote(bold("Multi PR = " * .(sprintf("%.2f (95 %% PI: %.2f–%.2f, N = %d)", 
+                                                             multi_row$HR, multi_row$lower95, 
+                                                             multi_row$upper95, multi_row$N))))
     } else {
-      hr_multi_expr <- bquote("Multi HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f, N=%d)", 
-                               multi_row$HR, multi_row$lower95, 
-                                                         multi_row$upper95, multi_row$N)))
+      hr_multi_expr <- bquote("Multi PR = " * .(sprintf("%.2f (95 %% PI: %.2f–%.2f, N = %d)", 
+                                                        multi_row$HR, multi_row$lower95, 
+                                                        multi_row$upper95, multi_row$N)))
     }
   }
   
   ## --- Combine 3 lines in subtitle ---
-  subtitle_expr <- bquote(.(hr_text_expr) ~ "\n" ~ .(pval_expr) ~ "\n" ~ .(hr_multi_expr))
+  subtitle_text <- paste0(
+    "Uni PR = ", ifelse(is.na(hr_row$HR), "NA",
+                        sprintf("%.2f (95%% PI: %.2f–%.2f)", hr_row$HR, hr_row$lower95, hr_row$upper95)
+    ),
+    "\nLog-rank p = ", sprintf("%.3f", pval_km),
+    "\nMulti PR = ", ifelse(is.na(multi_row$HR), "NA",
+                            sprintf("%.2f (95%% PI: %.2f–%.2f, N = %d)", 
+                                    multi_row$HR, multi_row$lower95, multi_row$upper95, multi_row$N)
+    )
+  )
   
   ## --- Legend labels ---
   legend_labels <- c(
@@ -2391,13 +1494,13 @@ for (gene in genes_f) {
     ) +
     labs(
       title = bquote(italic(.(gene_clean))),
-      subtitle = subtitle_expr,
+      subtitle = subtitle_text,
       y = "Išgyvenamumas",
       x = "Laikas, mėnesiais"
     ) +
     theme(
       plot.title = element_text(hjust = 0.5, face = "bold"),
-      plot.subtitle = element_text(size = 10, hjust = 0.5, lineheight = 1.1)
+      plot.subtitle = element_text(size = 12, hjust = 0.5, lineheight = 1.3)
     )
   
   plots2x[[gene]] <- p
@@ -2411,8 +1514,6 @@ combined_plotx2 <- wrap_plots(plots2x, ncol = 4) +
       plot.title = element_text(size = 18, face = "bold", hjust = 0.5)
     )
   )
-
-
 ###separate the 10 gene expression plot form the notch and wnt ##########
 # Subset plots for the two gene sets
 plots_genes10_2x <- plots2x[names(plots2x) %in% genes10_f]
@@ -2434,40 +1535,101 @@ combined_plot_genes_notch_2x <- wrap_plots(plots_genes_notch_2x, ncol = 5)+
       plot.title = element_text(size = 18, face = "bold", hjust = 0.5)
     )
   )
-library(cowplot)
-
-# Combine your patchwork plots
-combined_plot <- wrap_plots(plots_genes_notch_2x, ncol = 5) +
-  plot_annotation(
-    title = "Išgyvenamumo analizė KV grupėje",
-    theme = theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
-  )
-
-# Add a single big "A" in the top-left of the whole figure
-final_plot <- ggdraw(combined_plot) +
-  draw_plot_label(
-    label = "A",
-    x = 0, y = 1,      # top-left corner
-    hjust = -0.2, vjust = 1.2,  # adjust position relative to plot
-    size = 20,
-    fontface = "bold"
-  )
-
-final_plot
 
 #save 10 gene
 ggsave(
-  filename = "KM_combined_plot_w_HR_OC_10_gene_20250922LT.png",  # output file name
+  filename = "KM_combined_plot_w_HR_OC_10_gene_20250925LT2.png",  # output file name
   plot = combined_plot_genes10_2x,               # the patchwork plot object
-  width = 35,                         # width in inches
-  height = 10,                        # height in inches
-  dpi = 300                           # resolution
+  width = 25,                         # width in inches
+  height = 12,                        # height in inches
+  dpi = 400                           # resolution
 )
 #save notch
 ggsave(
-  filename = "KM_combined_plot_w_HR_OC_notch_20250922LTXX.png",  # output file name
-  plot = final_plot,               # the patchwork plot object
-  width = 35,                         # width in inches
-  height = 10,                        # height in inches
-  dpi = 300                           # resolution
+  filename = "KM_combined_plot_w_HR_OC_notch_20250925LT2.png",  # output file name
+  plot = combined_plot_genes_notch_2x,               # the patchwork plot object
+  width = 25,                         # width in inches
+  height = 12,                        # height in inches
+  dpi = 400                           # resolution
+)
+
+#LITHUANIAN plot OC METHYLATION ##########################
+plots_met3 <- list()
+
+for (gene in methylation) {
+  gene_clean <- gene
+  
+  # Fit KM
+  fit <- survfit(as.formula(paste("Surv(OS, STATUS) ~", gene)), 
+                 data = OC_SURV_EXPRESSION)
+  
+  ## --- Univariate ---
+  hr_row_uni <- met_univ_df3[met_univ_df3$Gene == gene, ]
+  if (nrow(hr_row_uni) == 0 || any(is.na(hr_row_uni$HR))) {
+    uni_text <- "Uni PR = NA"
+  } else {
+    uni_text <- sprintf("Uni PR = %.2f (95%% PI: %.2f–%.2f)",
+                        hr_row_uni$HR, hr_row_uni$lower95, hr_row_uni$upper95)
+  }
+  
+  ## --- Multivariable ---
+  hr_row_multi <- cox_results_df3[cox_results_df3$Gene == gene, ]
+  if (nrow(hr_row_multi) == 0 || any(is.na(hr_row_multi$HR))) {
+    multi_text <- "Multi PR = NA"
+  } else {
+    multi_text <- sprintf("Multi PR = %.2f (95%% CI: %.2f–%.2f), n = 48",
+                          hr_row_multi$HR, hr_row_multi$Lower95, hr_row_multi$Upper95)
+  }
+  
+  ## --- KM log-rank p-value ---
+  survdiff_res <- survdiff(as.formula(paste("Surv(OS, STATUS) ~", gene)), 
+                           data = OC_SURV_EXPRESSION)
+  pval_km <- 1 - pchisq(survdiff_res$chisq, length(survdiff_res$n) - 1)
+  pval_text <- sprintf("Log-rank p = %.3f", pval_km)
+  
+  ## --- Combine lines ---
+  subtitle_text <- paste0(uni_text, "\n", multi_text, "\n", pval_text)
+  
+  ## --- KM plot ---
+  p <- ggsurvplot(
+    fit,
+    data = OC_SURV_EXPRESSION,
+    pval = FALSE,
+    risk.table = TRUE,
+    legend.title = "",
+    palette = c("blue", "red")
+  )$plot +
+    scale_color_manual(
+      values = c("blue", "red"),
+      labels = c("nemetilintas", "metilintas")
+    ) +
+    labs(
+      title = bquote(italic(.(gene_clean))),
+      subtitle = subtitle_text,
+      y = "Išgyvenamumas",
+      x = "Laikas, mėnesiais"
+    ) +
+    theme(
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      plot.subtitle = element_text(size = 12, hjust = 0.5, lineheight = 1.3) # bigger & spaced
+    )
+  
+  plots_met3[[gene]] <- p
+}
+
+# Combine plots with overall title
+combined_met_plot3 <- wrap_plots(plots_met3, ncol = 4) +
+  plot_annotation(
+    title = "Išgyvenamumo analizė kiaušidžių vėžio grupėje",
+    theme = theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
+  )
+
+# Save to file
+ggsave(
+  filename = "KM_combined_methylation_OC_w_HR_multi0925.png",
+  plot = combined_met_plot3,
+  width = 25,
+  height = 6,
+  dpi = 600
+  
 )

@@ -437,6 +437,14 @@ combined_image2o <- image_append(c(roc_image2_paddedo, table_image2_paddedo), st
 image_write(combined_image2o, 
             "FIG_COMBINED_forHGSOC_others_genes20250625.png")
 
+#horizontal version
+# Now append vertically
+combined_image2o2 <- image_append(c(roc_image2o, table_image2o), stack = F)
+
+# Save the combined image
+image_write(combined_image2o2, 
+            "FIG_COMBINED_forHGSOC_others_genes20250923.png")
+
 ##compare HGSOC vs OTHERs ###################################
 roc.test(roc_curve10, roc_curve22, method = "delong")
 roc.test(roc_curve6, roc_curve10, method = "delong")

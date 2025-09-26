@@ -631,7 +631,7 @@ roc_plot_10oc()
 dev.off()
 
 #HGSOC benign roc plot EN ###########################
-#ROC HGSOC vs BENIGN########################################################
+#ROC HGSOC vs BENIGN
 roc_results_tumor<- lapply(expression, function(col) {
   roc(response = OC_HGSOC_BENIGN$tumor, predictor = OC_HGSOC_BENIGN[[col]])})
 names(roc_results_tumor) <- expression
