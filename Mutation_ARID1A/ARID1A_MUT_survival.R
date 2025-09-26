@@ -15,6 +15,7 @@ library(broom)
 library(dplyr)
 library(timeROC)
 library(coxphf)
+library(readxl)
 #set wd for plots###########################################
 setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
 #upload data##############################################################
@@ -68,7 +69,8 @@ SURV <- SURVIVAL_KN[, c(2, 3,20, 21)]
 ARID1A_df$KN %in% SURV$KN  #all the same
 MAIN_DF <- left_join(ARID1A_df, SURV, by = "KN") #join
 colnames(MAIN_DF)
-
+#Make main df OC only
+MAIN_DF <- MAIN_DF[ MAIN_DF$Grupė_Ieva != "Benign", ]
 #SURVIVAL WITH AR1D1A MUTATION COUNT############################################
 str(MAIN_DF$ARID1A_tumor_mut)
 MAIN_DF$ARID1A_tumor_mut <- factor(MAIN_DF$ARID1A_tumor_mut)
@@ -82,31 +84,37 @@ survdiff(Surv(OS, STATUS) ~ ARID1A_tumor_mut, data = MAIN_DF)
 #or this # Fit a Kaplan-Meier model
 km_fit_ARID1A_mut <- survfit(Surv(OS, STATUS) ~ ARID1A_tumor_mut, data = MAIN_DF)
 summary(km_fit_ARID1A_mut)$table #overall summary
-summary(km_fit)$table[, "rmean"]
+summary(km_fit_ARID1A_mut)$table[, "rmean"]
 #KM summary at times 12, 24, 36 months
 time_points <- c(12, 36, 60)
 km_summary <- summary(km_fit_ARID1A_mut, times = time_points)
 km_summary
 
 #add RMS onto the KM plot##################################
-km_table <- summary(km_fit)$table
+km_table <- summary(km_fit_ARID1A_mut)$table
 rms_values <- km_table[, "rmean"]
 
-# Create a subtitle string with RMS in months
+# get p-value from survdiff (log-rank test)
+logrank_test <- survdiff(Surv(OS, STATUS) ~ ARID1A_tumor_mut, data = MAIN_DF)
+p_val <- 1 - pchisq(logrank_test$chisq, length(logrank_test$n) - 1)
+
+# make subtitle
 rms_subtitle <- paste0(
-  "Restricted mean survival (months): ",
+  "Vidutinis išgyvenamumo laikas, mėnesiais: ",
   "Be mutacijų = ", round(rms_values["ARID1A_tumor_mut=Be mutacijų"], 1), ", ",
-  "Mutacija = ", round(rms_values["ARID1A_tumor_mut=Mutacija"], 1)
+  "Mutacija = ", round(rms_values["ARID1A_tumor_mut=Mutacija"], 1),
+  "; Log-rank p = ", signif(p_val, 2)
 )
 
-# Plot KM with RMS in subtitle
+# plot km
 test_survplot_Arid <- ggsurvplot(
-  km_fit,
+  km_fit_ARID1A_mut,
   data = MAIN_DF,
-  pval = TRUE,               # log-rank p-value
-  risk.table = TRUE,         # risk table below plot
-  title = "Kaplan-Meier kreivė: ARID1A mutacija visų KV audinių imtyje",
-  subtitle = rms_subtitle,   # RMS subtitle
+  pval = FALSE,              
+  risk.table = TRUE,
+  title = expression( italic("ARID1A") * " mutacijų sąsaja su bendru išgyvenamumu KV audinių imtyje"),
+  risk.table.title = "Pacientų skaičius rizikos grupėje",
+  subtitle = rms_subtitle,
   xlab = "Bendras išgyvenamumo laikas",
   ylab = "Išgyvenamumo tikimybė",
   palette = c("darkblue", "maroon"),
@@ -115,8 +123,23 @@ test_survplot_Arid <- ggsurvplot(
 )
 
 test_survplot_Arid
+
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/ARID1A_mut_KM_ALL_20250916.png",
-    width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/ARID1A_mut_KM_ALL_20250925.png",
+    width = 1000, height = 600, res = 100) # width and height in pixels, resolution in dpi
 test_survplot_Arid #
 dev.off() # Close the PNG device
+
+#time roc 
+MAIN_DF$ARID1A_mut_num <- ifelse(MAIN_DF$ARID1A_tumor_mut == "Mutacija", 1, 0) #make mutation a factor
+roc_obj <- timeROC(
+  T = MAIN_DF$OS,
+  delta = MAIN_DF$STATUS,
+  marker = MAIN_DF$ARID1A_mut_num,
+  cause = 1,
+  weighting = "marginal",
+  times = c(12, 36, 60),   # 1yr, 3yr, 5yr
+  iid = TRUE
+)
+plot(roc_obj, time = 60)   # ROC curve at 60 months
+roc_obj
