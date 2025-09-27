@@ -20,6 +20,8 @@ library(RColorBrewer)
 library(ggprism)
 library(rstatix) 
 library(patchwork)
+library(magick)
+library(gt)
 #set directory of the data
 setwd("../TCGA-OV-RISK-PROJECT/Public data RDSs/")
 # Load train data ###################################
@@ -119,18 +121,7 @@ clin_df_joined$overall_survival
 clin_df_joined$RiskScore
 clin_df_joined$vital_status
 
-# Create the dot plot
-ggplot(clin_df_joined, aes(x = overall_survival, y = RiskScore, color = vital_status)) +
-  geom_point(size = 4, alpha = 0.7) +  # Dot plot with a slight transparency
-  scale_color_manual(values = c("turquoise", "deeppink")) +  # Blue for Alive, Red for Deceased
-  labs(title = "Risk Score vs. Overall Survival",
-       x = "Overall Survival",
-       y = "Risk Score") +
-  geom_hline(yintercept = -0.05914624, linetype = "dotted", color = "black", size = 1) +  # Dotted line at median (calculated below)
-  theme_minimal(base_size = 14) +
-  theme(legend.title = element_blank())  
-
-#Kaplan-meier plot ##################################
+#Kaplan-meier plot RISK SCORE ##################################
 # Calculate the median risk score
 median_risk <- median(clin_df_joined$RiskScore, na.rm = TRUE) #-0.05914624
 # Create a new factor column based on the median value
@@ -139,18 +130,36 @@ clin_df_joined$RiskGroup <- ifelse(clin_df_joined$RiskScore <= median_risk, "Low
 surv_object <- Surv(time = clin_df_joined$overall_survival, event = clin_df_joined$deceased )
 # Fit a Kaplan-Meier model
 km_fit <- survfit(surv_object ~ RiskGroup, data = clin_df_joined)
-# Plot the Kaplan-Meier curve using ggsurvplot
-train_surv <- ggsurvplot(km_fit, data = clin_df_joined, 
-           pval = TRUE,  # Show p-value of the log-rank test
-           risk.table = TRUE,  # Add risk table below the plot
-           title = "Kaplan-Meier kreivė: Didelės vs. mažos rizikos atvejai mokymosi imtyje",
-           xlab = "Bendras išgyvenamumo laikas",
-           ylab = "Išgyvenamumo tikimybė",
-           palette = c("turquoise", "deeppink"),  # Color palette for groups
-           legend.title = "Rizikos grupė", 
-           legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
+# Compute log-rank test
+surv_test <- survdiff(Surv(overall_survival, deceased) ~ RiskGroup, data = clin_df_joined)
+pval_num <- 1 - pchisq(surv_test$chisq, length(surv_test$n) - 1)
+# Format nicely
+if (pval_num < 0.001) {
+  pval_text <- "Long-rank p < 0.001"
+} else {
+  pval_text <- paste0("Long-rank p = ", signif(pval_num, 3))
+}
+
+# Plot
+train_surv <- ggsurvplot(
+  km_fit, 
+  data = clin_df_joined, 
+  pval = FALSE,  # disable built-in
+  risk.table = TRUE,
+  risk.table.title = "Pacienčių skaičius rizikos grupėje",
+  title = "Didelės vs. mažos rizikos atvejai mokymosi imtyje",
+  xlab = "Bendras išgyvenamumo laikas",
+  ylab = "Išgyvenamumo tikimybė",
+  palette = c("turquoise", "deeppink"),
+  legend.title = "Rizikos grupė", 
+  legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas")
+)
+
+# Add subtitle
+train_surv$plot <- train_surv$plot + labs(subtitle = pval_text)
+print(train_surv)
 #save km plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_train20250916.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_train20250925.png",
     width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
 train_surv #
 dev.off() # Close the PNG device
@@ -232,7 +241,7 @@ plot(roc_result, time = 1825)
 plot(roc_result, time = 1095) 
 plot(roc_result, time = 365) 
 
-#make pretier plot 
+#make prettier plot 
 # Generate base ROC curve without default labels
 plot(roc_result$FP[, "t=1825"], roc_result$TP[, "t=1825"], 
      type = "l", col = "blue", lwd = 2,
@@ -246,182 +255,6 @@ abline(a = 0, b = 1, lty = 2, col = "gray")
 # Add AUC text
 auc_val <- roc_result$AUC["t=1825"]
 text(x = 0.6, y = 0.2, labels = paste0("AUC = ", round(auc_val, 3)), cex = 1.2)
-
-#With stage risk model ###########################
-#choose variables
-colnames(clin_df_joined)
-table(clin_df_joined$clinicalstage2, useNA = "a")
-clin_df_joined$RiskScore
-
-#get anova
-kruskal_test <- kruskal.test(clin_df_joined$RiskScore,
-                             clin_df_joined$clinicalstage2, 
-                             var.equal = F,
-                             #alternative = "two.sided", 
-                             na.rm = TRUE)
-kruskal.testp_value <- kruskal_test$p.value
-kruskal.testp_value
-#get colors 
-custom_colors <- c("Stage I" = "pink2", "Stage II" = "lightpink","Stage III" = "deeppink",
-                   "Stage IV" = "darkviolet") 
-#plot
-stage_plot <- ggplot(clin_df_joined, aes(x=clinicalstage2 , y=RiskScore, fill = clinicalstage2)) +
-  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = clinicalstage2 )) +
-  geom_jitter(aes(color = clinicalstage2 ), size=1, alpha=0.5) +
-  ylab(label = expression("Risk score")) + 
-  theme_minimal()+
-  theme(
-    strip.text.x = element_text(
-      size = 12, face = "bold.italic"
-    ),
-    legend.position = "none",
-    plot.title = element_text(hjust = 0.5))+
-  labs(x=NULL)+
-  stat_boxplot(geom ='errorbar')+
-  scale_fill_manual(values = custom_colors) +
-  scale_color_manual(values = custom_colors) +
-  ggtitle("Risk score correlation with stage ")+
-  annotate("text", x = 2, y = max(clin_df_joined$RiskScore) + 0.11, 
-           label = paste("p = ", format(kruskal.testp_value, digits = 3)), 
-           size = 5, color = "black")
-
-stage_plot
-
-#With grade risk model###########################
-table(clin_df_joined$neoplasmhistologicgrade, useNA = "a")
-clin_df_joined$neoplasmhistologicgrade <- recode(clin_df_joined$neoplasmhistologicgrade,
-                                                  "GB" = NA_character_,
-                                                  "GX" = NA_character_,
-                                                  "G4" = NA_character_)
-# Remove NA values from both columns using complete.cases()
-clin_df_joined_gr <- clin_df_joined[complete.cases(clin_df_joined$RiskScore,
-                                                   clin_df_joined$neoplasmhistologicgrade), ]
-clin_df_joined_gr$neoplasmhistologicgrade <- as.factor(clin_df_joined_gr$neoplasmhistologicgrade)
-#fix stage while at it
-clin_df_joined_gr <- clin_df_joined_gr %>%
-  mutate(stage_early_late = case_when(
-    clinicalstage2 %in% c("Stage I", "Stage II") ~ "early stage",
-    clinicalstage2 %in% c("Stage III", "Stage IV") ~ "late stage",
-    TRUE ~ NA_character_
-  ))
-
-ttest_grade <- t.test(clin_df_joined_gr$RiskScore ~ clin_df_joined_gr$neoplasmhistologicgrade ,  
-                      var.equal = F,
-                      alternative = "two.sided")
-ttest_grade_p <- ttest_grade$p.value
-
-#get colors 
-custom_colors <- c("G2" = "lightpink","G3" = "deeppink") 
-#plot
-grade_plot <- ggplot(clin_df_joined, aes(x=neoplasmhistologicgrade ,
-                                          y=RiskScore, fill = neoplasmhistologicgrade)) +
-  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = neoplasmhistologicgrade )) +
-  geom_jitter(aes(color = neoplasmhistologicgrade ), size=1, alpha=0.5) +
-  ylab(label = expression("Risk score")) + 
-  theme_minimal()+
-  theme(
-    strip.text.x = element_text(
-      size = 12, face = "bold.italic"
-    ),
-    legend.position = "none",
-    plot.title = element_text(hjust = 0.5))+
-  labs(x=NULL)+
-  stat_boxplot(geom ='errorbar')+
-  scale_fill_manual(values = custom_colors) +
-  scale_color_manual(values = custom_colors) +
-  ggtitle("Risk score correlation with grade ")+
-  annotate("text", x = 2, y = max(clin_df_joined$RiskScore) + 0.11, 
-           label = paste("p = ", format(ttest_grade_p, digits = 3)), 
-           size = 5, color = "black")
-
-grade_plot
-
-#GTEX vs TCGA, boxplot ###########################
-#CREATE GROUPINGS ACCORDING TO DATA#
-snames = rownames(gtex_counts_train)
-group = substr(snames, 1, 4)
-group = as.factor(group)
-levels(group) <- c("GTEx", "TCGA-OV")
-gtex_counts_train2 <- gtex_counts_train
-gtex_counts_train2$group <- group
-expression <- res_coef_cox_names
-#get long df
-gtcga_table_full <- reshape2::melt(gtex_counts_train2[, colnames(gtex_counts_train2) %in%
-                                    c("group", expression )],
-                          id.vars="group",
-                          measure.vars= expression)
-#get t test
-t.test_gtex <- gtcga_table_full %>%
-  group_by(variable) %>%
-  t_test(value ~ group,
-         p.adjust.method = "BH", 
-         var.equal = TRUE, #stjudents
-         paired = FALSE, 
-         detailed=TRUE 
-  ) # Format p-values to remove scientific notation
-t.test_gtex
-#make a tibble of p values: ~group1, ~group2, ~p.adj,   ~y.position, ~variable
-t.test_gtex_tibble <- t.test_gtex %>% 
-  select(group1, group2, p, variable) %>%
-  mutate(
-    y.position = c(6, 8, 8, 9, 10, 
-                   8, 6, 6, 12, 12) #choose where to plot p values
-  )
-t.test_gtex_tibble$p_custom <- ifelse(t.test_gtex_tibble$p < 0.001, 
-                                       "p < 0.001", 
-                                       paste0("p = ", sprintf("%.3f",
-                                                              each.vs.ref_sig$pj)))
-#get colors 
-custom_colors <- c("GTEx" = "turquoise","TCGA-OV" = "deeppink") 
-#plot
-gtex_plot <- ggplot(gtcga_table_full, aes(x=group , y=value, fill = variable)) +
-  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = group )) +
-  geom_jitter(aes(color = group ), size=1, alpha=0.5) +
-  ylab(label = expression("Genų raiška")) + 
-  facet_wrap(.~ variable, nrow = 2, scales = "free") +
-  add_pvalue(t.test_gtex_tibble, label = "p_custom") + #pvalue
-  theme_minimal()+
-  theme(
-    strip.text.x = element_text(
-      size = 12, face = "bold.italic"
-    ),
-    legend.position = "none",
-    plot.title = element_text(hjust = 0.5))+
-  labs(x=NULL)+
-  stat_boxplot(geom ='errorbar')+
-  scale_fill_manual(values = custom_colors) +
-  scale_color_manual(values = custom_colors) +
-  ggtitle("Genų raiška mokymosi imtyje")
-  
-gtex_plot
-#save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_20250618.png",
-    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
-gtex_plot #
-dev.off() # Close the PNG device
-
-#GET FC
-gtex_counts_train_my <- gtex_counts_train2[, colnames(gtex_counts_train2) %in%
-                                             c("group", expression )]
-#drop group as comumn
-gtex_counts_train_my$group
-group <- gtex_counts_train_my$group
-gtex_counts_train_my <- gtex_counts_train_my[, !(names(gtex_counts_train_my) %in% "group")] 
-#get group means
-group1_mean <- colMeans(gtex_counts_train_my[group == "GTEx", ])
-group2_mean <- colMeans(gtex_counts_train_my[group == "TCGA-OV", ])
-#get logFC  and FC
-log2FC <- group2_mean - group1_mean
-FC <- 2^log2FC
-#show
-
-fc_table_train <- data.frame(
-  Gene = colnames(gtex_counts_train_my),
-  log2FC = log2FC,
-  FoldChange = FC
-)
-
-print(fc_table_train)
 
 #TIME ROC PLOTS for separate biomarkers ######################################
 rez_list2 <- apply(coxnet.df, 2, timeROC,
@@ -505,83 +338,6 @@ legend(
   cex = 0.6,
   bty = "n"
 )
-
-## plot at year 5 with saving###########################
-# Choose target time
-target_time <- 1825   #choose year 5
-time_index <- which(rez_list2[[1]]$times == target_time)
-#plot with save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20250724.png",
-    width = 1500, height = 1200, res = 200)
-# Set up base plot with gene 1
-par(pty="s")
-
-plot(
-  rez_list2[[1]]$FP[, time_index],
-  rez_list2[[1]]$TP[, time_index],
-  type = "l",
-  col = 1,
-  lwd = 2,
-  xlab = "Specifiškumas",
-  ylab = "Jautrumas",
-  main = paste("Nuo laiko priklausomos ROC kreivės,
-5 metai po diagnozės mokymosi imtyje"),
-  xlim = c(0, 1),
-  ylim = c(0, 1),
-  asp = 1
-)
-
-# Add ROC lines for all genes
-for (i in 2:length(rez_list2)) {
-  lines(
-    rez_list2[[i]]$FP[, time_index],
-    rez_list2[[i]]$TP[, time_index],
-    col = i,
-    lwd = 2
-  )
-}
-
-# Add risk score ROC line in bold 
-lines(
-  roc_result$FP[, time_index],
-  roc_result$TP[, time_index],
-  col = "maroon",
-  lwd = 3,
-  lty = 1
-)
-
-# Add diagonal reference line
-abline(0, 1, lty = 2, col = "gray")
-
-# Get AUCs for each gene at time_index
-auc_list <- sapply(rez_list2, function(x) x$AUC[time_index])
-auc_risk <- roc_result$AUC[time_index]
-
-# Build gene labels with italic names and AUCs
-legend_labels <- mapply(function(name, auc) {
-  paste0("italic('", name, "')~'(AUC = ", sprintf("%.3f", auc), ")'")
-}, names(rez_list2), auc_list)
-
-# Add risk score with AUC
-legend_labels <- c(legend_labels,
-                   paste0("'Risk Score (AUC = ", sprintf("%.3f", auc_risk), ")'"))
-
-# Add legend
-legend(
-  "bottomright",
-  legend = parse(text = legend_labels),
-  col = c(1:length(rez_list2), "maroon"),
-  lwd = c(rep(2, length(rez_list2)), 3),
-  cex = 0.6,
-  bty = "n"
-)
-
-#add A label during png
-mtext("C", side = 3, line = 2.5, adj = -0.2, font = 2, cex = 1.5)
-
-#run plot
-dev.off() # Close the PNG device
-
 ##plot at year 3 ##########################
 # Choose target time
 target_time <- 1095      #choose year 3
@@ -640,6 +396,267 @@ legend(
   bty = "n"
 )
 
+## plot at year 5 with saving###########################
+# Choose target time
+target_time <- 1825   # choose year 5
+time_index <- which(rez_list2[[1]]$times == target_time)
+
+# plot with save
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20250925.png",
+    width = 1000, height = 1000, res = 200)
+
+par(pty="s")
+
+# Base plot with first gene
+plot(
+  rez_list2[[1]]$FP[, time_index],
+  rez_list2[[1]]$TP[, time_index],
+  type = "l",
+  col = 1,
+  lwd = 2,
+  xlab = "Specifiškumas",
+  ylab = "Jautrumas",
+  main = paste("Nuo laiko priklausomos ROC kreivės,\n5 metai po diagnozės mokymosi imtyje"),
+  xlim = c(0, 1),
+  ylim = c(0, 1),
+  asp = 1
+)
+
+# Add ROC lines for all genes
+for (i in 2:length(rez_list2)) {
+  lines(
+    rez_list2[[i]]$FP[, time_index],
+    rez_list2[[i]]$TP[, time_index],
+    col = i,
+    lwd = 2
+  )
+}
+
+# Add risk score ROC line in bold
+lines(
+  roc_result$FP[, time_index],
+  roc_result$TP[, time_index],
+  col = "maroon",
+  lwd = 3,
+  lty = 1
+)
+
+# Add diagonal reference line
+abline(0, 1, lty = 2, col = "gray")
+
+# Build legend labels without AUC
+legend_labels <- c(paste0("italic('", names(rez_list2), "')"),
+                   "'Rizikos balas'")
+
+# Add legend
+legend(
+  "bottomright",
+  legend = parse(text = legend_labels),
+  col = c(1:length(rez_list2), "maroon"),
+  lwd = c(rep(2, length(rez_list2)), 3),
+  cex = 0.6,
+  bty = "n"
+)
+
+# Add panel label
+mtext("C", side = 3, line = 2.5, adj = -0.2, font = 2, cex = 1.5)
+
+dev.off()
+
+#COORDS table #####################################################
+
+# extract best sens/spec at a given time
+extract_coords <- function(roc, gene, timepoint = 1825) {
+  idx <- which(roc$times == timepoint)
+  
+  # sensitivity & specificity across thresholds
+  sens <- as.vector(roc$TP[, idx])
+  spec <- as.vector(1 - roc$FP[, idx])
+  
+  # Youden index to pick best threshold
+  youden <- sens + spec - 1
+  best_idx <- which.max(youden)
+  
+  tibble(
+    gene = gene,
+    time = roc$times[idx],
+    auc = roc$AUC[idx] * 100,
+    sens = sens[best_idx],
+    spec = spec[best_idx],
+    cutoff = roc$cutoffs[best_idx]
+  )
+}
+
+# Apply to each biomarker
+sens_spec_auc_60 <- map_dfr(names(rez_list2), ~ extract_coords(rez_list2[[.x]], .x, 1825))
+
+# Apply to risk score
+risk_score_row <- extract_coords(roc_result, "10 Genų raiškos rizikos balas", 1825)
+
+# Combine into one tibble
+sens_spec_auc_60_all <- bind_rows(sens_spec_auc_60, risk_score_row)
+# View
+sens_spec_auc_60_all
+
+#make prety table
+# Prepare table: rename columns for display
+roc_table_display <- sens_spec_auc_60_all %>%
+  rename(
+    Biožymuo = gene,
+    Laikas_dienom = time,
+    AUC = auc,
+    Jautrumas = sens,
+    Specifiškumas = spec
+  )
+
+# Create gt table
+gt_table_roc_60 <- roc_table_display %>%
+  gt() %>%
+  tab_header(
+    title = "ROC kriterijai",
+    subtitle = "Prognostinis tikslumas 5 metų išgyvenimui"
+  ) %>%
+  fmt_number(
+    columns = vars(AUC, Jautrumas, Specifiškumas),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Biožymuo))
+  )
+
+# Show table
+gt_table_roc_60
+
+#there is no other convenient way to save gt outputs
+gtsave(gt_table_roc_60,
+       filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_timeroc_table_20250925.png")
+
+#Combine the images
+roc_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20250925.png")
+table_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_timeroc_table_20250925.png")
+
+combined_image <- image_append(c(roc_image, table_image), stack = F)
+
+# Save the combined image
+image_write(combined_image, 
+            "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_ROC_W_TABLE2025925.png")
+
+#Kaplan-meier plot, sepratae genes##################################
+colnames(clin_df_joined) 
+genes <-  c("EXO1", "RAD50", "PPT2", "LUC7L2", 
+            "PKP3", "CDCA5", "ZFPL1", "VPS33B", 
+            "GRB7", "TCEAL4")
+genes_f <-  paste0(genes, "_f")
+# Calculate the median expressions
+clin_df_joined2 <- clin_df_joined %>%
+  mutate(
+    across(all_of(genes),
+           ~ factor(if_else(. > median(., na.rm = TRUE), "High", "Low")),
+           .names = "{.col}_f")
+  )
+colnames(clin_df_joined2)
+
+##COX REGRESION, UNIVARIATE, using continuous variables######################
+univ_results <- lapply(genes, function(gene) {
+  formula <- as.formula(paste("Surv(overall_survival, deceased) ~", gene))
+  cox_model <- coxph(formula, data = clin_df_joined2)
+  sum_cox <- summary(cox_model)
+  
+  # Extract hazard ratio, 95% CI, and p-value
+  if (!is.null(sum_cox$conf.int)) {
+    data.frame(
+      HR = sum_cox$conf.int[,"exp(coef)"],
+      lower95 = sum_cox$conf.int[,"lower .95"],
+      upper95 = sum_cox$conf.int[,"upper .95"],
+      pvalue = sum_cox$coefficients[,"Pr(>|z|)"]
+    )
+  } else {
+    data.frame(HR = NA, lower95 = NA, upper95 = NA, pvalue = NA)
+  }
+})
+
+# Combine results
+univ_df <- do.call(rbind, univ_results)
+univ_df$Gene <- genes_f
+univ_df <- univ_df[, c("Gene", "HR", "lower95", "upper95", "pvalue")]
+print(univ_df)
+
+##plot KM, separate ###################
+plots_met <- list()
+
+for (gene in genes_f) {
+  # Clean gene name: remove "_f" suffix if present
+  gene_clean <- gsub("_f$", "", gene)
+  
+  # Fit KM survival curve
+  fit <- survfit(as.formula(paste("Surv(overall_survival, deceased) ~", gene)), data = clin_df_joined2)
+  
+  ## --- Extract univariable Cox HR + CI from univ_df ---
+  hr_row_uni <- univ_df[univ_df$Gene == gene, ]
+  if (nrow(hr_row_uni) == 0 || any(is.na(hr_row_uni$HR))) {
+    hr_text_uni <- bquote("HR = NA")
+  } else {
+    hr_text_uni <- bquote("HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f)", 
+                                              hr_row_uni$HR, hr_row_uni$lower95, hr_row_uni$upper95)))
+  }
+  
+  ## --- KM log-rank p-value ---
+  survdiff_res <- survdiff(as.formula(paste("Surv(overall_survival, deceased) ~", gene)), 
+                           data = clin_df_joined2)
+  pval_km <- 1 - pchisq(survdiff_res$chisq, length(survdiff_res$n) - 1)
+  if (pval_km < 0.05) {
+    pval_expr <- bquote(bold("Log-rank p = " ~ .(sprintf("%.3f", pval_km))))
+  } else {
+    pval_expr <- bquote("Log-rank p = " ~ .(sprintf("%.3f", pval_km)))
+  }
+  
+  ## --- Combine HR and log-rank p-value in subtitle ---
+  subtitle_expr <- bquote(.(hr_text_uni) ~ "\n" ~ .(pval_expr))
+  
+  ## --- Legend labels ---
+  legend_labels <- c("Low", "High")
+  
+  ## --- KM plot ---
+  p <- ggsurvplot(
+    fit,
+    data = clin_df_joined2,
+    pval = FALSE,
+    risk.table = TRUE,
+    legend.title = "",
+    palette = c("blue", "red")
+  )$plot +
+    scale_color_manual(
+      values = c("blue", "red"),
+      labels = legend_labels
+    ) +
+    labs(
+      title = bquote(italic(.(gene_clean))),
+      subtitle = subtitle_expr
+    ) +
+    theme(
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      plot.subtitle = element_text(size = 10, hjust = 0.5, lineheight = 1.1)
+    )
+  
+  plots_met[[gene_clean]] <- p  # save using cleaned name
+}
+
+# Combine plots with overall title
+combined_plot <- wrap_plots(plots_met, ncol = 5) +
+  plot_annotation(
+    title = "Survival analysis of train data",
+    theme = theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
+  )
+
+# Save to file
+ggsave(
+  filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/KM_combined_TRAIN_data.png",
+  plot = combined_plot,
+  width = 25,
+  height = 7,
+  dpi = 300
+)
 #Forest plot################
 colnames(clin_df_joined_gr)
 vars <- c("RiskScore", "stage_early_late",
@@ -678,7 +695,7 @@ term_order <-  c("Risk Score", "FIGO Stage late vs early",
 # Apply the order to the term variable in the models data frame
 models$term <- factor(models$term, levels = term_order)
 models
-#RCC plot
+#FOREST plot
 p <- 
   models |>
   ggplot(aes(y = fct_rev(term))) + 
@@ -706,7 +723,181 @@ odds1 <- p +geom_text(aes(y = term, x = 50, label = sprintf("%0.2f", round(estim
 
 odds1 # forest plot
 
+#With stage risk model ###########################
+#choose variables
+colnames(clin_df_joined)
+table(clin_df_joined$clinicalstage2, useNA = "a")
+clin_df_joined$RiskScore
 
+#get anova
+kruskal_test <- kruskal.test(clin_df_joined$RiskScore,
+                             clin_df_joined$clinicalstage2, 
+                             var.equal = F,
+                             #alternative = "two.sided", 
+                             na.rm = TRUE)
+kruskal.testp_value <- kruskal_test$p.value
+kruskal.testp_value
+#get colors 
+custom_colors <- c("Stage I" = "pink2", "Stage II" = "lightpink","Stage III" = "deeppink",
+                   "Stage IV" = "darkviolet") 
+#plot
+stage_plot <- ggplot(clin_df_joined, aes(x=clinicalstage2 , y=RiskScore, fill = clinicalstage2)) +
+  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = clinicalstage2 )) +
+  geom_jitter(aes(color = clinicalstage2 ), size=1, alpha=0.5) +
+  ylab(label = expression("Risk score")) + 
+  theme_minimal()+
+  theme(
+    strip.text.x = element_text(
+      size = 12, face = "bold.italic"
+    ),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5))+
+  labs(x=NULL)+
+  stat_boxplot(geom ='errorbar')+
+  scale_fill_manual(values = custom_colors) +
+  scale_color_manual(values = custom_colors) +
+  ggtitle("Risk score correlation with stage ")+
+  annotate("text", x = 2, y = max(clin_df_joined$RiskScore) + 0.11, 
+           label = paste("p = ", format(kruskal.testp_value, digits = 3)), 
+           size = 5, color = "black")
+
+stage_plot
+
+#With grade risk model###########################
+table(clin_df_joined$neoplasmhistologicgrade, useNA = "a")
+clin_df_joined$neoplasmhistologicgrade <- recode(clin_df_joined$neoplasmhistologicgrade,
+                                                 "GB" = NA_character_,
+                                                 "GX" = NA_character_,
+                                                 "G4" = NA_character_)
+# Remove NA values from both columns using complete.cases()
+clin_df_joined_gr <- clin_df_joined[complete.cases(clin_df_joined$RiskScore,
+                                                   clin_df_joined$neoplasmhistologicgrade), ]
+clin_df_joined_gr$neoplasmhistologicgrade <- as.factor(clin_df_joined_gr$neoplasmhistologicgrade)
+#fix stage while at it
+clin_df_joined_gr <- clin_df_joined_gr %>%
+  mutate(stage_early_late = case_when(
+    clinicalstage2 %in% c("Stage I", "Stage II") ~ "early stage",
+    clinicalstage2 %in% c("Stage III", "Stage IV") ~ "late stage",
+    TRUE ~ NA_character_
+  ))
+
+ttest_grade <- t.test(clin_df_joined_gr$RiskScore ~ clin_df_joined_gr$neoplasmhistologicgrade ,  
+                      var.equal = F,
+                      alternative = "two.sided")
+ttest_grade_p <- ttest_grade$p.value
+
+#get colors 
+custom_colors <- c("G2" = "lightpink","G3" = "deeppink") 
+#plot
+grade_plot <- ggplot(clin_df_joined, aes(x=neoplasmhistologicgrade ,
+                                         y=RiskScore, fill = neoplasmhistologicgrade)) +
+  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = neoplasmhistologicgrade )) +
+  geom_jitter(aes(color = neoplasmhistologicgrade ), size=1, alpha=0.5) +
+  ylab(label = expression("Risk score")) + 
+  theme_minimal()+
+  theme(
+    strip.text.x = element_text(
+      size = 12, face = "bold.italic"
+    ),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5))+
+  labs(x=NULL)+
+  stat_boxplot(geom ='errorbar')+
+  scale_fill_manual(values = custom_colors) +
+  scale_color_manual(values = custom_colors) +
+  ggtitle("Risk score correlation with grade ")+
+  annotate("text", x = 2, y = max(clin_df_joined$RiskScore) + 0.11, 
+           label = paste("p = ", format(ttest_grade_p, digits = 3)), 
+           size = 5, color = "black")
+
+grade_plot
+
+#GTEX vs TCGA, boxplot ###########################
+#CREATE GROUPINGS ACCORDING TO DATA#
+snames = rownames(gtex_counts_train)
+group = substr(snames, 1, 4)
+group = as.factor(group)
+levels(group) <- c("GTEx", "TCGA-OV")
+gtex_counts_train2 <- gtex_counts_train
+gtex_counts_train2$group <- group
+expression <- res_coef_cox_names
+#get long df
+gtcga_table_full <- reshape2::melt(gtex_counts_train2[, colnames(gtex_counts_train2) %in%
+                                                        c("group", expression )],
+                                   id.vars="group",
+                                   measure.vars= expression)
+#get t test
+t.test_gtex <- gtcga_table_full %>%
+  group_by(variable) %>%
+  t_test(value ~ group,
+         p.adjust.method = "BH", 
+         var.equal = TRUE, #stjudents
+         paired = FALSE, 
+         detailed=TRUE 
+  ) # Format p-values to remove scientific notation
+t.test_gtex
+#make a tibble of p values: ~group1, ~group2, ~p.adj,   ~y.position, ~variable
+t.test_gtex_tibble <- t.test_gtex %>% 
+  select(group1, group2, p, variable) %>%
+  mutate(
+    y.position = c(6, 8, 8, 9, 10, 
+                   8, 6, 6, 12, 12) #choose where to plot p values
+  )
+t.test_gtex_tibble$p_custom <- ifelse(t.test_gtex_tibble$p < 0.001, 
+                                      "p < 0.001", 
+                                      paste0("p = ", sprintf("%.3f",
+                                                             each.vs.ref_sig$pj)))
+#get colors 
+custom_colors <- c("GTEx" = "turquoise","TCGA-OV" = "deeppink") 
+#plot
+gtex_plot <- ggplot(gtcga_table_full, aes(x=group , y=value, fill = variable)) +
+  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = group )) +
+  geom_jitter(aes(color = group ), size=1, alpha=0.5) +
+  ylab(label = expression("Genų raiška")) + 
+  facet_wrap(.~ variable, nrow = 2, scales = "free") +
+  add_pvalue(t.test_gtex_tibble, label = "p_custom") + #pvalue
+  theme_minimal()+
+  theme(
+    strip.text.x = element_text(
+      size = 12, face = "bold.italic"
+    ),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5))+
+  labs(x=NULL)+
+  stat_boxplot(geom ='errorbar')+
+  scale_fill_manual(values = custom_colors) +
+  scale_color_manual(values = custom_colors) +
+  ggtitle("Genų raiška mokymosi imtyje")
+
+gtex_plot
+#save
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_20250618.png",
+    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
+gtex_plot #
+dev.off() # Close the PNG device
+
+#GET FC
+gtex_counts_train_my <- gtex_counts_train2[, colnames(gtex_counts_train2) %in%
+                                             c("group", expression )]
+#drop group as comumn
+gtex_counts_train_my$group
+group <- gtex_counts_train_my$group
+gtex_counts_train_my <- gtex_counts_train_my[, !(names(gtex_counts_train_my) %in% "group")] 
+#get group means
+group1_mean <- colMeans(gtex_counts_train_my[group == "GTEx", ])
+group2_mean <- colMeans(gtex_counts_train_my[group == "TCGA-OV", ])
+#get logFC  and FC
+log2FC <- group2_mean - group1_mean
+FC <- 2^log2FC
+#show
+
+fc_table_train <- data.frame(
+  Gene = colnames(gtex_counts_train_my),
+  log2FC = log2FC,
+  FoldChange = FC
+)
+
+print(fc_table_train)
 #TCGA - stage, boxplot #############################
 #CREATE GROUPINGS ACCORDING TO DATA#
 table(clin_df_joined$clinicalstage2, useNA ="a")
@@ -1039,118 +1230,149 @@ dev.off() # Close the PNG device
 
 
 
-#Kaplan-meier plot, sepratae genes##################################
-colnames(clin_df_joined) 
-genes <-  c("EXO1", "RAD50", "PPT2", "LUC7L2", 
-            "PKP3", "CDCA5", "ZFPL1", "VPS33B", 
-            "GRB7", "TCEAL4")
-genes_f <-  paste0(genes, "_f")
-# Calculate the median expressions
-clin_df_joined2 <- clin_df_joined %>%
-  mutate(
-    across(all_of(genes),
-           ~ factor(if_else(. > median(., na.rm = TRUE), "High", "Low")),
-           .names = "{.col}_f")
+
+#ENGLISH plot at year 5 with saving###########################
+# Choose target time
+target_time <- 1825   # choose year 5
+time_index <- which(rez_list2[[1]]$times == target_time)
+
+# plot with save
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20250925EN.png",
+    width = 1000, height = 1000, res = 200)
+
+par(pty="s")
+
+# Base plot with first gene
+plot(
+  rez_list2[[1]]$FP[, time_index],
+  rez_list2[[1]]$TP[, time_index],
+  type = "l",
+  col = 1,
+  lwd = 2,
+  xlab = "Specificity",
+  ylab = "Sensitivity",
+  main = paste("ROC curves,\n 5 years form diagnosis, Train cohort"),
+  xlim = c(0, 1),
+  ylim = c(0, 1),
+  asp = 1
+)
+
+# Add ROC lines for all genes
+for (i in 2:length(rez_list2)) {
+  lines(
+    rez_list2[[i]]$FP[, time_index],
+    rez_list2[[i]]$TP[, time_index],
+    col = i,
+    lwd = 2
   )
-colnames(clin_df_joined2)
-
-##COX REGRESION, UNIVARIATE, using continuous variables######################
-univ_results <- lapply(genes, function(gene) {
-  formula <- as.formula(paste("Surv(overall_survival, deceased) ~", gene))
-  cox_model <- coxph(formula, data = clin_df_joined2)
-  sum_cox <- summary(cox_model)
-  
-  # Extract hazard ratio, 95% CI, and p-value
-  if (!is.null(sum_cox$conf.int)) {
-    data.frame(
-      HR = sum_cox$conf.int[,"exp(coef)"],
-      lower95 = sum_cox$conf.int[,"lower .95"],
-      upper95 = sum_cox$conf.int[,"upper .95"],
-      pvalue = sum_cox$coefficients[,"Pr(>|z|)"]
-    )
-  } else {
-    data.frame(HR = NA, lower95 = NA, upper95 = NA, pvalue = NA)
-  }
-})
-
-# Combine results
-univ_df <- do.call(rbind, univ_results)
-univ_df$Gene <- genes_f
-univ_df <- univ_df[, c("Gene", "HR", "lower95", "upper95", "pvalue")]
-print(univ_df)
-
-##plot KM, separate ###################
-plots_met <- list()
-
-for (gene in genes_f) {
-  # Clean gene name: remove "_f" suffix if present
-  gene_clean <- gsub("_f$", "", gene)
-  
-  # Fit KM survival curve
-  fit <- survfit(as.formula(paste("Surv(overall_survival, deceased) ~", gene)), data = clin_df_joined2)
-  
-  ## --- Extract univariable Cox HR + CI from univ_df ---
-  hr_row_uni <- univ_df[univ_df$Gene == gene, ]
-  if (nrow(hr_row_uni) == 0 || any(is.na(hr_row_uni$HR))) {
-    hr_text_uni <- bquote("HR = NA")
-  } else {
-    hr_text_uni <- bquote("HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f)", 
-                                              hr_row_uni$HR, hr_row_uni$lower95, hr_row_uni$upper95)))
-  }
-  
-  ## --- KM log-rank p-value ---
-  survdiff_res <- survdiff(as.formula(paste("Surv(overall_survival, deceased) ~", gene)), 
-                           data = clin_df_joined2)
-  pval_km <- 1 - pchisq(survdiff_res$chisq, length(survdiff_res$n) - 1)
-  if (pval_km < 0.05) {
-    pval_expr <- bquote(bold("Log-rank p = " ~ .(sprintf("%.3f", pval_km))))
-  } else {
-    pval_expr <- bquote("Log-rank p = " ~ .(sprintf("%.3f", pval_km)))
-  }
-  
-  ## --- Combine HR and log-rank p-value in subtitle ---
-  subtitle_expr <- bquote(.(hr_text_uni) ~ "\n" ~ .(pval_expr))
-  
-  ## --- Legend labels ---
-  legend_labels <- c("Low", "High")
-  
-  ## --- KM plot ---
-  p <- ggsurvplot(
-    fit,
-    data = clin_df_joined2,
-    pval = FALSE,
-    risk.table = TRUE,
-    legend.title = "",
-    palette = c("blue", "red")
-  )$plot +
-    scale_color_manual(
-      values = c("blue", "red"),
-      labels = legend_labels
-    ) +
-    labs(
-      title = bquote(italic(.(gene_clean))),
-      subtitle = subtitle_expr
-    ) +
-    theme(
-      plot.title = element_text(hjust = 0.5, face = "bold"),
-      plot.subtitle = element_text(size = 10, hjust = 0.5, lineheight = 1.1)
-    )
-  
-  plots_met[[gene_clean]] <- p  # save using cleaned name
 }
 
-# Combine plots with overall title
-combined_plot <- wrap_plots(plots_met, ncol = 5) +
-  plot_annotation(
-    title = "Survival analysis of train data",
-    theme = theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
+# Add risk score ROC line in bold
+lines(
+  roc_result$FP[, time_index],
+  roc_result$TP[, time_index],
+  col = "maroon",
+  lwd = 3,
+  lty = 1
+)
+
+# Add diagonal reference line
+abline(0, 1, lty = 2, col = "gray")
+
+# Build legend labels without AUC
+legend_labels <- c(paste0("italic('", names(rez_list2), "')"),
+                   "'Risk score'")
+
+# Add legend
+legend(
+  "bottomright",
+  legend = parse(text = legend_labels),
+  col = c(1:length(rez_list2), "maroon"),
+  lwd = c(rep(2, length(rez_list2)), 3),
+  cex = 0.6,
+  bty = "n"
+)
+
+# Add panel label
+mtext("A", side = 3, line = 2.5, adj = -0.2, font = 2, cex = 1.5)
+
+dev.off()
+
+#COORDS table #####################################################
+
+# extract best sens/spec at a given time
+extract_coords <- function(roc, gene, timepoint = 1825) {
+  idx <- which(roc$times == timepoint)
+  
+  # sensitivity & specificity across thresholds
+  sens <- as.vector(roc$TP[, idx])
+  spec <- as.vector(1 - roc$FP[, idx])
+  
+  # Youden index to pick best threshold
+  youden <- sens + spec - 1
+  best_idx <- which.max(youden)
+  
+  tibble(
+    gene = gene,
+    time = roc$times[idx],
+    auc = roc$AUC[idx] * 100,
+    sens = sens[best_idx],
+    spec = spec[best_idx],
+    cutoff = roc$cutoffs[best_idx]
+  )
+}
+
+# Apply to each biomarker
+sens_spec_auc_60 <- map_dfr(names(rez_list2), ~ extract_coords(rez_list2[[.x]], .x, 1825))
+
+# Apply to risk score
+risk_score_row <- extract_coords(roc_result, "Risk score", 1825)
+
+# Combine into one tibble
+sens_spec_auc_60_all <- bind_rows(sens_spec_auc_60, risk_score_row)
+# View
+sens_spec_auc_60_all
+
+#make prety table
+# Prepare table: rename columns for display
+roc_table_display <- sens_spec_auc_60_all %>%
+  rename(
+    Biomarker = gene,
+    Time_days = time,
+    AUC = auc,
+    Sensitivity = sens,
+    Specificity = spec
   )
 
-# Save to file
-ggsave(
-  filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/KM_combined_TRAIN_data.png",
-  plot = combined_plot,
-  width = 25,
-  height = 7,
-  dpi = 300
-)
+# Create gt table
+gt_table_roc_60 <- roc_table_display %>%
+  gt() %>%
+  tab_header(
+    title = "ROC criteria",
+    subtitle = "Prognostic criteria for 5 year survival"
+  ) %>%
+  fmt_number(
+    columns = vars(AUC, Sensitivity, Specificity),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Biomarker))
+  )
+
+# Show table
+gt_table_roc_60
+
+#there is no other convenient way to save gt outputs
+gtsave(gt_table_roc_60,
+       filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_timeroc_table_20250925EN.png")
+
+#Combine the images
+roc_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20250925EN.png")
+table_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_timeroc_table_20250925EN.png")
+
+combined_image <- image_append(c(roc_image, table_image), stack = F)
+
+# Save the combined image
+image_write(combined_image, 
+            "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_ROC_W_TABLE2025925EN.png")

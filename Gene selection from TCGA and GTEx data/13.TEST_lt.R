@@ -20,6 +20,8 @@ library(RColorBrewer)
 library(ggprism)
 library(patchwork)
 library(rstatix) 
+library(magick)
+library(gt)
 #set directory of the data
 setwd("../TCGA-OV-RISK-PROJECT/Public data RDSs/")
 # Load test data ###################################
@@ -339,16 +341,18 @@ legend(
   bty = "n"
 )
 
-##plot at year 5  with plotting###############
+## plot at year 5 with saving###########################
 # Choose target time
-target_time <- 1825        
+target_time <- 1825   # choose year 5
 time_index <- which(rez_list[[1]]$times == target_time)
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test20250916.png",
-    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
-# Set up base plot with gene 1
+# plot with save
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test20250925.png",
+    width = 1000, height = 1000, res = 200)
+
 par(pty="s")
-# Set up base plot with gene 1
+
+# Base plot with first gene
 plot(
   rez_list[[1]]$FP[, time_index],
   rez_list[[1]]$TP[, time_index],
@@ -357,8 +361,7 @@ plot(
   lwd = 2,
   xlab = "Specifiškumas",
   ylab = "Jautrumas",
-  main = paste("Nuo laiko priklausomos ROC kreivės,
-5 metai po diagnozės testavimo imtyje"),
+  main = paste("Nuo laiko priklausomos ROC kreivės,\n5 metai po diagnozės testavimo imtyje"),
   xlim = c(0, 1),
   ylim = c(0, 1),
   asp = 1
@@ -374,7 +377,7 @@ for (i in 2:length(rez_list)) {
   )
 }
 
-# Add risk score ROC line in bold black
+# Add risk score ROC line in bold
 lines(
   roc_result$FP[, time_index],
   roc_result$TP[, time_index],
@@ -386,24 +389,9 @@ lines(
 # Add diagonal reference line
 abline(0, 1, lty = 2, col = "gray")
 
-# Build legend names: italic gene names + "risk score"
-legend_labels <- c(
-  parse(text = paste0("italic('", names(rez_list), "')")),
-  "Risk Score"
-)
-
-# Get AUCs for each gene at time_index
-auc_list <- sapply(rez_list, function(x) x$AUC[time_index])
-auc_risk <- roc_result$AUC[time_index]
-
-# Build gene labels with italic names and AUCs
-legend_labels <- mapply(function(name, auc) {
-  paste0("italic('", name, "')~'(AUC = ", sprintf("%.3f", auc), ")'")
-}, names(rez_list), auc_list)
-
-# Add risk score with AUC
-legend_labels <- c(legend_labels,
-                   paste0("'Risk Score (AUC = ", sprintf("%.3f", auc_risk), ")'"))
+# Build legend labels without AUC
+legend_labels <- c(paste0("italic('", names(rez_list), "')"),
+                   "'Rizikos balas'")
 
 # Add legend
 legend(
@@ -414,36 +402,134 @@ legend(
   cex = 0.6,
   bty = "n"
 )
-#add A label during png
+
+# Add panel label
 mtext("D", side = 3, line = 2.5, adj = -0.2, font = 2, cex = 1.5)
 
-#run plot
-dev.off() # Close the PNG device
+dev.off()
+
+#COORDS table #####################################################
+
+# extract best sens/spec at a given time
+extract_coords <- function(roc, gene, timepoint = 1825) {
+  idx <- which(roc$times == timepoint)
+  
+  # sensitivity & specificity across thresholds
+  sens <- as.vector(roc$TP[, idx])
+  spec <- as.vector(1 - roc$FP[, idx])
+  
+  # Youden index to pick best threshold
+  youden <- sens + spec - 1
+  best_idx <- which.max(youden)
+  
+  tibble(
+    gene = gene,
+    time = roc$times[idx],
+    auc = roc$AUC[idx] * 100,
+    sens = sens[best_idx],
+    spec = spec[best_idx],
+    cutoff = roc$cutoffs[best_idx]
+  )
+}
+
+# Apply to each biomarker
+sens_spec_auc_60 <- map_dfr(names(rez_list), ~ extract_coords(rez_list[[.x]], .x, 1825))
+
+# Apply to risk score
+risk_score_row <- extract_coords(roc_result, "10 Genų raiškos rizikos balas", 1825)
+
+# Combine into one tibble
+sens_spec_auc_60_all <- bind_rows(sens_spec_auc_60, risk_score_row)
+# View
+sens_spec_auc_60_all
+
+#make prety table
+# Prepare table: rename columns for display
+roc_table_display <- sens_spec_auc_60_all %>%
+  rename(
+    Biožymuo = gene,
+    Laikas_dienom = time,
+    AUC = auc,
+    Jautrumas = sens,
+    Specifiškumas = spec
+  )
+
+# Create gt table
+gt_table_roc_60 <- roc_table_display %>%
+  gt() %>%
+  tab_header(
+    title = "ROC kriterijai",
+    subtitle = "Prognostinis tikslumas 5 metų išgyvenimui"
+  ) %>%
+  fmt_number(
+    columns = vars(AUC, Jautrumas, Specifiškumas),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Biožymuo))
+  )
+
+# Show table
+gt_table_roc_60
+
+#there is no other convenient way to save gt outputs
+gtsave(gt_table_roc_60,
+       filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20250925.png")
+
+#Combine the images
+roc_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test20250925.png")
+table_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20250925.png")
+
+combined_image <- image_append(c(roc_image, table_image), stack = F)
+
+# Save the combined image
+image_write(combined_image, 
+            "C:/Users/Ieva/rprojects/outputs_all/DISS/TESTROC_W_TABLE2025925.png")
+
 #KM plot with RISK SCORE#################
+#Kaplan-meier plot ##################################
 # Calculate the median risk score
-median_risk <- median(clin_df_joined_test$RiskScore, na.rm = TRUE) #--0.07747393
+median_risk <- median(clin_df_joined_test$RiskScore, na.rm = TRUE) #-0.05914624
 # Create a new factor column based on the median value
-clin_df_joined_test$RiskGroup <- ifelse(clin_df_joined_test$RiskScore <= median_risk,
-                                   "Low Risk", "High Risk")
+clin_df_joined_test$RiskGroup <- ifelse(clin_df_joined_test$RiskScore <= median_risk, "Low Risk", "High Risk")
 #Create a survival object
-surv_object <- Surv(time = clin_df_joined_test$overall_survival,
-                    event = clin_df_joined_test$deceased )
+surv_object <- Surv(time = clin_df_joined_test$overall_survival, event = clin_df_joined_test$deceased )
 # Fit a Kaplan-Meier model
 km_fit <- survfit(surv_object ~ RiskGroup, data = clin_df_joined_test)
-# Plot the Kaplan-Meier curve using ggsurvplot
-test_survplot <- ggsurvplot(km_fit, data = clin_df_joined_test, 
-           pval = TRUE,  # Show p-value of the log-rank test
-           risk.table = TRUE,  # Add risk table below the plot
-           title = "Kaplan-Meier kreivė: Didelės vs. mažos rizikos atvejai testavimo imtyje",
-           xlab = "Bendras išgyvenamumo laikas",
-           ylab = "Išgyvenamumo tikimybė",
-           palette = c("turquoise", "deeppink"),  # Color palette for groups
-           legend.title = "Rizikos grupė", 
-           legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
+# Compute log-rank test
+surv_test <- survdiff(Surv(overall_survival, deceased) ~ RiskGroup, data = clin_df_joined_test)
+pval_num <- 1 - pchisq(surv_test$chisq, length(surv_test$n) - 1)
+# Format nicely
+if (pval_num < 0.001) {
+  pval_text <- "Long-rank p < 0.001"
+} else {
+  pval_text <- paste0("Long-rank p = ", signif(pval_num, 3))
+}
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_test0916.png",
+# Plot
+train_surv <- ggsurvplot(
+  km_fit, 
+  data = clin_df_joined_test, 
+  pval = FALSE,  # disable built-in
+  risk.table = TRUE,
+  risk.table.title = "Pacienčių skaičius rizikos grupėje",
+  title = "Didelės vs. mažos rizikos atvejai testavimo imtyje",
+  xlab = "Bendras išgyvenamumo laikas",
+  ylab = "Išgyvenamumo tikimybė",
+  palette = c("turquoise", "deeppink"),
+  legend.title = "Rizikos grupė", 
+  legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas")
+)
+
+# Add subtitle
+train_surv$plot <- train_surv$plot + labs(subtitle = pval_text)
+# Add a big "B" to the top-left corner
+print(train_surv)
+#save km plot
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_test20250925.png",
     width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
-test_survplot #
+train_surv #
 dev.off() # Close the PNG device
 
 #Forest plot################
@@ -957,3 +1043,148 @@ ggsave(
   dpi = 300
 )
 
+#ENGLSIH plot at year 5 with saving###########################
+# Choose target time
+target_time <- 1825   # choose year 5
+time_index <- which(rez_list[[1]]$times == target_time)
+
+# plot with save
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test20250925EN.png",
+    width = 1000, height = 1000, res = 200)
+
+par(pty="s")
+
+# Base plot with first gene
+plot(
+  rez_list[[1]]$FP[, time_index],
+  rez_list[[1]]$TP[, time_index],
+  type = "l",
+  col = 1,
+  lwd = 2,
+  xlab = "Specificity",
+  ylab = "Sensitivity",
+  main = paste("ROC curves,\n5 years form diagnosis, Test cohort"),
+  xlim = c(0, 1),
+  ylim = c(0, 1),
+  asp = 1
+)
+
+# Add ROC lines for all genes
+for (i in 2:length(rez_list)) {
+  lines(
+    rez_list[[i]]$FP[, time_index],
+    rez_list[[i]]$TP[, time_index],
+    col = i,
+    lwd = 2
+  )
+}
+
+# Add risk score ROC line in bold
+lines(
+  roc_result$FP[, time_index],
+  roc_result$TP[, time_index],
+  col = "maroon",
+  lwd = 3,
+  lty = 1
+)
+
+# Add diagonal reference line
+abline(0, 1, lty = 2, col = "gray")
+
+# Build legend labels without AUC
+legend_labels <- c(paste0("italic('", names(rez_list), "')"),
+                   "'Risk score'")
+
+# Add legend
+legend(
+  "bottomright",
+  legend = parse(text = legend_labels),
+  col = c(1:length(rez_list), "maroon"),
+  lwd = c(rep(2, length(rez_list)), 3),
+  cex = 0.6,
+  bty = "n"
+)
+
+# Add panel label
+mtext("B", side = 3, line = 2.5, adj = -0.2, font = 2, cex = 1.5)
+
+dev.off()
+
+#COORDS table #####################################################
+
+# extract best sens/spec at a given time
+extract_coords <- function(roc, gene, timepoint = 1825) {
+  idx <- which(roc$times == timepoint)
+  
+  # sensitivity & specificity across thresholds
+  sens <- as.vector(roc$TP[, idx])
+  spec <- as.vector(1 - roc$FP[, idx])
+  
+  # Youden index to pick best threshold
+  youden <- sens + spec - 1
+  best_idx <- which.max(youden)
+  
+  tibble(
+    gene = gene,
+    time = roc$times[idx],
+    auc = roc$AUC[idx] * 100,
+    sens = sens[best_idx],
+    spec = spec[best_idx],
+    cutoff = roc$cutoffs[best_idx]
+  )
+}
+
+# Apply to each biomarker
+sens_spec_auc_60 <- map_dfr(names(rez_list), ~ extract_coords(rez_list[[.x]], .x, 1825))
+
+# Apply to risk score
+risk_score_row <- extract_coords(roc_result, "10 Genų raiškos rizikos balas", 1825)
+
+# Combine into one tibble
+sens_spec_auc_60_all <- bind_rows(sens_spec_auc_60, risk_score_row)
+# View
+sens_spec_auc_60_all
+
+#make prety table
+# Prepare table: rename columns for display
+roc_table_display <- sens_spec_auc_60_all %>%
+  rename(
+    Biomarker = gene,
+    Time_Days = time,
+    AUC = auc,
+    Sensitivity = sens,
+    Specificity = spec
+  )
+
+# Create gt table
+gt_table_roc_60 <- roc_table_display %>%
+  gt() %>%
+  tab_header(
+    title = "ROC criteria",
+    subtitle = "Prognostic criteria for 5 year survival"
+  ) %>%
+  fmt_number(
+    columns = vars(AUC, Sensitivity, Specificity),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Biomarker))
+  )
+
+# Show table
+gt_table_roc_60
+
+#there is no other convenient way to save gt outputs
+gtsave(gt_table_roc_60,
+       filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20250925EN.png")
+
+#Combine the images
+roc_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test20250925EN.png")
+table_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20250925EN.png")
+
+combined_image <- image_append(c(roc_image, table_image), stack = F)
+
+# Save the combined image
+image_write(combined_image, 
+            "C:/Users/Ieva/rprojects/outputs_all/DISS/TESTROC_W_TABLE2025925EN.png")
