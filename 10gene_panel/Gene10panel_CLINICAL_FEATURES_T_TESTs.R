@@ -665,5 +665,116 @@ ggsave(
   dpi = 300         # high resolution
 )
 
+#CA125 plot but in english################################################
+##tribble CA125 pre op ################
+each.vs.ref_sig_ca125EN <- tibble::tribble(
+  ~group1, ~group2, ~p.adj,   ~y.position, ~variable,
+  "CA125 increase",   "Norm" , 0.0499, 2, "TCEAL4", #wilcox
+  "CA125 increase",   "Norm" , 0.0259, 0, "LUC7L2" #wilcox
+)
 
+CA125_table_OCEN <- melt(OC_full[, colnames(OC_full) %in%
+                                   c("CA125_f", expression )],
+                         id.vars="CA125_f",
+                         measure.vars= expression) %>%
+  drop_na(CA125_f) 
+##boxplot CA125 pre op ####################
+custom_colors <- c("CA125 increase" = "blue","Norm" = "lightpink") 
+Ca125_plot <- ggplot(CA125_table_OCEN, aes(x=CA125_f , y=value, fill = variable)) +
+  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = CA125_f )) +
+  geom_jitter(aes(color = CA125_f ), size=1, alpha=0.5) +
+  ylab(label = expression("Relative gene expression, normalised to " * italic("GAPDH"))) + 
+  facet_wrap(.~ variable, nrow = 2, scales = "free") +
+  add_pvalue(each.vs.ref_sig_ca125EN, label = "p.adj") + #pvalue
+  theme_minimal()+
+  theme(
+    strip.text.x = element_text(
+      size = 12, face = "bold.italic"
+    ),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5))+
+  labs(x=NULL)+
+  stat_boxplot(geom ='errorbar')+
+  scale_fill_manual(values = custom_colors) +
+  scale_color_manual(values = custom_colors) + 
+  scale_y_continuous(labels = function(x) gsub("-", "\u2212", x))
+
+Ca125_plot
+
+##save plot ca125 pre op######################################
+png("10_gene_boxplot_ca125_2025_0927EN.png"
+    , width = 3500, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+Ca125_plot #
+dev.off() # Close the PNG device
+
+table(OC_full$CA125_f, useNA = "a")
+
+#ENGLISH coreliation with age#################
+table(OC_full$Age, useNA ="a")
+age_test <- OC_full[, colnames(OC_full) %in% c(expression, "Age")]
+#not normal TCEAL4, GRB7, PKP3, LUC7L2
+nn <- c("TCEAL4", "GRB7", "PKP3", "LUC7L2")
+on <- expression[!expression %in% nn]
+results_nn <- lapply(OC_full[, colnames(OC_full) %in% nn], 
+                     function(x) cor.test(x, OC_full$Age, method = "spearman"))
+results_nn
+
+results_n <- lapply(OC_full[, colnames(OC_full) %in% on], 
+                    function(x) cor.test(x, OC_full$Age, method = "pearson"))
+results_n
+
+#make dfs
+df_pearson <- data.frame(
+  variable = names(results_n),
+  R = sapply(results_n, function(x) if (is.list(x)) x$estimate else NA),
+  p_value = sapply(results_n, function(x) if (is.list(x)) x$p.value else NA),
+  method = "Pearson"
+)
+# Spearman results (nn)
+df_spearman <- data.frame(
+  variable = names(results_nn),
+  R = sapply(results_nn, function(x) if (is.list(x)) x$estimate else NA),
+  p_value = sapply(results_nn, function(x) if (is.list(x)) x$p.value else NA),
+  method = "Spearman"
+)
+
+# Combine
+df_all <- rbind(df_pearson, df_spearman)
+
+##plot age #######################
+# Create the plot list
+plot_list <- lapply(df_all$variable, function(gene) {
+  method <- df_all$method[df_all$variable == gene]
+  r_val <- round(df_all$R[df_all$variable == gene], 2)
+  p_val <- signif(df_all$p_value[df_all$variable == gene], 2)
+  
+  ggplot(age_test, aes_string(x = "Age", y = gene)) +
+    geom_point(color = "steelblue") +
+    geom_smooth(method = "lm", se = FALSE, color = "darkred") +
+    labs(
+      title = bquote("Age vs"~italic(.(gene))),
+      subtitle = paste0( 
+        "  R = ", r_val, 
+        " | p = ", p_val),
+      x = "Age, years ",
+      y = bquote("Gene Expression"~italic(.(gene)))
+    ) +
+    theme_minimal() +
+    theme(plot.subtitle = element_text(size = 10, face = "italic", color = "gray30"))
+})
+# Show plots one by one (optional)
+for (p in plot_list) print(p)
+
+# Combine into one figure
+combined_plot <- wrap_plots(plot_list, ncol = 2) +
+  plot_annotation(title = "Gene expression correlation with age at diagnosis")
+combined_plot
+#save in english
+ggsave(
+  filename = "10_gene_age10genes20250027EN.png",
+  plot = combined_plot,
+  width = 8,       # adjust width as needed
+  height = 11,       # adjust height as needed
+  dpi = 300         # high resolution
+)
 

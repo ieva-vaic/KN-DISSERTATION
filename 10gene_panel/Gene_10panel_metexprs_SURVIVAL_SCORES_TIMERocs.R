@@ -689,3 +689,195 @@ png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_TCGA_COEF_hgsoc_2015091
 test_survplotctga3 #
 dev.off() # Close the PNG device
 
+#ENGLISH KM PLOT ###############################
+
+test_survplot2EN <- ggsurvplot(km_fit2, data = surv_df_test2, 
+                               #pval = TRUE,  # Show p-value of the log-rank test
+                               risk.table = TRUE,  # Add risk table below the plot
+                               title = "Risk score association with overall survival, OC group",
+                               palette = c("turquoise", "deeppink"),  # Color palette for groups
+                               legend.title = "Risk score", 
+                               legend.labs = c("Low risk score", "High risk score"))
+# Add subtitle form cox result
+test_survplot2EN$plot <- test_survplot2EN$plot +
+  labs(subtitle = "Uni HR =  0.24  (95% CI: 0.07–0.81); Multi HR = 0.21 (95% CI: 0.05–0.91), Long-rank p = 0.013, n = 47")
+
+test_survplot2EN
+#save
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_OCa_20150927EN.png",
+    width = 1100, height = 600, res = 100) # width and height in pixels, resolution in dpi
+test_survplot2EN #
+dev.off() # Close the PNG device
+
+
+#ENGLISH plot at year 5  with plotting, no AUCS in the plot###############
+# Choose target time
+target_time <- 60        
+time_index <- which(rez_list[[1]]$times == target_time)
+
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test2025927EN.png",
+    width = 1200, height = 1200, res = 200) # width and height in pixels, resolution in dpi
+# Set up base plot with gene 1
+par(pty="s")
+# Set up base plot with gene 1
+plot(
+  rez_list[[1]]$FP[, time_index],
+  rez_list[[1]]$TP[, time_index],
+  type = "l",
+  col = 1,
+  lwd = 2,
+  xlab = "Specificity",
+  ylab = "Sensitivity",
+  main = paste("ROC curves, 5 years form diagnosis, OC group"),
+  xlim = c(0, 1),
+  ylim = c(0, 1),
+  asp = 1
+)
+
+# Add ROC lines for all genes
+for (i in 2:length(rez_list)) {
+  lines(
+    rez_list[[i]]$FP[, time_index],
+    rez_list[[i]]$TP[, time_index],
+    col = i,
+    lwd = 2
+  )
+}
+
+# Add risk score ROC line in bold black
+lines(
+  roc_result$FP[, time_index],
+  roc_result$TP[, time_index],
+  col = "maroon",
+  lwd = 3,
+  lty = 1
+)
+
+# Add diagonal reference line
+abline(0, 1, lty = 2, col = "gray")
+
+# Build legend names: italic gene names + "risk score"
+legend_labels <- c(
+  parse(text = paste0("italic('", names(rez_list), "')")),
+  "Risk Score"
+)
+
+# Get AUCs for each gene at time_index
+auc_list <- sapply(rez_list, function(x) x$AUC[time_index])
+auc_risk <- roc_result$AUC[time_index]
+
+# Build gene labels with italic names and AUCs
+legend_labels <- mapply(function(name, auc) {
+  paste0("italic('", name, "')~'(AUC = ", sprintf("%.3f", auc), ")'")
+}, names(rez_list), auc_list)
+
+# Add risk score with AUC
+legend_labels <- c(legend_labels,
+                   paste0("'Risk score (AUC = ", sprintf("%.3f", auc_risk), ")'"))
+
+# Add legend
+legend(
+  "bottomright",
+  legend = parse(text = legend_labels),
+  col = c(1:length(rez_list), "maroon"),
+  lwd = c(rep(2, length(rez_list)), 3),
+  cex = 0.6,
+  bty = "n"
+)
+
+#run plot
+dev.off() # Close the PNG device
+
+
+#TABLE of aucs, sensitivity, specificity##########################
+# Extract best sensitivity, specificity, cutoff for Notch risk score at 60 months
+sens_60_risk <- roc_result$TP[, which(roc_result$times == 60)]
+spec_60_risk <- 1 - roc_result$FP[, which(roc_result$times == 60)]
+
+youden_risk <- sens_60_risk + spec_60_risk - 1
+best_idx_risk <- which.max(youden_risk)
+
+risk_score_row <- tibble(
+  gene = "Risk score",
+  time = roc_result$times[which(roc_result$times == 60)],
+  auc = roc_result$AUC[which(roc_result$times == 60)]*100,
+  sens = sens_60_risk[best_idx_risk],
+  spec = spec_60_risk[best_idx_risk],
+  cutoff = roc_result$cutoffs[best_idx_risk]
+)
+
+# Build table of AUC + Sensitivity + Specificity at 60 months
+sens_spec_auc_60 <- map_dfr(names(rez_list), function(gene) {
+  roc <- rez_list[[gene]]
+  
+  # Get index for t=60
+  idx_60 <- which(roc$times == 60)
+  
+  # Sensitivity & specificity vectors across thresholds
+  sens_60 <- roc$TP[, idx_60]
+  spec_60 <- 1 - roc$FP[, idx_60]
+  
+  # Use Youden index to select optimal cutoff
+  youden <- sens_60 + spec_60 - 1
+  best_idx <- which.max(youden)
+  
+  tibble(
+    gene = gene,
+    time = roc$times[idx_60],
+    auc = roc$AUC[idx_60]*100,
+    sens = sens_60[best_idx],
+    spec = spec_60[best_idx],
+    cutoff = roc$cutoffs[best_idx]
+  )
+})
+
+
+# Combine with gene-level table
+sens_spec_auc_60_all <- bind_rows(sens_spec_auc_60, risk_score_row)
+
+print(sens_spec_auc_60_all)
+
+#make prety table
+# Prepare table: rename columns for display
+roc_table_display <- sens_spec_auc_60_all %>%
+  rename(
+    Biomarker = gene,
+    Time_months = time,
+    AUC = auc,
+    Sensitivity = sens,
+    Specificity = spec
+  )
+
+# Create gt table
+gt_table_roc_60 <- roc_table_display %>%
+  gt() %>%
+  tab_header(
+    title = "ROC criteria",
+    subtitle = "Prognostic criteria, 5 years from diagnosis"
+  ) %>%
+  fmt_number(
+    columns = vars(AUC, Sensitivity, Specificity),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Biomarker))
+  )
+
+# Show table
+gt_table_roc_60
+
+#there is no other convenient way to save gt outputs
+gtsave(gt_table_roc_60,
+       filename = "10genetimeroc_table_20250927EN.png")
+
+#Combine the images
+roc_image <- image_read("tissues_OCtimeROC_test2025927EN.png")
+table_image <- image_read("10genetimeroc_table_20250927EN.png")
+
+combined_image <- image_append(c(roc_image, table_image), stack = F)
+
+# Save the combined image
+image_write(combined_image, 
+            "tissues_OCtimeROCw_table_test2025927EN.png")
+

@@ -1633,3 +1633,117 @@ ggsave(
   dpi = 600
   
 )
+
+#ENGLISH OC SUVRVIVAL KM SEPARATE#####################
+#plot with multi
+plots2x <- list()
+
+for (gene in genes_f) {
+  gene_clean <- sub("_f$", "", gene)
+  
+  # Fit KM survival curve
+  fit <- survfit(as.formula(paste("Surv(OS, STATUS) ~", gene)), 
+                 data = OC_SURV_EXPRESSION)
+  
+  ## --- Univariate HR ---
+  hr_row <- univ_df2[univ_df2$Gene == gene, ]
+  if (nrow(hr_row) == 0 || any(is.na(hr_row$HR))) {
+    hr_text_expr <- bquote("Univ HR = NA")
+  } else {
+    hr_text_expr <- bquote("Univ HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f)", 
+                                                    hr_row$HR, hr_row$lower95, hr_row$upper95)))
+  }
+  
+  ## --- KM log-rank p-value ---
+  survdiff_res <- survdiff(as.formula(paste("Surv(OS, STATUS) ~", gene)), 
+                           data = OC_SURV_EXPRESSION)
+  pval_km <- 1 - pchisq(survdiff_res$chisq, length(survdiff_res$n) - 1)
+  if (pval_km < 0.05) {
+    pval_expr <- bquote(bold("Log-rank p = " ~ .(sprintf("%.3f", pval_km))))
+  } else {
+    pval_expr <- bquote("Log-rank p = " ~ .(sprintf("%.3f", pval_km)))
+  }
+  
+  ## --- Multivariable HR (Age + CA125) ---
+  multi_row <- multi_df2[multi_df2$Gene == gene, ]
+  if (nrow(multi_row) == 0 || any(is.na(multi_row$HR))) {
+    hr_multi_expr <- bquote("Multiv HR = NA")
+  } else {
+    # Bold if p < 0.05
+    if (!is.na(multi_row$pvalue) && multi_row$pvalue < 0.05) {
+      hr_multi_expr <- bquote(bold("Multiv HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f, N=%d)", 
+                                                              multi_row$HR, multi_row$lower95, 
+                                                              multi_row$upper95, multi_row$N))))
+    } else {
+      hr_multi_expr <- bquote("Multiv HR = " * .(sprintf("%.2f (95%% CI: %.2f–%.2f, N=%d)", 
+                                                         multi_row$HR, multi_row$lower95, 
+                                                         multi_row$upper95, multi_row$N)))
+    }
+  }
+  
+  ## --- Combine 3 lines in subtitle ---
+  subtitle_expr <- bquote(.(hr_text_expr) ~ "\n" ~ .(pval_expr) ~ "\n" ~ .(hr_multi_expr))
+  
+  ## --- Legend labels ---
+  legend_labels <- c(
+    bquote(italic(.(gene_clean)) ~ " Low"),
+    bquote(italic(.(gene_clean)) ~ " High")
+  )
+  
+  ## --- KM plot ---
+  p <- ggsurvplot(
+    fit,
+    data = OC_SURV_EXPRESSION,
+    pval = FALSE,
+    risk.table = TRUE,
+    legend.title = "",
+    palette = c("blue", "red")
+  )$plot +
+    scale_color_manual(
+      values = c("blue", "red"),
+      labels = legend_labels
+    ) +
+    labs(
+      title = bquote(italic(.(gene_clean))),
+      subtitle = subtitle_expr,
+      x = "Time, months",
+      y = "Survival probabilities"
+    ) +
+    theme(
+      plot.title = element_text(hjust = 0.5, face = "bold"),
+      plot.subtitle = element_text(size = 10, hjust = 0.5, lineheight = 1.1)
+    )
+  
+  plots2x[[gene]] <- p
+}
+
+# Combine plots and add overall title
+combined_plotx2 <- wrap_plots(plots2x, ncol = 4) +
+  plot_annotation(
+    title = "Survival analysis of OC",
+    theme = theme(
+      plot.title = element_text(size = 18, face = "bold", hjust = 0.5)
+    )
+  )
+
+# Subset plots for the two gene sets
+plots_genes10_2x <- plots2x[names(plots2x) %in% genes10_f]
+plots_genes_notch_2x <- plots2x[names(plots2x) %in% genes_notch_f]
+
+# Combine separately
+combined_plot_genes10_2x <- wrap_plots(plots_genes10_2x, ncol = 2)+
+  plot_annotation(
+    title = "Survival analysis of OC",
+    theme = theme(
+      plot.title = element_text(size = 18, face = "bold", hjust = 0.5)
+    ))
+
+#save 10 gene
+ggsave(
+  filename = "KM_combined_plot_w_HR_OC_10_gene_20250925vertical.png",  # output file name
+  plot = combined_plot_genes10_2x,               # the patchwork plot object
+  width = 14,                         # width in inches
+  height = 20,                        # height in inches
+  dpi = 400                           # resolution
+)
+
