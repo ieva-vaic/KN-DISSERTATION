@@ -7,6 +7,11 @@ library(tidyverse)
 library(FSA)
 library(grid)
 library(ggpubr)
+library(magick)
+library(gt)
+library(multcomp)
+library(FSA)
+library(cowplot)
 #set directory of the data
 setwd("../TCGA-OV-RISK-PROJECT/Public data RDSs/")
 #set genes of interest
@@ -18,10 +23,10 @@ full_test <- read.csv("C:/Users/Ieva/rprojects/OTHER DATA/KN-DISSERTATION FILES/
 full_test$AGE2 <- factor(full_test$AGE2, ordered = T)
 #pivot long
 age_long <- full_test %>%
-  select(all_of(expression), AGE2) %>%
+  dplyr::select(all_of(expression), AGE2) %>%
   pivot_longer(cols = all_of(expression), names_to = "gene", values_to = "expression") %>%
   filter(!is.na(AGE2))
-#BOXPLOT: Age TRAIN ########################################
+#BOXPLOT: Age TEST ########################################
 # Step 1: Compute Kruskal-Wallis test for each gene
 kw_df <- lapply(expression, function(gene) {
   test <- kruskal.test(full_test[[gene]] ~ full_test$AGE2)
@@ -64,12 +69,13 @@ age_test_plot <-
     x = "Amžiaus intervalai", y = "Genų raiška",
     fill = "Amžius", color = "Amžius"
   ) +
-  theme(legend.position = "bottom")+
+  theme(legend.position = "bottom", 
+        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"))+
   scale_fill_brewer(palette = "Pastel1") +
   scale_color_brewer(palette = "Pastel1") 
 #save plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontest20250718.png",
-    width = 3000, height = 2500, res = 250) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontest20251001.png",
+    width = 3000, height = 3000, res = 250) # width and height in pixels, resolution in dpi
 age_test_plot #
 grid.text("B", x = unit(0.02, "npc"), y = unit(0.98, "npc"),
           gp = gpar(fontsize = 18, fontface = "bold"))
@@ -102,10 +108,10 @@ full_age_df$Row.names <- NULL
 
 #pivot long
 age_long <- full_age_df %>%
-  select(all_of(expression), AGE2) %>%
+  dplyr::select(all_of(expression), AGE2) %>%
   pivot_longer(cols = all_of(expression), names_to = "gene", values_to = "expression") %>%
   filter(!is.na(AGE2))
-#BOXPLOT: Age TEST ########################################
+#BOXPLOT: Age TRAIN ########################################
 # Step 1: Compute Kruskal-Wallis test for each gene
 kw_df <- lapply(expression, function(gene) {
   test <- kruskal.test(full_age_df[[gene]] ~ full_age_df$AGE2)
@@ -212,9 +218,10 @@ age_train_plot <- ggplot(age_long, aes(x = AGE2, y = expression)) +
   scale_fill_brewer(palette = "Pastel2") +
   scale_color_brewer(palette = "Pastel2") 
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontrain20250718.png",
-    width = 3000, height = 2500, res = 250) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontrain20251001.png",
+    width = 3000, height = 3000, res = 250) # width and height in pixels, resolution in dpi
 age_train_plot #
 grid.text("A", x = unit(0.02, "npc"), y = unit(0.98, "npc"),
           gp = gpar(fontsize = 18, fontface = "bold"))
 dev.off() # Close the PNG device
+

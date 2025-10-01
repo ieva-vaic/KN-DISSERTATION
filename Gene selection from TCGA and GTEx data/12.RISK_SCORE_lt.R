@@ -22,6 +22,9 @@ library(rstatix)
 library(patchwork)
 library(magick)
 library(gt)
+library(multcomp)
+library(FSA)
+library(cowplot)
 #set directory of the data
 setwd("../TCGA-OV-RISK-PROJECT/Public data RDSs/")
 # Load train data ###################################
@@ -34,6 +37,9 @@ gtex_filtered_counts_train2 <- gtex_filtered_counts_train %>%
   dplyr::filter(grepl("^TCGA", rownames(gtex_filtered_counts_train)))
 dim(gtex_filtered_counts_train2)
 #gtex_filtered_counts_train2 <- as.data.frame(t(gtex_filtered_counts_train2))
+#get genes of interest
+expression <- c( "EXO1",   "RAD50",  "PPT2",   "LUC7L2", "PKP3",
+                 "CDCA5",  "ZFPL1" , "VPS33B", "GRB7",   "TCEAL4")
 # Load clinical data ###################################
 clin_df <- readRDS("joinedTCGA_XENA_clinical2025.RDS")
 #fix survival
@@ -657,71 +663,6 @@ ggsave(
   height = 7,
   dpi = 300
 )
-#Forest plot################
-colnames(clin_df_joined_gr)
-vars <- c("RiskScore", "stage_early_late",
-          "neoplasmhistologicgrade", "ageatinitialpathologicdiagnosis" )
-#model
-models <- vars %>%       # begin with variables of interest
-  str_c("deceased ~ ", .) %>%   # combine each variable into formula ("outcome ~ variable of interest")
-  # iterate through each univariate formula
-  map(                               
-    .f = ~glm(                       # pass the formulas one-by-one to glm()
-      formula = as.formula(.x),      # within glm(), the string formula is .x
-      family = "binomial",           # specify type of glm (logistic)
-      data = clin_df_joined_gr)) %>%          # dataset
-  
-  # tidy up each of the glm regression outputs from above
-  map(
-    .f = ~tidy(
-      .x, 
-      exponentiate = TRUE,           # exponentiate 
-      conf.int = TRUE)) %>%          # return confidence intervals
-  
-  # collapse the list of regression outputs in to one data frame
-  bind_rows() %>% 
-  
-  # round all numeric columns
-  mutate(across(where(is.numeric), round, digits = 2)) %>%
-  filter(term != "(Intercept)")
-
-models #simple table models
-
-# fix terms
-models$term <-  c("Risk Score", "FIGO Stage late vs early",
-                  "Neoplasm histologic grade G3 vs G1", "Age at initial pathologic diagnosis")
-term_order <-  c("Risk Score", "FIGO Stage late vs early",
-                 "Neoplasm histologic grade G3 vs G1", "Age at initial pathologic diagnosis")
-# Apply the order to the term variable in the models data frame
-models$term <- factor(models$term, levels = term_order)
-models
-#FOREST plot
-p <- 
-  models |>
-  ggplot(aes(y = fct_rev(term))) + 
-  theme_classic()+
-  geom_point(aes(x=estimate), shape=15, size=3) +
-  geom_linerange(aes(xmin=conf.low, xmax=conf.high)) +
-  geom_vline(xintercept = 1, linetype="dashed") +
-  labs(x="Odds Ratio, 95% CI", y="")+
-  theme(
-    axis.text.y = element_text(face = "italic")  # Make y-axis labels italic
-  )+
-  scale_x_continuous(
-    breaks = c(1, seq(-3,  160, by = 10))  # Increase the number of x-axis ticks
-  )
-
-
-odds1 <- p +geom_text(aes(y = term, x = 50, label = sprintf("%0.2f", round(estimate, digits = 2))), size = 4) + ## decimal places
-  annotate("text", x = 60, y= 4.5,  label = "OR", size = 4, fontface = "bold", hjust = 0)+
-  geom_text(aes(y = term, x = 70, label = paste(conf.low, "-", conf.high)), size = 4) + 
-  annotate("text", x = 80, y= 4.5,  label = "95 % CI", size =4, fontface = "bold", hjust = 0)+
-  geom_text(aes(y = term, x = 90, label = sprintf("%0.2f", round(p.value, digits = 2))), size = 4) + 
-  annotate("text", x = 114, y= 4.5,  label = "p value", size = 4, fontface = "bold", hjust = 0)+
-  labs(title = "Hazard Ratios for Mortality")
-
-
-odds1 # forest plot
 
 #With stage risk model ###########################
 #choose variables
@@ -907,45 +848,110 @@ colnames(clin_df_joined)
 stage_train <- clin_df_joined[, colnames(clin_df_joined) %in% c(expression,
                                             "clinicalstage2", "barcode" )]
 stage_train <- stage_train[!is.na(stage_train$clinicalstage2), ]
-#get long df
+
+#make stage comaprisons############################################
+#levene test for variance, stage, tcga
+levene_rez <- stage_train[, c(2:12)] %>%
+  pivot_longer(cols = -clinicalstage2 , names_to = "variable", values_to = "value") %>%
+  group_by(variable) %>%
+  summarise(
+    p_value = car::leveneTest(value ~ clinicalstage2 )$`Pr(>F)`[1],
+    .groups = "drop"
+  )
+levene_rez  #all normal
+
+##anova, stage################################
+results <- lapply(names(stage_train)[c(3:12)], function(var) {
+  formula <- as.formula(paste(var, "~ clinicalstage2"))
+  fit <- aov(formula, data = stage_train)
+  
+  list(
+    variable = var,
+    summary = summary(fit),
+    shapiro = shapiro.test(residuals(fit))
+  )
+})
+
+names(results) <- names(stage_train)[c(3:12)]
+#make df of results
+results_df <- lapply(results, function(x) {
+  data.frame(
+    variable   = x$variable,
+    anova_p    = x$summary[[1]][["Pr(>F)"]][1],
+    shapiro_p  = x$shapiro$p.value
+  )
+}) %>%
+  bind_rows()
+
+results_df
+#show not normal
+non_normal_df <- results_df %>% filter(shapiro_p <= 0.05) #TCEAL4, LUC7L2, PKP3
+non_normal_df
+#show significant
+results_df %>% filter(anova_p <= 0.05) #EXO1 
+
+##stage Kruskal test######################################################
+kruskal_results <- lapply(non_normal_df$variable, function(var) {
+  df <- stage_train[, c(var, "clinicalstage2")]
+  # df <- na.omit(df)  # remove NAs
+  test <- kruskal.test(as.formula(paste(var, "~ clinicalstage2")), data = df)
+  
+  data.frame(
+    variable = var,
+    kruskal_p = test$p.value
+  )
+}) %>%
+  bind_rows()
+
+kruskal_results# EXO1 is only significant
+
+##dunns tests (posthoc for kurskal)###################################
+# Run Dunn post-hoc for all non-normal variables
+dunn_results <- lapply(non_normal_df$variable, function(var) {
+  df <- stage_train[, c(var, "clinicalstage2")]
+  df <- na.omit(df)
+  df$clinicalstage2 <- as.factor(df$clinicalstage2)
+  
+  test <- dunnTest(as.formula(paste(var, "~ clinicalstage2")), data = df, method = "holm")
+  
+  data.frame(
+    variable   = var,
+    comparison = test$res$Comparison,  # <- use this column instead of rownames
+    Z          = test$res$Z,
+    p_value    = test$res$P.adj
+  )
+}) %>%
+  bind_rows()
+
+# View results
+dunn_results %>%
+  filter(p_value < 0.1) #exo1 II vs IV 0.07
+
+#get long df for plot
 stage_table_train_full <- reshape2::melt(stage_train[, colnames(stage_train) %in%
                                                 c("clinicalstage2", expression )],
                                    id.vars="clinicalstage2",
                                    measure.vars= expression)
-#get t test
-t.train_stage <- stage_table_train_full %>%
-  group_by(variable) %>%
-  t_test(value ~ clinicalstage2,
-         p.adjust.method = "BH", 
-         var.equal = TRUE, #stjudents
-         paired = FALSE, 
-         detailed=TRUE 
-  ) # Format p-values to remove scientific notation
-t.train_stage
-#make a tibble of p values: ~group1, ~group2, ~p.adj,   ~y.position, ~variable
-t.train_stage_tibble <- t.train_stage %>% 
-  select(group1, group2, p, variable) %>%
-  mutate(
-    y.position = c(8, 8, 8, 8,8, 
-                   8, 6, 6, 8, 8,
-                   8, 8, 8, 8, 8, 
-                   8, 6, 6, 8, 8,
-                   8, 8, 8, 8, 8, 
-                   8, 6, 6, 8, 8,
-                   8, 8, 8, 8, 8, 
-                   8, 6, 6, 8, 8,
-                   8, 8, 8, 8,8, 
-                   8, 6, 6, 8, 8,
-                   8, 8, 8, 8, 8, 
-                   8, 6, 6, 8, 8) #choose where to plot p values
-  )%>%
-  filter(p < 0.05)%>%
-  filter(group1 != "Stage I")
-t.train_stage_tibble
+
+stage_table_train_full <- stage_table_train_full %>%
+  mutate(clinicalstage2 = case_when(
+    clinicalstage2 == "Stage I" ~ "I stadija",
+    clinicalstage2 == "Stage II" ~ "II stadija",
+    clinicalstage2 == "Stage III" ~ "III stadija",
+    clinicalstage2 == "Stage IV" ~ "IV stadija",
+    TRUE ~ NA_character_
+  ))
+
+#add manually from anovas
+t.train_stage_tibble <-  tibble::tribble(
+    ~group1, ~group2, ~p,   ~y.position, ~variable,
+    "II stadija",   "IV stadija", 0.0661, 6, "EXO1", #dunn
+  )
 
 #get colors 
-custom_colors_stage <- c("Stage I" = "turquoise","Stage II" = "lightblue","Stage III" = "blue", "Stage IV"= "darkblue") 
-#plot
+custom_colors_stage <- c("I stadija" = "turquoise","II stadija" = "lightblue",
+                         "III stadija" = "blue", "IV stadija"= "darkblue") 
+##plot stage ###########
 stage_plot <- ggplot(stage_table_train_full, aes(x=clinicalstage2 , y=value, fill = variable)) +
   geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = clinicalstage2 )) +
   geom_jitter(aes(color = clinicalstage2 ), size=1, alpha=0.5) +
@@ -965,11 +971,14 @@ stage_plot <- ggplot(stage_table_train_full, aes(x=clinicalstage2 , y=value, fil
   scale_color_manual(values = custom_colors_stage) +
   ggtitle("Genų raiškos koreliacija su stadija mokymosi imtyje")
 
-stage_plot
+stage_plot2 <- ggdraw(stage_plot) +
+  draw_plot_label(label = "A", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
+
+stage_plot2
 #save stage plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_stage_barplot_20250618.png",
-    width = 2200, height = 1300, res = 200) # width and height in pixels, resolution in dpi
-stage_plot #
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_stage_barplot_20250925.png",
+    width = 2200, height = 1300, res = 180) # width and height in pixels, resolution in dpi
+stage_plot2 #
 dev.off() # Close the PNG device
 
 #TCGA - grade, boxplot ###########################
@@ -1005,10 +1014,10 @@ t.train_grade <- grade_table_full %>%
 t.train_grade
 #make a tibble of p values: ~group1, ~group2, ~p.adj,   ~y.position, ~variable
 t.train_grade_tibble <- t.train_grade %>% 
-  select(group1, group2, p, variable) %>%
+  dplyr::select(group1, group2, p, variable) %>%
   mutate(
-    y.position = c(6, 6, 6, 8.5, 13, 
-                   8, 6, 6, 6, 11) #choose where to plot p values
+    y.position = c(4, 4, 4, 8.5, 13, 
+                   8, 8, 4,8, 8) #choose where to plot p values
   )%>%
   filter(p < 0.05)
 t.train_grade_tibble
@@ -1036,10 +1045,14 @@ grade_plot <- ggplot(grade_table_full, aes(x=grade , y=value, fill = variable)) 
   ggtitle("Genų raiškos koreliacija su naviko diferenciacijos laipsniu mokymosi imtyje")
 
 grade_plot
+
+grade_plot2 <- ggdraw(grade_plot) +
+  draw_plot_label(label = "B", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
+
 #save grade plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_grade_barplot_20250619.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_grade_barplot_20251001.png",
     width = 2200, height = 1300, res = 200) 
-grade_plot 
+grade_plot2 
 dev.off() 
 
 #Coreliation with age#################
@@ -1105,7 +1118,7 @@ t.train_lymph <- lymph_table_full %>%
 t.train_lymph
 #make a tibble of p values: ~group1, ~group2, ~p.adj,   ~y.position, ~variable
 t.train_lymph_tibble <- t.train_lymph %>% 
-  select(group1, group2, p, variable) %>%
+  dplyr::select(group1, group2, p, variable) %>%
   mutate(
     y.position = c(6, 6, 6, 7, 13, 
                    8, 6, 6, 6, 11) #choose where to plot p values
@@ -1137,10 +1150,15 @@ lymph_plot <- ggplot(lymph_table_full, aes(x=lymphaticinvasion , y=value, fill =
   ggtitle("Genų raiškos koreliacija su invazija į limfmazgius mokymosi imtyje")
 
 lymph_plot
+
+lymph_plot2 <- ggdraw(lymph_plot) +
+  draw_plot_label(label = "A", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
+
+lymph_plot2
 #save lymphovascular invasion plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_lymph_barplot_20250619.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_lymph_barplot_20251001.png",
     width = 2450, height = 1300, res = 200) # width and height in pixels, resolution in dpi
-lymph_plot #
+lymph_plot2 #
 dev.off() # Close the PNG device
 
 #TCGA - resudual tumor, boxplot ##############
@@ -1155,52 +1173,104 @@ levels(clin_df_joined$tumorresidualdisease) <- c(">20 mm", "1-10 mm ","11-20 mm"
 residual_train <- clin_df_joined[, colnames(clin_df_joined) %in% c(expression,
                                                                 "tumorresidualdisease" )]
 residual_train <- residual_train[!is.na(residual_train$tumorresidualdisease), ]
+
+#make residual tumor comaprisons############################################
+table(residual_train$tumorresidualdisease, useNA = "a")
+#levene test for variance, stage, tcga
+levene_rez2 <- residual_train %>%
+  pivot_longer(cols = -tumorresidualdisease , names_to = "variable", values_to = "value") %>%
+  group_by(variable) %>%
+  summarise(
+    p_value = car::leveneTest(value ~ tumorresidualdisease )$`Pr(>F)`[1],
+    .groups = "drop"
+  )
+levene_rez2  #all normal
+
+
+##anova, residual tumor################################
+results2 <- lapply(names(residual_train)[c(2:11)], function(var) {
+  formula <- as.formula(paste(var, "~ tumorresidualdisease"))
+  fit <- aov(formula, data = residual_train)
+  
+  list(
+    variable = var,
+    summary = summary(fit),
+    shapiro = shapiro.test(residuals(fit))
+  )
+})
+
+names(results2) <- names(residual_train)[c(2:11)]
+#make df of results2
+results2_df <- lapply(results2, function(x) {
+  data.frame(
+    variable   = x$variable,
+    anova_p    = x$summary[[1]][["Pr(>F)"]][1],
+    shapiro_p  = x$shapiro$p.value
+  )
+}) %>%
+  bind_rows()
+
+results2_df
+#show not normal
+non_normal_df2 <- results2_df %>% filter(shapiro_p <= 0.05) 
+non_normal_df2
+#show significant
+results2_df %>% filter(anova_p <= 0.05) #GRB7 
+
+##stage Kruskal test######################################################
+kruskal_results2 <- lapply(non_normal_df2$variable, function(var) {
+  df <- residual_train[, c(var, "tumorresidualdisease")]
+  # df <- na.omit(df)  # remove NAs
+  test <- kruskal.test(as.formula(paste(var, "~ tumorresidualdisease")), data = df)
+  
+  data.frame(
+    variable = var,
+    kruskal_p = test$p.value
+  )
+}) %>%
+  bind_rows()
+
+kruskal_results2# GRB7  is only significant
+
+##dunns tests (posthoc for kurskal)###################################
+# Run Dunn post-hoc for all non-normal variables
+dunn_results2 <- lapply(non_normal_df2$variable, function(var) {
+  df <- residual_train[, c(var, "tumorresidualdisease")]
+  df <- na.omit(df)
+  df$tumorresidualdisease <- as.factor(df$tumorresidualdisease)
+  
+  test <- dunnTest(as.formula(paste(var, "~ tumorresidualdisease")), data = df, method = "holm")
+  
+  data.frame(
+    variable   = var,
+    comparison = test$res$Comparison,  # <- use this column instead of rownames
+    Z          = test$res$Z,
+    p_value    = test$res$P.adj
+  )
+}) %>%
+  bind_rows()
+
+# View results
+dunn_results2 %>%
+  filter(p_value < 0.1) #grb7 
+
+#add manually from anovas
+t.train_res_tibble <-  tibble::tribble(
+  ~group1, ~group2, ~p,   ~y.position, ~variable,
+  "Be likutinio naviko",   ">20 mm", 0.0091, 9, "GRB7", #dunn
+)
+
 #get long df
 residual_table_full <- reshape2::melt(residual_train[, colnames(residual_train) %in%
                                                  c("tumorresidualdisease", expression )],
                                    id.vars="tumorresidualdisease",
                                    measure.vars= expression)
-#get t test
-t.train_res <- residual_table_full %>%
-  group_by(variable) %>%
-  t_test(value ~ tumorresidualdisease,
-         p.adjust.method = "BH", 
-         var.equal = TRUE, #stjudents
-         paired = FALSE, 
-         detailed=TRUE 
-  ) # Format p-values to remove scientific notation
-t.train_res
-#make a tibble of p values: ~group1, ~group2, ~p.adj,   ~y.position, ~variable
-t.train_res_tibble <- t.train_res %>% 
-  select(group1, group2, p, variable) %>%
-  mutate(
-    y.position = c(11, 2, 3, 4, 5, 
-                   6, 7, 8, 9, 10,
-                   
-                   11, 2, 3, 4, 5, 
-                   6, 7, 8, 9, 10,
-                   
-                   11, 2, 3, 4, 5, 
-                   6, 7, 8, 9, 10,
-                   
-                   11, 2, 3, 4, 5, 
-                   6, 7, 8, 9, 10,
-                   
-                   11, 2, 3, 4, 5, 
-                   6, 7, 8, 9, 10,
-                   
-                   11, 2, 3, 4, 5, 
-                   6, 7, 8, 9, 10) #choose where to plot p values
-  )%>%
-  filter(p < 0.05)
-t.train_res_tibble
-
 #get colors 
 custom_colors_res <- c(">20 mm" = "#D8A7B1",
                        "1-10 mm " = "#FA8072",
                        "11-20 mm" = "#FF66CC",
                        "Be likutinio naviko" ="#F6CFCB") 
-#plot
+##plot residual tumor ###########
 res_plot <- ggplot(residual_table_full, aes(x=tumorresidualdisease , y=value, fill = variable)) +
   geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = tumorresidualdisease )) +
   geom_jitter(aes(color = tumorresidualdisease ), size=1, alpha=0.5) +
@@ -1219,16 +1289,19 @@ res_plot <- ggplot(residual_table_full, aes(x=tumorresidualdisease , y=value, fi
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_res) +
   scale_color_manual(values = custom_colors_res) +
-  ggtitle("Genų raiškos koreliacija su invazija į limfmazgius mokymosi imtyje")
+  ggtitle("Genų raiškos koreliacija su likutiniu naviku mokymosi imtyje")
 
 res_plot
+
+res_plot2 <- ggdraw(res_plot) +
+  draw_plot_label(label = "B", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
+
+res_plot2
 #save residual tumor plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_res_barplot_20250619.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_res_barplot_20251001.png",
     width = 2450, height = 1300, res = 170) # width and height in pixels, resolution in dpi
-res_plot #
+res_plot2 #
 dev.off() # Close the PNG device
-
-
 
 
 #ENGLISH plot at year 5 with saving###########################
