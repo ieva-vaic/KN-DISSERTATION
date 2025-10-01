@@ -51,44 +51,6 @@ var_results <- OC_full[, c(3:13 )] %>%
   filter(p_value < 0.05)
 var_results #luc7l2 not equal variances
 
-#var.test to 3 groups#############################
-#hgsoc vs benign
-var_results_benign_hgsoc <- OC_full[, c(2:12 )] %>%
-  filter(type != "Other")%>%
-  pivot_longer(cols = -type, names_to = "variable", values_to = "value") %>%
-  group_by(variable) %>%
-  summarise(
-    p_value = var.test(value[type == unique(type)[1]], 
-                       value[type == unique(type)[2]])$p.value,
-    .groups = "drop"
-  ) %>%
-  filter(p_value < 0.05)
-var_results_benign_hgsoc #luc7l2 not equal variances
-#hgsoc vs other
-var_results_other_hgsoc <- OC_full[, c(2:12 )] %>%
-  filter(type != "Benign")%>%
-  pivot_longer(cols = -type, names_to = "variable", values_to = "value") %>%
-  group_by(variable) %>%
-  summarise(
-    p_value = var.test(value[type == unique(type)[1]], 
-                       value[type == unique(type)[2]])$p.value,
-    .groups = "drop"
-  ) %>%
-  filter(p_value < 0.05)
-var_results_other_hgsoc # pkp3 unequal
-#other vs benign
-var_results_other_benign <- OC_full[, c(2:12 )] %>%
-  filter(type != "HGSOC")%>%
-  pivot_longer(cols = -type, names_to = "variable", values_to = "value") %>%
-  group_by(variable) %>%
-  summarise(
-    p_value = var.test(value[type == unique(type)[1]], 
-                       value[type == unique(type)[2]])$p.value,
-    .groups = "drop"
-  ) %>%
-  filter(p_value < 0.05)
-var_results_other_benign # luc7l2 
-
 #TEST EXAMPLES ####################################
 #NORMAL DISTRIBUTION AND VARIANCE: STUJENT T.TEST
 #NOT NORMAL DISTRIBUTION, NORMAL VARIANCE: Mann-Whitney U test (Wilcoxon rank-sum test)
@@ -131,6 +93,7 @@ wilcox.test_OC <- OC_table %>%
 wilcox.test_OC
 
 #I have multiple groups
+#I AM NOT USING THIS, USING ANOVA, THIS IS FOR EXAMPLE PURPOSES ONLY
 ##PAIRWISE STJUDENTS T TEST ###################################
 #stjundents test (normal, equal variances)
 t.test_3groups <- Group3_table %>%

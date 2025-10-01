@@ -399,7 +399,7 @@ Stage_plot <- ggplot(Stage_table_hgsoc, aes(x=Stage4 , y=value, fill = variable)
     ),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
-  labs(x=NULL)+
+  labs(x=NULL, title = "Genų raiškos sąsaja su stadija HGSOC imtyje")+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors) +
   scale_color_manual(values = custom_colors) +
@@ -409,7 +409,7 @@ Stage_plot <- ggplot(Stage_table_hgsoc, aes(x=Stage4 , y=value, fill = variable)
 
 Stage_plot
 ##save png hgsoc stage####################################
-png("10_gene_stage20250922.png",
+png("10_gene_stage20251001.png",
     width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
 Stage_plot #
 dev.off() # Close the PNG device
