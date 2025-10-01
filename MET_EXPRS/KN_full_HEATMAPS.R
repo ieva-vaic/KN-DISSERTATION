@@ -4,36 +4,71 @@ Sys.setenv(LANG = "en")
 #libraries
 library(tidyverse)
 library(readxl)
-library(ComplexHeatm)
+library(ComplexHeatmap)
 library(circlize)
 #data upload##################################################################
 merged_df <- readRDS("C:/Users/Ieva/rprojects/OTHER DATA/KN-DISSERTATION FILES/merged_all_data_diss.RDS")
+expression <- c("EXO1", "RAD50","PPT2", "LUC7L2","PKP3", "CDCA5","ZFPL1","VPS33B", "GRB7","TCEAL4", 
+                "NOTCH1", "NOTCH2", "NOTCH3", "NOTCH4", "ARID1A", "CTNNB1", "FBXW7", "JAG2", "DLL1", "HES1")
+
 # All expression heatmap #######################################################
 Heat_data <- merged_df[, c("KN",
-                           expression        
-                           
+                           expression 
 )]
 Heat_data <- as.data.frame(Heat_data)
 rownames(Heat_data) <- Heat_data[, 1]
 Heat_data <- Heat_data[, -1]
 heatmap_raiska <- Heatmap(as.matrix(Heat_data))
 #Clinical data###################################################################
-clinical <- merged_df[, c("KN", "Histology", "Tumor", "CA125_f" ,"STAGE4", "Grade.x", "Age")]
-clinical <- as.data.frame(clinical)
-rownames(clinical) <- clinical$KN
-clinical <- clinical[, -1]
-head(clinical)
+clinical2 <- merged_df[, c("KN", "Histology", "Tumor", "CA125_f" ,"STAGE4", "Grade.x", "Age", "CA125 po gydymo", "patient_id_aud")]
+clinical2 <- as.data.frame(clinical2)
+rownames(clinical2) <- clinical2$KN
+clinical2 <- clinical2[, -1]
+head(clinical2)
 #fix na so it shows on the legend
-clinical$CA125_f <- factor(clinical$CA125_f, levels = c("Padidėjimas", "Norma", "NA"), exclude = NULL)
-clinical$STAGE4 <- replace(clinical$STAGE4, is.na(clinical$STAGE4), "NA" )
-clinical$Grade.x <-replace(clinical$Grade.x, is.na(clinical$Grade.x), "NA" )
+clinical2$CA125_f <- factor(clinical2$CA125_f, levels = c("Padidėjimas", "Norma", "NA"), exclude = NULL)
+clinical2$STAGE4 <- replace(clinical2$STAGE4, is.na(clinical2$STAGE4), "NA" )
+clinical2$Grade.x <-replace(clinical2$Grade.x, is.na(clinical2$Grade.x), "NA" )
+
+#FIX CA125 post op
+clinical2 <- clinical2 %>%
+  mutate(CA125_status_post_op = case_when(
+    `CA125 po gydymo` > 10 ~ "Padidėjimas",
+    `CA125 po gydymo` <= 10 ~ "Norma",
+    TRUE ~ NA_character_   # keep NA values
+  ))
+clinical2$CA125_status_post_op
+clinical2$`CA125 po gydymo`
+clinical2$CA125_status_post_op <-replace(clinical2$CA125_status_post_op,
+                                        is.na(clinical2$CA125_status_post_op), "NA" )
+
+#get survival data as of 2025-09-11
+SURVIVAL_KN <- openxlsx::read.xlsx("../../OTHER DATA/KN-DISSERTATION FILES/KN_MIRTIES_FAILAS_20250911.xlsx")
+#make only surv df
+SURV <- SURVIVAL_KN[, c(2, 3,20, 21)]
+head(SURV)
+
+#join with main data
+clinical <- left_join(clinical2, SURV, by = "patient_id_aud")
+#fix status
+clinical <- clinical %>%
+  mutate(STATUS  = case_when(
+    STATUS  == 0 ~ "Gyvos",
+    STATUS  == 1 ~ "Mirę",
+    TRUE ~ NA_character_   # keep NA values
+  ))
+clinical$STATUS
+
+clinical2$STATUS <-replace(clinical$STATUS,is.na(clinical$STATUS), "NA" )
 
 # clinical data annotation
 col_age <- colorRamp2(c(40, 90), c( "#9cd4c4", "#3c402f")) #age colors
 row_ha = rowAnnotation(Histologija = clinical$Histology,
                        Navikas = clinical$Tumor, Stadija = clinical$STAGE4,
                        `Diferenciacijos laipsnis` = clinical$Grade.x,
-                       Amžius = clinical$Age, CA125 = clinical$CA125_f,
+                       Amžius = clinical$Age, CA125 = clinical$CA125_f, 
+                       `CA125 po gydymo` = clinical$CA125_status_post_op, 
+                       `Mirties statusas` = clinical$STATUS,
                        col = list(Histologija = c("Šviesių lastelių" = "lightblue",
                                                   "Cista" = "lightgreen", 
                                                   "Endometrioidinis" = "green",
@@ -58,6 +93,12 @@ row_ha = rowAnnotation(Histologija = clinical$Histology,
                                   CA125 = c("Norma"="#9cd4c4", 
                                             "Padidėjimas" = "#3c402f",
                                             "NA" = "grey"),
+                                  `CA125 po gydymo` = c("Norma"="#9cd4c4", 
+                                            "Padidėjimas" = "#3c402f",
+                                            "NA" = "grey"),
+                                  `Mirties statusas` = c("Gyvos"="#9cd4c4", 
+                                                        "Mirę" = "#3c402f",
+                                                        "NA" = "grey"),
                                   Amžius = col_age
                        ))
 
@@ -90,7 +131,7 @@ heatmap_raiska <- Heatmap(as.matrix(Heat_data),cluster_columns = TRUE,
 heatmap_raiska
 
 # Methylation data heatmap ##################################################
-met_data <- KN_data[, c("patient_id_aud", "ALX4" ,"CDX2","ARID1A_met", "HOPX")]
+met_data <- merged_df[, c("patient_id_aud", "ALX4" ,"CDX2","ARID1A_met", "HOPX")]
 met_data <- as.matrix(met_data)
 rownames(met_data) <- met_data[, 1]
 met_data <- met_data[, -1]
@@ -132,7 +173,7 @@ heatmap_metilinimas_only <- Heatmap(met_data1, name = "Promotorių metilinimo st
 heatmap_metilinimas_only
 
 #SAVE PNG
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/heatmap_output_met20250605.png", width =4000, height = 5500,
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/heatmap_output_met20251001.png", width =4000, height = 5500,
     res = 510, units = "px", pointsize = 12) # width and height in pixels, resolution in dpi
 draw(heatmap_metilinimas_only)# Render the heatmap
 dev.off() # Close the PNG device
@@ -155,17 +196,16 @@ heatmap_raiska1 <- Heatmap(as.matrix(Heat_data[, 11:20]),cluster_columns = TRUE,
 heatmap_raiska1
 
 #SAVE PNG
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/heatmap_output_expr1_20250604.png", width =7000, height = 5500,
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/heatmap_output_expr1_20251001.png", width =7000, height = 5500,
     res = 510, units = "px", pointsize = 12) # width and height in pixels, resolution in dpi
 draw(heatmap_raiska1)# Render the heatmap
 dev.off() # Close the PNG device
 
 #Other gene expression only##########################################################
 colnames(Heat_data)
-col_fun2 = colorRamp2(c(2, -5, -10, -15), c("#64fbb3","#88e0bd","#7EC8E3", "#2745af"))
 heatmap_raiska2 <- Heatmap(as.matrix(Heat_data[, 1:10]),cluster_columns = TRUE,
                            name = "Santykinė genų raiška",  
-                           right_annotation = row_ha, col = col_fun2, 
+                           right_annotation = row_ha, col = col_fun, 
                            row_order = order_list,
                            row_split = clinical$Tumor, 
                            column_names_gp = gpar(fontface = "italic"),
@@ -179,7 +219,7 @@ heatmap_raiska2 <- Heatmap(as.matrix(Heat_data[, 1:10]),cluster_columns = TRUE,
 heatmap_raiska2
 
 #SAVE PNG
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/heatmap_output_expr2_20250604.png", width =7000, height = 5500,
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/heatmap_output_expr2_20251001.png", width =7000, height = 5500,
     res = 510, units = "px", pointsize = 12) # width and height in pixels, resolution in dpi
 draw(heatmap_raiska2)# Render the heatmap
 dev.off() # Close the PNG device

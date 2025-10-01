@@ -235,7 +235,7 @@ auc_table_notch_oc <- map_dfr(names(rez_list2_notch_OC), function(gene) {
   )
 })
 
-View(auc_table_notch_oc)
+print(auc_table_notch_oc)
 
 ##COORDS, seprate notch genes #####################
 # Build table of AUC + Sensitivity + Specificity at 60 months
@@ -263,7 +263,7 @@ sens_spec_auc_60 <- map_dfr(names(rez_list2_notch_OC), function(gene) {
   )
 })
 
-View(sens_spec_auc_60)
+print(sens_spec_auc_60)
 
 
 ##time roc, all notch genes ###################
@@ -757,3 +757,184 @@ combined_image <- image_append(c(roc_image, table_image), stack = F)
 image_write(combined_image, 
             "roc_notch_all_oc_with_table_20250924.png")
 
+#compare time rocs ##################################################
+#separate
+rez_list2_notch_OC_60 <- apply(surv_df_notch_oc[, c(2:15)], 2, timeROC,
+                               T = surv_df_notch_oc$OS,       # Survival time from df
+                               delta =  surv_df_notch_oc$STATUS,# Event indicator from df
+                               #marker  # Predictor already in the df
+                               cause = 1,         # Event of interest
+                               times = 60,    # Time points for ROC
+                               iid = TRUE )        # Compute confidence intervals)
+#gene expresion model
+roc_result_model_notch_60 <- timeROC(
+  T = surv_df_notch_oc$OS,       # Survival time from df
+  delta = surv_df_notch_oc$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc$RiskScore_notch, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE         # Compute confidence intervals
+)
+#gene expression + methylation model
+roc_result_model_notch_met_60 <- timeROC(
+  T = surv_df_notch_oc$OS,       # Survival time from df
+  delta = surv_df_notch_oc$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc$RiskScore_14, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+#compare time roc models
+compare(roc_result_model_notch_met_60, roc_result_model_notch_60, adjusted = FALSE) #0.1014317
+#compare all time roc models for separate genes to the 14 biomarker model
+#compare full model to arid1a_met
+#remove case KN-100 because it is not compatable with comaprisons (empty gene expression)
+surv_df_notch_oc100 <- surv_df_notch_oc[!c(surv_df_notch_oc$patient_id_aud %in% "KN-100"),]
+#ARID1A MET
+roc_result_model_ARID1A_met_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$ARID1A_met, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+
+compare(roc_result_model_notch_met_60, roc_result_model_ARID1A_met_60, adjusted = F) #0.223373 
+
+#HOPX MET
+roc_result_model_HOPX_met_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$HOPX, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+compare(roc_result_model_notch_met_60, roc_result_model_HOPX_met_60, adjusted = F) #0.0006880568  
+
+#ALX4 MET
+roc_result_model_ALX4_met_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$ALX4, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+
+compare(roc_result_model_notch_met_60, roc_result_model_ALX4_met_60, adjusted = F) #0.02423082  
+
+#cdx2 MET
+roc_result_model_CDX2_met_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$CDX2, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+
+compare(roc_result_model_notch_met_60, roc_result_model_CDX2_met_60, adjusted = F) #0.006333155    
+#hes1
+roc_result_model_HES1_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$HES1, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+
+compare(roc_result_model_notch_met_60, roc_result_model_HES1_60, adjusted = F) #0.001634476 
+
+#jag2
+roc_result_model_JAG2_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$JAG2, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+
+compare(roc_result_model_notch_met_60, roc_result_model_JAG2_60, adjusted = F) #0.04426828    
+
+#dll1
+roc_result_model_DLL1_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$DLL1, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+
+compare(roc_result_model_notch_met_60, roc_result_model_DLL1_60, adjusted = F) #0.0158335    
+#notch1
+roc_result_model_NOTCH1_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$NOTCH1, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+
+compare(roc_result_model_notch_met_60, roc_result_model_NOTCH1_60, adjusted = F) #0.252605  
+
+#notch2
+roc_result_model_NOTCH2_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$NOTCH2, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+
+compare(roc_result_model_notch_met_60, roc_result_model_NOTCH2_60, adjusted = F) #0.0256091 
+
+#notch3
+roc_result_model_NOTCH3_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$NOTCH3, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+
+compare(roc_result_model_notch_met_60, roc_result_model_NOTCH3_60, adjusted = F) #0.2970238  
+
+#notch4
+roc_result_model_NOTCH4_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$NOTCH4, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+
+compare(roc_result_model_notch_met_60, roc_result_model_NOTCH4_60, adjusted = F) #0.01927686 
+
+#ctnnb1
+roc_result_model_CTNNB1_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$CTNNB1, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+
+compare(roc_result_model_notch_met_60, roc_result_model_CTNNB1_60, adjusted = F) #0.003989765     
+#fbxw7
+roc_result_model_FBXW7_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$FBXW7, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+
+compare(roc_result_model_notch_met_60, roc_result_model_FBXW7_60, adjusted = F) #0.04926349   
+
+#ARID1A EXPRESSION
+roc_result_model_ARID1A_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$ARID1A, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+
+compare(roc_result_model_notch_met_60, roc_result_model_ARID1A_60, adjusted = F) #0.1225441     
