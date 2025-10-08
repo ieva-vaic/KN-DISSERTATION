@@ -249,16 +249,16 @@ test_survplot2 <- ggsurvplot(km_fit2, data = surv_df_test2,
                              title = "Didelės vs. mažos rizikos atvejai KV imtyje, 10 genų raiškos kombinacija",
                              xlab = "Bendras išgyvenamumo laikas",
                              ylab = "Išgyvenamumo tikimybė",
-                             palette = c("turquoise", "deeppink"),  # Color palette for groups
+                             palette = c( "deeppink", "turquoise"),  # Color palette for groups
                              legend.title = "Rizikos grupė", 
                              legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
 # Add subtitle form cox result
 test_survplot2$plot <- test_survplot2$plot +
-  labs(subtitle = "Uni PR =  0,24  (95 % PI: 0,07–0,81); Multi PR = 0,21 (95 % PI: 0,05–0,91), Long-rank p = 0,013, n = 47")
+  labs(subtitle = "Uni PR =  0,24  (95 % PI: 0,07–0,81); Multi PR = 0,21 (95 % PI: 0,05–0,91), Log-rank p = 0,013, n = 47")
 
 test_survplot2
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_OCa_20150925.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_OCa_20251008.png",
     width = 1100, height = 600, res = 100) # width and height in pixels, resolution in dpi
 test_survplot2 #
 dev.off() # Close the PNG device
@@ -475,7 +475,7 @@ best_idx_risk <- which.max(youden_risk)
 risk_score_row <- tibble(
   gene = "10 Genų raiškos rizikos balas",
   time = roc_result$times[which(roc_result$times == 60)],
-  auc = roc_result$AUC[which(roc_result$times == 60)]*100,
+  auc = roc_result$AUC[which(roc_result$times == 60)],
   sens = sens_60_risk[best_idx_risk],
   spec = spec_60_risk[best_idx_risk],
   cutoff = roc_result$cutoffs[best_idx_risk]
@@ -499,7 +499,7 @@ sens_spec_auc_60 <- map_dfr(names(rez_list), function(gene) {
   tibble(
     gene = gene,
     time = roc$times[idx_60],
-    auc = roc$AUC[idx_60]*100,
+    auc = roc$AUC[idx_60],
     sens = sens_60[best_idx],
     spec = spec_60[best_idx],
     cutoff = roc$cutoffs[best_idx]
@@ -546,17 +546,17 @@ gt_table_roc_60
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_roc_60,
-       filename = "10genetimeroc_table_20250925.png")
+       filename = "10genetimeroc_table_20251002.png")
 
 #Combine the images
 roc_image <- image_read("tissues_OCtimeROC_test2025925LT.png")
-table_image <- image_read("10genetimeroc_table_20250925.png")
+table_image <- image_read("10genetimeroc_table_20251002.png")
 
 combined_image <- image_append(c(roc_image, table_image), stack = F)
 
 # Save the combined image
 image_write(combined_image, 
-            "tissues_OCtimeROCw_table_test2025925.png")
+            "tissues_OCtimeROCw_table_test20251002.png")
 
 
 
