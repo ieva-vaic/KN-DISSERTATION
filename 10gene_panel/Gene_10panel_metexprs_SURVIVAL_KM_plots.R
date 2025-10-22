@@ -1499,59 +1499,42 @@ for (gene in genes_f) {
       x = "Laikas, mėnesiais"
     ) +
     theme(
-      plot.title = element_text(hjust = 0.5, face = "bold"),
-      plot.subtitle = element_text(size = 12, hjust = 0.5, lineheight = 1.3)
+      plot.title = element_text(hjust = 0.5, face = "bold", size = 25),
+      plot.subtitle = element_text(size = 22, hjust = 0.5, lineheight = 1.3)
     )
   
   plots2x[[gene]] <- p
 }
 
 # Combine plots and add overall title
-combined_plotx2 <- wrap_plots(plots2x, ncol = 4) +
-  plot_annotation(
-    title = "Išgyvenamumo analizė KV grupėje",
-    theme = theme(
-      plot.title = element_text(size = 18, face = "bold", hjust = 0.5)
-    )
-  )
+combined_plotx2 <- wrap_plots(plots2x, ncol = 4)
 ###separate the 10 gene expression plot form the notch and wnt ##########
 # Subset plots for the two gene sets
 plots_genes10_2x <- plots2x[names(plots2x) %in% genes10_f]
 plots_genes_notch_2x <- plots2x[names(plots2x) %in% genes_notch_f]
 
 # Combine separately
-combined_plot_genes10_2x <- wrap_plots(plots_genes10_2x, ncol = 5)+
-  plot_annotation(
-    title = "Išgyvenamumo analizė KV grupėje",
-    theme = theme(
-      plot.title = element_text(size = 18, face = "bold", hjust = 0.5)
-    )
-  )
+combined_plot_genes10_2x <- wrap_plots(plots_genes10_2x, ncol = 5)
 
-combined_plot_genes_notch_2x <- wrap_plots(plots_genes_notch_2x, ncol = 5)+
-  plot_annotation(
-    title = "Išgyvenamumo analizė KV grupėje",
-    theme = theme(
-      plot.title = element_text(size = 18, face = "bold", hjust = 0.5)
-    )
-  )
+combined_plot_genes_notch_2x <- wrap_plots(plots_genes_notch_2x, ncol = 5)
 
 #save 10 gene
 ggsave(
-  filename = "KM_combined_plot_w_HR_OC_10_gene_20250925LT2.png",  # output file name
+  filename = "KM_combined_plot_w_HR_OC_10_gene_20251020LT2.png",  # output file name
   plot = combined_plot_genes10_2x,               # the patchwork plot object
-  width = 25,                         # width in inches
-  height = 12,                        # height in inches
-  dpi = 400                           # resolution
+  width = 32,                         # width in inches
+  height = 15,                        # height in inches
+  dpi = 500                           # resolution
 )
 #save notch
 ggsave(
-  filename = "KM_combined_plot_w_HR_OC_notch_20250925LT2.png",  # output file name
+  filename = "KM_combined_plot_w_HR_OC_notch_20251020LT2.png",  # output file name
   plot = combined_plot_genes_notch_2x,               # the patchwork plot object
-  width = 25,                         # width in inches
-  height = 12,                        # height in inches
-  dpi = 400                           # resolution
+  width = 32,                         # width in inches
+  height = 15,                        # height in inches
+  dpi = 500                           # resolution
 )
+
 
 #LITHUANIAN plot OC METHYLATION ##########################
 plots_met3 <- list()
@@ -1610,29 +1593,25 @@ for (gene in methylation) {
       x = "Laikas, mėnesiais"
     ) +
     theme(
-      plot.title = element_text(hjust = 0.5, face = "bold"),
-      plot.subtitle = element_text(size = 12, hjust = 0.5, lineheight = 1.3) # bigger & spaced
+      plot.title = element_text(hjust = 0.5, face = "bold", size = 25),
+      plot.subtitle = element_text(size = 23, hjust = 0.5, lineheight = 1.3) # bigger & spaced
     )
   
   plots_met3[[gene]] <- p
 }
 
 # Combine plots with overall title
-combined_met_plot3 <- wrap_plots(plots_met3, ncol = 4) +
-  plot_annotation(
-    title = "Išgyvenamumo analizė kiaušidžių vėžio grupėje",
-    theme = theme(plot.title = element_text(size = 18, face = "bold", hjust = 0.5))
-  )
+combined_met_plot3 <- wrap_plots(plots_met3, ncol = 2)
 
 # Save to file
 ggsave(
-  filename = "KM_combined_methylation_OC_w_HR_multi0925.png",
+  filename = "KM_combined_methylation_OC_w_HR_multi1020.png",
   plot = combined_met_plot3,
-  width = 25,
-  height = 6,
+  width = 20,
+  height = 15,
   dpi = 600
-  
 )
+
 
 #ENGLISH OC SUVRVIVAL KM SEPARATE#####################
 #plot with multi

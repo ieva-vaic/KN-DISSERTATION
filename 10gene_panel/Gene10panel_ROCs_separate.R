@@ -41,7 +41,7 @@ roc_plot <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor[["EXO1"]], print.auc = F, col = "#dcbeff",
            cex.main=0.8, 
-           main ="Gerybinių pokyčių atskyrimas nuo HGSOC",
+           main ="Gerybinių pakitimų atskyrimas nuo HGSOC",
            xlab = "Specifiškumas", 
            ylab = "Jautrumas") #title
   lines(roc_results_tumor[["RAD50"]], col = "#911eb4", lwd =2) 
@@ -74,7 +74,7 @@ roc_plot <- function() {
 
 roc_plot()
 ## Save the plot as a PNG file###################################
-png("10_genes_roc_hgsoc_benign_20250623.png",
+png("10_genes_roc_hgsoc_benign_20251020.png",
     width = 1000, height = 1000, res = 200)
 roc_plot()
 dev.off()
@@ -104,7 +104,7 @@ gt_table_tumor <- results_tumor %>%
   gt() %>%
   tab_header(
     title = "ROC kriterijai", 
-    subtitle = "Gerybinių pokyčių atskyrimas nuo HGSOC") %>%
+    subtitle = "Gerybinių pakitimų atskyrimas nuo HGSOC") %>%
   fmt_number(
     columns = everything(),
     decimals = 3
@@ -118,11 +118,11 @@ gt_table_tumor
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_tumor,
-       filename = "10_genes_roc_table_hgsoc_benign_20250623.png")
+       filename = "10_genes_roc_table_hgsoc_benign_20251020.png")
 
 #Combine the images
-roc_image1<- image_read("10_genes_roc_hgsoc_benign_20250623.png")
-table_image1 <- image_read("10_genes_roc_table_hgsoc_benign_20250623.png")
+roc_image1<- image_read("10_genes_roc_hgsoc_benign_20251020.png")
+table_image1 <- image_read("10_genes_roc_table_hgsoc_benign_20251020.png")
 
 combined_image1 <- image_append(c(roc_image1, table_image1), stack = F)
 
@@ -138,7 +138,7 @@ table_image1_padded <- image_extent(table_image1, geometry = geometry_area(max_w
 combined_image1 <- image_append(c(roc_image1_padded, table_image1_padded), stack = T)
 # Save the combined image
 image_write(combined_image1, 
-            "10_genes_roc_combined_hgsoc_benign_20250909.png")
+            "10_genes_roc_combined_hgsoc_benign_20251020.png")
 
 
 ##CA125 ROC HGSOC vs benign for comparison###################################
