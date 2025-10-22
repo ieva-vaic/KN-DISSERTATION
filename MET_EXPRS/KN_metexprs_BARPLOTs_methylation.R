@@ -96,12 +96,12 @@ df_perc_tumor <- met_long_tumor %>%
 p1 <- ggplot(df_perc_tumor, aes(x = tumor, y = percentage, fill = value)) +
   geom_bar(stat = "identity")  +
   facet_wrap(~ biomarker, scales = "free_y", nrow = 1, ncol = 4) +
-  labs(x = "Tumor type", y = "Promotorių metilinimas, procentais", fill = "Value") +
+  labs(x = "Tumor type", y = "Promotorių metilinimas, %", fill = "Value") +
   theme_minimal()+
   labs(x=NULL,  
        #title = "Promoter methylation in gynecologic tumors"
   )+
-  theme(
+  theme(legend.position = "bottom",
     strip.text.x = element_text(
       size = 15, face = "bold.italic"
     ),
@@ -114,7 +114,7 @@ p1
 anno <- data.frame(x1 = c(1, 1, 1, 1), x2 = c(2, 2, 2, 2), 
                    y1 = c(101, 101, 101, 101), y2 = c(102, 102, 102, 102), 
                    xstar = c(1.5, 1.5, 1.5, 1.5), ystar = c(104, 104, 104, 104),
-                   lab = c("p = 0.023", "p = 0.027" , "p = 0.036", "p = 1"),
+                   lab = c("p = 0,023", "p = 0,027" , "p = 0,036", "p = 1"),
                    biomarker = c("HOPX", "CDX2", "ALX4", "ARID1A"), 
                    value = c("nemetilintas", "nemetilintas", "nemetilintas", "nemetilintas"))
 anno
@@ -145,7 +145,8 @@ pp1
 #set directory for saving plots
 setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
 #save
-png("met_BARPLOT_OVca_output20250609.png", width = 3000, height = 2000, res = 300) # width and height in pixels, resolution in dpi
+png("met_BARPLOT_OVca_output20251020.png",
+    width = 3000, height = 2200, res = 360) # width and height in pixels, resolution in dpi
 pp1# Render the heatmap
 dev.off() # Close the PNG device
 
@@ -194,9 +195,9 @@ met_long_group <- met_long_group %>%
   )%>%
   # Rename
   mutate(Grupė_Ieva = recode(Grupė_Ieva, 
-                            "Benign" = "Gerybiniai",      
-                            "HGSOC" = "HGSOC",   
-                            "Other" = "Kiti KV"))
+                             "Benign" = "Gerybiniai",      
+                             "HGSOC" = "HGSOC",   
+                             "Other" = "Kiti KV"))
 
 # Calculate counts
 df_perc_group <- met_long_group %>%
@@ -217,12 +218,12 @@ p3 <- ggplot(df_perc_group, aes(x = Grupė_Ieva, y = percentage, fill = value)) 
   labs(x=NULL,  
        #title = "Promoter methylation in gynecologic tumors"
   )+
-  theme(
-    strip.text.x = element_text(
-      size = 15, face = "bold.italic"
-    ),
-    legend.text = element_text(face = "italic"),
-    plot.title = element_text(hjust = 0.5))+
+  theme(legend.position = "bottom",  
+        strip.text.x = element_text(
+          size = 15, face = "bold.italic"
+        ),
+        legend.text = element_text(face = "italic"),
+        plot.title = element_text(hjust = 0.5))+
   labs(fill = "Promotorių metilinimo statusas") 
 p3
 
@@ -230,7 +231,7 @@ p3
 anno <- data.frame(x1 = c(1, 1, 1, 1), x2 = c(2, 2, 2, 2), 
                    y1 = c(101, 101, 101, 101), y2 = c(102, 102, 102, 102), 
                    xstar = c(1.5, 1.5, 1.5, 1.5), ystar = c(104, 104, 104, 104),
-                   lab = c("p = 0.043", "p = 0.060" , "p = 0.060", "p = 1"),
+                   lab = c("p = 0,043", "p = 0,06" , "p = 0,06", "p = 1"),
                    biomarker = c("HOPX", "CDX2", "ALX4", "ARID1A"), 
                    value = c("nemetilintas", "nemetilintas", "nemetilintas", "nemetilintas"))
 anno
@@ -258,7 +259,7 @@ pp3
 anno2 <- data.frame(x1 = c(1, 1,1,1), x2 = c(3, 3, 3, 3), 
                     y1 = c(105, 105, 105, 105), y2 = c(107, 107, 107, 107), 
                     xstar = c(2, 2, 2,2), ystar = c(109, 109, 109, 109),
-                    lab = c("p = 0.048", "p = 0.009" , "p = 0.08", "p = 1"),
+                    lab = c("p = 0,048", "p = 0,01" , "p = 0,08", "p = 1"),
                     biomarker = c("HOPX", "CDX2", "ALX4", "ARID1A"), 
                     value = c("nemetilintas", "nemetilintas", "nemetilintas", "nemetilintas"))
 anno2
@@ -278,32 +279,33 @@ ppp3 <- pp3 +
 
 ppp3
 
-#HGSOC vs others
-anno3 <- data.frame(x1 = c(2, 2,2,2), x2 = c(3, 3, 3, 3), 
-                    y1 = c(103, 103, 103, 103), y2 = c(104, 104, 104, 104), 
-                    xstar = c(2.5,2.5,2.5, 2.5), ystar = c(106, 106, 106, 106), #skaiciai neveikia 
-                    lab = c("p = 0.762", "p = 0.220" , "p = 1", "p = 0.551"),
-                    biomarker = c("HOPX", "CDX2", "ALX4", "ARID1A"), 
-                    value = c("nemetilintas", "nemetilintas", "nemetilintas", "nemetilintas"))
-anno3
-
-ppp3_final <- ppp3 +
-  geom_text(data = anno3, aes(x = xstar,  y = ystar, label = lab))+ #pvalues
-  geom_segment(data = anno3, aes(x = x1, xend = x1,  #visu 3 reikia nubraizyti brakets
-                                 y = y1, yend = y2),
-               colour = "black") +
-  geom_segment(data = anno3, aes(x = x2, xend = x2, 
-                                 y = y1, yend = y2),
-               colour = "black") +
-  geom_segment(data = anno3, aes(x = x1, xend = x2, 
-                                 y = y2, yend = y2),
-               colour = "black") 
-
-ppp3_final
+# #HGSOC vs others
+# anno3 <- data.frame(x1 = c(2, 2,2,2), x2 = c(3, 3, 3, 3), 
+#                     y1 = c(103, 103, 103, 103), y2 = c(104, 104, 104, 104), 
+#                     xstar = c(2.5,2.5,2.5, 2.5), ystar = c(106, 106, 106, 106), #skaiciai neveikia 
+#                     lab = c("p = 0,762", "p = 0,220" , "p = 1", "p = 0,551"),
+#                     biomarker = c("HOPX", "CDX2", "ALX4", "ARID1A"), 
+#                     value = c("nemetilintas", "nemetilintas", "nemetilintas", "nemetilintas"))
+# anno3
+# 
+# ppp3_final <- ppp3 +
+#   geom_text(data = anno3, aes(x = xstar,  y = ystar, label = lab))+ #pvalues
+#   geom_segment(data = anno3, aes(x = x1, xend = x1,  #visu 3 reikia nubraizyti brakets
+#                                  y = y1, yend = y2),
+#                colour = "black") +
+#   geom_segment(data = anno3, aes(x = x2, xend = x2, 
+#                                  y = y1, yend = y2),
+#                colour = "black") +
+#   geom_segment(data = anno3, aes(x = x1, xend = x2, 
+#                                  y = y2, yend = y2),
+#                colour = "black") 
+# 
+# ppp3_final
 
 #SAVE PNG 
-png("met_BARPLOT_3GR_output20250602.png", width = 4000, height = 2500, res = 300) # width and height in pixels, resolution in dpi
-ppp3_final# Render the heatmap
+png("met_BARPLOT_3GR_output20251020.png", 
+    width = 3000, height = 2600, res = 370) # width and height in pixels, resolution in dpi
+ppp3# Render the heatmap
 dev.off() # Close the PNG device
 
 #methylation, count % for text####################################################
@@ -469,7 +471,7 @@ plot3 <- ggplot(df_perc_stage, aes(x = Stage4, y = percentage, fill = value)) +
   labs(x=NULL,  
        #title = "Promoter methylation in HGSOC according to FIGO stage"
   )+
-  theme(
+  theme(legend.position = "bottom",
     strip.text.x = element_text(
       size = 15, face = "bold.italic"
     ),
@@ -482,7 +484,7 @@ plot3
 anno_plot <- data.frame(x1 = c(1, 1, 1, 1), x2 = c(3, 3, 3, 3), 
                    y1 = c(101, 101, 101, 101), y2 = c(102, 102, 102, 102), 
                    xstar = c(2, 2, 2, 2), ystar = c(104, 104, 104, 104),
-                   lab = c("p = 0.880", "p = 0.295" , "p = 1", "p = 0.048"),
+                   lab = c("p = 0,9", "p = 0,3" , "p = 1", "p = 0,048"),
                    biomarker = c("HOPX", "CDX2", "ALX4", "ARID1A"), 
                    value = c("nemetilintas", "nemetilintas", "nemetilintas", "nemetilintas"))
 anno_plot
@@ -508,6 +510,7 @@ plot33
 
 #SAVE PNG 
 
-png("met_BARPLOT_HGSOC_FIGO_output20250602.png", width = 4000, height = 2500, res = 300) # width and height in pixels, resolution in dpi
+png("met_BARPLOT_HGSOC_FIGO_output20251020.png",
+    width = 4000, height = 2500, res = 400) # width and height in pixels, resolution in dpi
 plot33# Render the heatmap
 dev.off() # Close the PNG device

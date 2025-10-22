@@ -86,7 +86,7 @@ table(HGSOC_SURV_EXPRESSION$STATUS, useNA = "a") #17 dead
 gene_data2NOTCH <- OC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in% genes_notch]
 # Example with 10 biomarkers
 cox_model_OC_notch <- coxph(
-  Surv(OS, STATUS) ~ NOTCH1 + NOTCH2 + NOTCH3 + NOTCH4 + ARID1A + CTNNB1 + FBXW7 ,
+  Surv(OS, STATUS) ~ NOTCH1 + NOTCH2 + NOTCH3 + NOTCH4 + ARID1A + CTNNB1 + FBXW7 + HES1 + DLL1 + JAG2,
   data = OC_SURV_EXPRESSION
 )
 summary(cox_model_OC_notch)
@@ -124,21 +124,25 @@ km_fit2notch <- survfit(surv_object2notch ~ RiskGroup_notch, data = surv_df_test
 test_survplot2_notch <- ggsurvplot(km_fit2notch, data = surv_df_test2notch, 
                                    #pval = TRUE,  # Show p-value of the log-rank test
                                    risk.table = TRUE, 
-                                   risk.table.title = "Pacientų skaičius rizikos grupėje",
+                                   risk.table.title = "Pacienčių skaičius rizikos grupėje",
                                    title = bquote("A    " ~
-                                                    "Didelės vs. mažos rizikos atvejai KV imtyje, Notch, Wnt ir" ~ italic("ARID1A") ~ "genų raiškos kombinacija"),
+                                                    "Notch, Wnt ir" ~ italic("ARID1A") ~ "genų raiškos kombinacija"),
                                    xlab = "Bendras išgyvenamumo laikas",
                                    ylab = "Išgyvenamumo tikimybė",
-                                   palette = c("turquoise", "deeppink"),  # Color palette for groups
+                                   palette = c("deeppink", "turquoise"),  # Color palette for groups
                                    legend.title = "Rizikos grupė", 
                                    legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
 # Add subtitle form cox result
 test_survplot2_notch$plot <- test_survplot2_notch$plot +
-  labs(subtitle = "Uni PR = 0,41  (95 % PI: 0,15–1,07); Multi PR = 0,48 (95 % PI: 0,16–1,47), Long-rank p = 0,059, n= 47")
+  labs(subtitle = 
+       "Uni PR = 0,32 (95 % PI: 0,12–0,92);
+Multi PR = 0,32 (95 % PI: 0,10–1,06),
+Log-rank p = 0,03, n = 47")
 
 print(test_survplot2_notch)
 #save
-png("KM_plot_notch_arid1a_OC_w_HR20250925.png", width = 1800, height = 1100, res = 150)
+png("KM_plot_notch_arid1a_OC_w_HR20251020.png",
+    width = 1300, height = 1100, res = 200)
 print(test_survplot2_notch)  # print the full ggsurvplot object
 dev.off()
 
@@ -185,27 +189,97 @@ km_fit14<- survfit(surv_object14 ~ RiskGroup_14, data = surv_df_test14)
 test_survplot14<- ggsurvplot(km_fit14, data = surv_df_test14, 
                              #pval = TRUE,  # Show p-value of the log-rank test
                              risk.table = TRUE,  # Add risk table below the plot
-                             risk.table.title = "Pacientų skaičius rizikos grupėje",
+                             risk.table.title = "Pacienčių skaičius rizikos grupėje",
                              title = bquote("B  " ~  
-                                              "Didelės vs. mažos rizikos atvejai KV imtyje, Promotorių metilinimo, Notch, Wnt ir" ~ italic("ARID1A") ~ "genų raiškos kombinacija"),
+                                              "Promotorių metilinimo, Notch, Wnt ir" ~ italic("ARID1A") ~ " raiškos kombinacija"),
                              xlab = "Bendras išgyvenamumo laikas",
                              ylab = "Išgyvenamumo tikimybė",
-                             palette = c("turquoise", "deeppink"),  # Color palette for groups
+                             palette = c( "deeppink", "turquoise"),  # Color palette for groups
                              legend.title = "Rizikos grupė", 
                              legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
 # Add subtitle form cox result
 test_survplot14$plot <- test_survplot14$plot +
-  labs(subtitle = "Uni PR =  0.22  (95 % PI: 0,07–0,66); Multi PR = 0.22 (95 % PI: 0,06–0,77), Long-rank p = 0,0035, n= 47")
+  labs(subtitle = "Uni PR =  0.22  (95 % PI: 0,07–0,66);
+Multi PR = 0.22 (95 % PI: 0,06–0,77),
+Log-rank p = 0,003, n = 47")
 
 print(test_survplot14)
 #save
-png("KM_plot_14_OC_w_HR20250925.png", width = 1800, height = 1100, res = 150)
+png("KM_plot_14_OC_w_HR202501020.png",
+    width = 1300, height = 1100, res = 170)
 print(test_survplot14)  # print the full ggsurvplot object
+dev.off()
+
+#NOTCH2 and HES1 risk score
+#gene_dataNOTCH_HES1 - only OC, notch and hes
+gene_dataNOTCH_HES1 <- OC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in% c("HES1", "NOTCH3")]
+# Example with 10 biomarkers
+cox_model_OC_notch_hes <- coxph(
+  Surv(OS, STATUS) ~ NOTCH3 + HES1 ,
+  data = OC_SURV_EXPRESSION
+)
+summary(cox_model_OC_notch_hes)
+
+#get coeficients
+coefs_notch_hes <- coef(cox_model_OC_notch_hes)
+# Risk score = sum( gene_expression * coefficient )
+risk_scores_notch_hes <- rowSums(sweep(gene_dataNOTCH_HES1, 2, coefs_notch_hes, "*"))
+# View the risk scores
+print(risk_scores_notch_hes) # now I have some risk scores
+#add risk scores to the clin_df_joined_test
+OC_SURV_EXPRESSION$RiskScore_notch_hes <- risk_scores_notch_hes
+#create df wih survival data
+surv_df_testnotch_hes <- OC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in%
+                                              c("OS", "STATUS", genes_notch, "RiskScore_notch_hes", "patient_id_aud", "Age", "CA125")]
+
+rownames(surv_df_testnotch_hes) <- surv_df_testnotch_hes$patient_id_aud
+
+
+# Calculate the median risk score
+median_risk_notch_hes <- median(surv_df_testnotch_hes$RiskScore_notch_hes, na.rm = TRUE) #-0.08001295
+# Create a new factor column based on the median value
+surv_df_testnotch_hes$RiskScore_notch_hes <- ifelse(surv_df_testnotch_hes$RiskScore_notch_hes <= median_risk_notch_hes,
+                                                    "Low Risk", "High Risk")
+#Create a survival object
+surv_object_notch_hes<- Surv(time = surv_df_testnotch_hes$OS,
+                             event = surv_df_testnotch_hes$STATUS )
+# Fit Univariable cox model for notch3 hes model ############################
+cox_model_notch_hes <- coxph(Surv(OS, STATUS) ~ RiskScore_notch_hes , data = surv_df_testnotch_hes)
+summary(cox_model_notch_hes)
+# Fit Multivariable cox model for notch3 hes model ############################
+cox_model_notch_hes2 <- coxph(Surv(OS, STATUS) ~RiskScore_notch_hes + Age + CA125, data = surv_df_testnotch_hes)
+summary(cox_model_notch_hes2)
+# Fit a Kaplan-Meier model for notch3 hes model#################################
+km_fitnotch_hes <- survfit(surv_object_notch_hes ~ RiskScore_notch_hes, data = surv_df_testnotch_hes)
+# Plot the Kaplan-Meier curve using ggsurvplot
+test_survplot_notch_hes <- ggsurvplot(km_fitnotch_hes, data = surv_df_testnotch_hes, 
+                                      #pval = TRUE,  # Show p-value of the log-rank test
+                                      risk.table = TRUE, 
+                                      risk.table.title = "Pacienčių skaičius rizikos grupėje",
+                                      title = bquote("C    " ~
+                                                        italic("NOTCH3") ~ "ir" ~ italic("HES1") ~ "genų raiškos kombinacija"),
+                                      xlab = "Bendras išgyvenamumo laikas",
+                                      ylab = "Išgyvenamumo tikimybė",
+                                      palette = c( "deeppink", "turquoise"),  # Color palette for groups
+                                      legend.title = "Rizikos grupė", 
+                                      legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
+# Add subtitle form cox result
+test_survplot_notch_hes$plot <- test_survplot_notch_hes$plot +
+  labs(subtitle = "Uni PR = 0,37  (95 % PI: 0,14–0,98);
+Multi PR = 0,50 (95 % PI: 0,17–1,47),
+Log-rank p = 0,04, n = 48")
+
+print(test_survplot_notch_hes)
+
+#save
+png("KM_plot_notch_HES_OC_w_HR202510020.png",
+    width = 1300, height = 1100, res = 200)
+print(test_survplot_notch_hes)  # print the full ggsurvplot object
 dev.off()
 
 #TIME ROC, NOTCH, OC #########################################
 surv_df_notch_oc <- OC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in%
-                                         c("OS", "STATUS", genes_notch, methylation, "RiskScore_notch", "RiskScore_14" , "patient_id_aud")]
+                                         c("OS", "STATUS", genes_notch, methylation, "RiskScore_notch", "RiskScore_14", "RiskScore_notch_hes", "patient_id_aud")]
 
 ##time rocs for separate NOTCH biomarkers######################################
 coxdf2_notch_oc <- surv_df_notch_oc[, (colnames(surv_df_notch_oc) %in% c(genes_notch, methylation) )]
@@ -256,7 +330,7 @@ sens_spec_auc_60 <- map_dfr(names(rez_list2_notch_OC), function(gene) {
   tibble(
     gene = gene,
     time = roc$times[idx_60],
-    auc = roc$AUC[idx_60]*100,
+    auc = roc$AUC[idx_60],
     sens = sens_60[best_idx],
     spec = spec_60[best_idx],
     cutoff = roc$cutoffs[best_idx]
@@ -320,6 +394,36 @@ best_index_60 <- which.max(youden_60)
 best_spec_60 <- spec_60[best_index_60]
 best_sens_60 <- sens_60[best_index_60]
 best_cutoff_60 <- roc_result_model_notch$cutoffs[best_index_60]
+
+cat("At 60 months:\n")
+cat("  Specificity:", round(best_spec_60, 3), "\n")
+cat("  Sensitivity:", round(best_sens_60, 3), "\n")
+cat("  Cutoff:", best_cutoff_60, "\n")
+
+##time roc, notch3 and hes1 genes ###################
+roc_result_model_notch_hes <- timeROC(
+  T = surv_df_notch_oc$OS,       # Survival time from df
+  delta = surv_df_notch_oc$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc$RiskScore_notch_hes, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = t_eval,    # Time points for ROC
+  iid = TRUE         # Compute confidence intervals
+)
+roc_result_model_notch_hes
+
+##COORDS time roc, notch3 and hes1#############################
+# Sensitivity and specificity vectors at 60 months
+sens_60 <- roc_result_model_notch_hes$TP[, which(roc_result_model_notch_hes$times == 60)]
+spec_60 <- 1 - roc_result_model_notch_hes$FP[, which(roc_result_model_notch_hes$times == 60)]
+
+# Youden index
+youden_60 <- sens_60 + spec_60 - 1
+best_index_60 <- which.max(youden_60)
+
+# Extract best specificity
+best_spec_60 <- spec_60[best_index_60]
+best_sens_60 <- sens_60[best_index_60]
+best_cutoff_60 <- roc_result_model_notch_hes$cutoffs[best_index_60]
 
 cat("At 60 months:\n")
 cat("  Specificity:", round(best_spec_60, 3), "\n")
@@ -584,16 +688,17 @@ legend(
 #run plot
 dev.off() # Close the PNG device
 
-#SAME 5 year plot, no AUCS#######################
+# FINAL 5 year plot, no AUCs #######################
 # Choose target time
 target_time <- 60        
 time_index <- which(rez_list2_notch_OC[[1]]$times == target_time)
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissuesNO_AUCS_OCtimeROC_test20250924.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissuesNO_AUCS_OCtimeROC_test20251013.png",
     width = 1500, height = 1500, res = 200) # width and height in pixels, resolution in dpi
-# Set up base plot with gene 1
-# Base ROC curve plot
+
 par(pty="s")
+
+# --- Base ROC curve plot with first gene ---
 plot(
   rez_list2_notch_OC[[1]]$FP[, time_index],
   rez_list2_notch_OC[[1]]$TP[, time_index],
@@ -609,7 +714,7 @@ plot(
   asp = 1
 )
 
-# Add ROC lines for all genes
+# --- Add ROC lines for all genes ---
 for (i in 2:length(rez_list2_notch_OC)) {
   lines(
     rez_list2_notch_OC[[i]]$FP[, time_index],
@@ -619,16 +724,16 @@ for (i in 2:length(rez_list2_notch_OC)) {
   )
 }
 
-# Add risk score ROC line (Notch)
+
+# --- Add risk score ROC curves ---
 lines(
   roc_result_model_notch$FP[, time_index],
   roc_result_model_notch$TP[, time_index],
   col = "maroon",
   lwd = 3,
-  lty = 1
+  lty = 2
 )
 
-# Add second risk score ROC line (14 biomarkers)
 lines(
   roc_result_model_notch_met$FP[, time_index],
   roc_result_model_notch_met$TP[, time_index],
@@ -637,38 +742,44 @@ lines(
   lty = 2
 )
 
-# Add diagonal reference line
+
+lines(
+  roc_result_model_notch_hes$FP[, time_index],
+  roc_result_model_notch_hes$TP[, time_index],
+  col = "darkblue",
+  lwd = 3,
+  lty = 2
+)
+
+# --- Diagonal reference line ---
 abline(0, 1, lty = 2, col = "gray")
 
-# --- Legend preparation without AUCs ---
-
-# Gene names
-legend_labels <- names(rez_list2_notch_OC)
-
-# Add risk score labels
+# --- Legend preparation (no AUCs) ---
 legend_labels <- c(
-  legend_labels,
+  names(rez_list2_notch_OC),
+  "HES1 ir NOTCH3 raiškos rizikos balas",
   "Genų raiškos rizikos balas",
   "14 biožymenų rizikos balas"
 )
 
-# Convert labels to italic expressions
-legend_labels_italic <- lapply(legend_labels, function(x) bquote(italic(.(x))))
-
-# Add legend
-legend(
-  "bottomright",
-  legend = legend_labels_italic,
-  col = c(1:length(rez_list2_notch_OC), "maroon", "darkgreen"),
-  lwd = c(rep(2, length(rez_list2_notch_OC)), 3, 3),
-  lty = c(rep(1, length(rez_list2_notch_OC)), 1, 2),
-  cex = 0.6,
-  bty = "n"
+# italicize gene names only, leave risk scores normal
+legend_labels_expr <- c(
+  lapply(names(rez_list2_notch_OC), function(x) bquote(italic(.(x)))),
+  legend_labels[(length(rez_list2_notch_OC)+1):length(legend_labels)]
 )
 
-# Optional: Add panel label "D" above title
-#mtext("D", side = 3, line = 2.5, adj = -0.2, font = 2, cex = 1.5)
-dev.off() # Close the PNG device
+legend(
+  "bottomright",
+  legend = legend_labels_expr,
+  col   = c(1:length(rez_list2_notch_OC),  "maroon", "darkgreen", "darkblue"),
+  lwd   = c(rep(2, length(rez_list2_notch_OC)), 3, 3, 3),
+  lty   = c(rep(1, length(rez_list2_notch_OC)), 2, 2, 2),
+  cex   = 0.6,
+  bty   = "n"
+)
+
+dev.off()
+
 
 #TABLE of aucs, sensitivity, specificity##########################
 # Extract best sensitivity, specificity, cutoff for Notch risk score at 60 months
@@ -681,7 +792,7 @@ best_idx_risk <- which.max(youden_risk)
 risk_score_row <- tibble(
   gene = "Genų raiškos rizikos balas",
   time = roc_result_model_notch$times[which(roc_result_model_notch$times == 60)],
-  auc = roc_result_model_notch$AUC[which(roc_result_model_notch$times == 60)]*100,
+  auc = roc_result_model_notch$AUC[which(roc_result_model_notch$times == 60)],
   sens = sens_60_risk[best_idx_risk],
   spec = spec_60_risk[best_idx_risk],
   cutoff = roc_result_model_notch$cutoffs[best_idx_risk]
@@ -702,7 +813,7 @@ best_idx_met <- which.max(youden_60_met)
 risk_score_met_row <- tibble(
   gene = "14 biožymenų rizikos balas",
   time = roc_result_model_notch_met$times[which(roc_result_model_notch_met$times == 60)],
-  auc = roc_result_model_notch_met$AUC[which(roc_result_model_notch_met$times == 60)]*100,
+  auc = roc_result_model_notch_met$AUC[which(roc_result_model_notch_met$times == 60)],
   sens = sens_60_met[best_idx_met],
   spec = spec_60_met[best_idx_met],
   cutoff = roc_result_model_notch_met$cutoffs[best_idx_met]
@@ -712,6 +823,28 @@ risk_score_met_row <- tibble(
 sens_spec_auc_60_all <- bind_rows(sens_spec_auc_60_all, risk_score_met_row)
 
 View(sens_spec_auc_60_all)
+
+# Extract best sensitivity, specificity, cutoff for notch3 and hes risk score at 60 months
+sens_60_met <- roc_result_model_notch_hes$TP[, which(roc_result_model_notch_hes$times == 60)]
+spec_60_met <- 1 - roc_result_model_notch_hes$FP[, which(roc_result_model_notch_hes$times == 60)]
+
+youden_60_met <- sens_60_met + spec_60_met - 1
+best_idx_met <- which.max(youden_60_met)
+
+risk_score_notch_hes_row <- tibble(
+  gene = "NOTCH3 ir HES1 rizikos balas",
+  time = roc_result_model_notch_hes$times[which(roc_result_model_notch_hes$times == 60)],
+  auc = roc_result_model_notch_hes$AUC[which(roc_result_model_notch_hes$times == 60)],
+  sens = sens_60_met[best_idx_met],
+  spec = spec_60_met[best_idx_met],
+  cutoff = roc_result_model_notch_hes$cutoffs[best_idx_met]
+)
+
+# Combine with previous table (genes + Notch risk score)
+sens_spec_auc_60_all <- bind_rows(sens_spec_auc_60_all, risk_score_notch_hes_row)
+
+View(sens_spec_auc_60_all)
+
 
 #make prety table
 # Prepare table: rename columns for display
@@ -745,17 +878,17 @@ gt_table_roc_60
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_roc_60,
-       filename = "timeroc_table_20250924.png")
+       filename = "timeroc_table_20251003.png")
 
 #Combine the images
-roc_image <- image_read("tissuesNO_AUCS_OCtimeROC_test20250924.png")
-table_image <- image_read("timeroc_table_20250924.png")
+roc_image <- image_read("tissuesNO_AUCS_OCtimeROC_test20251013.png")
+table_image <- image_read("timeroc_table_20251003.png")
 
 combined_image <- image_append(c(roc_image, table_image), stack = F)
 
 # Save the combined image
 image_write(combined_image, 
-            "roc_notch_all_oc_with_table_20250924.png")
+            "roc_notch_all_oc_with_table_20251013.png")
 
 #compare time rocs ##################################################
 #separate
@@ -784,11 +917,27 @@ roc_result_model_notch_met_60 <- timeROC(
   times = 60,    # Time points for ROC
   iid = TRUE      )   # Compute confidence intervals
 #compare time roc models
-compare(roc_result_model_notch_met_60, roc_result_model_notch_60, adjusted = FALSE) #0.1014317
+compare(roc_result_model_notch_met_60, roc_result_model_notch_60, adjusted = FALSE) #0.5482305 
+
+
 #compare all time roc models for separate genes to the 14 biomarker model
 #compare full model to arid1a_met
 #remove case KN-100 because it is not compatable with comaprisons (empty gene expression)
 surv_df_notch_oc100 <- surv_df_notch_oc[!c(surv_df_notch_oc$patient_id_aud %in% "KN-100"),]
+
+#notch3 and hes 1 model
+roc_result_model_notch_hes_60 <- timeROC(
+  T = surv_df_notch_oc100$OS,       # Survival time from df
+  delta = surv_df_notch_oc100$STATUS, # Event indicator from df
+  marker = surv_df_notch_oc100$RiskScore_notch_hes, # Predictor or risk score from df
+  cause = 1,         # Event of interest
+  times = 60,    # Time points for ROC
+  iid = TRUE      )   # Compute confidence intervals
+
+#compare time roc models
+compare(roc_result_model_notch_hes_60, roc_result_model_notch_60, adjusted = FALSE) #0.7189816  
+compare(roc_result_model_notch_met_60, roc_result_model_notch_hes_60, adjusted = FALSE) #0.8340145 
+
 #ARID1A MET
 roc_result_model_ARID1A_met_60 <- timeROC(
   T = surv_df_notch_oc100$OS,       # Survival time from df

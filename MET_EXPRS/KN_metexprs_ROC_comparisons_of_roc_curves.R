@@ -124,4 +124,3 @@ roc.test(roc_curvex.3, roc_results_tumor_oh[["ALX4"]])#6.277e-07
 roc.test(roc_curvex.3, roc_results_tumor_oh[["ARID1A_met"]])#4.452e-07
 roc.test(roc_curvex.3, roc_results_tumor_oh[["CDX2"]])#2.6e-06
 
-

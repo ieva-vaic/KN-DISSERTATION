@@ -76,7 +76,7 @@ roc_plot <- function() {
 par(pty = "s") #sets square
 plot.roc(roc_results_tumor[["NOTCH1"]], print.auc = F, col = "#dcbeff",
          cex.main=0.8,
-         main ="Gerybinių pokyčių atskyrimas nuo visų KV atvejų", 
+         main ="Gerybinių pakitimų atskyrimas nuo visų KV atvejų", 
          xlab = "Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
          ylab = "Jautrumas") #7
 lines(roc_results_tumor[["NOTCH2"]], col = "#911eb4", lwd =2) #6
@@ -116,7 +116,7 @@ col = c("#f032e6", "#f58231","#808000", "#469990", "#42d4f4",
 cex = 0.7, lwd =3)
 }
 roc_plot()
-png("met_exprs_roc_OC_output20250623.png", width = 1000, height = 1000, res = 150)
+png("met_exprs_roc_OC_output20251020.png", width = 1000, height = 1000, res = 150)
 roc_plot()
 dev.off()
 
@@ -167,7 +167,7 @@ gt_table_tumor <- tumor_lentele_atskiru %>%
   gt() %>%
   tab_header(
     title = "ROC kriterijai", 
-    subtitle = "Gerybinių pokyčių atskyrimas nuo KV atvejų") %>%
+    subtitle = "Gerybinių pakitimų atskyrimas nuo KV atvejų") %>%
   fmt_number(
     columns = everything(),
     decimals = 3
@@ -181,17 +181,17 @@ gt_table_tumor
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_tumor,
-       filename = "met_exprs_roctable_OC_output20250623.png")
+       filename = "met_exprs_roctable_OC_output20251020.png")
 
 #Combine the images 
-roc_image2<- image_read("met_exprs_roc_OC_output20250623.png")
-table_image2 <- image_read("met_exprs_roctable_OC_output20250623.png")
+roc_image2<- image_read("met_exprs_roc_OC_output20251020.png")
+table_image2 <- image_read("met_exprs_roctable_OC_output20251020.png")
 
 combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
 
 # Save the combined image
 image_write(combined_image2, 
-            "met_exprs_ROC_TABLE_OC_outputs20250623.png")
+            "met_exprs_ROC_TABLE_OC_outputs20251020.png")
 
 ## Compare with CA125 OVCa #############
 #using only ovarian cancer data
@@ -244,7 +244,7 @@ auc_values_tumor_bh #extracted aucs
 roc_plot2 <- function() {
 par(pty = "s") #sets square
 plot.roc(roc_results_tumor_bh[["NOTCH1"]], print.auc = F, col = "#dcbeff",
-         cex.main=0.8, main ="Gerybinių pokyčių atskyrimas nuo HGSOC atvejų", 
+         cex.main=0.8, main ="Gerybinių pakitimų atskyrimas nuo HGSOC atvejų", 
          xlab = "Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
          ylab = "Jautrumas") #7
 lines(roc_results_tumor_bh[["NOTCH2"]], col = "#911eb4", lwd =2) #6
@@ -285,7 +285,7 @@ cex = 0.8, lwd =3)
 }
 roc_plot2()
 # Save the plot as a PNG file
-png("met_exrs_roc_HGSOC_output20250530.png", width = 1000, height = 1000, res = 150)
+png("met_exrs_roc_HGSOC_output20251020.png", width = 1000, height = 1000, res = 150)
 roc_plot2()
 dev.off()
 
@@ -334,7 +334,7 @@ gt_table_tumor_bh <- tumor_lentele_atskiru_bh %>%
   gt() %>%
   tab_header(
     title = "ROC kriterijai", 
-    subtitle = "Gerybinių pokyčių atskyrimas nuo HGSOC atvejų") %>%
+    subtitle = "Gerybinių pakitimų atskyrimas nuo HGSOC atvejų") %>%
   fmt_number(
     columns = everything(),
     decimals = 3
@@ -347,11 +347,11 @@ gt_table_tumor_bh <- tumor_lentele_atskiru_bh %>%
 gt_table_tumor_bh
 
 #there is no other convenient way to save gt outputs
-gtsave(gt_table_tumor_bh, filename = "met_exprs_roctable_HGSOC_output20250623.png")
+gtsave(gt_table_tumor_bh, filename = "met_exprs_roctable_HGSOC_output20251020.png")
 
 #Combine the images 
-roc_image2<- image_read("met_exrs_roc_HGSOC_output20250530.png")
-table_image2 <- image_read("met_exprs_roctable_HGSOC_output20250623.png")
+roc_image2<- image_read("met_exrs_roc_HGSOC_output20251020.png")
+table_image2 <- image_read("met_exprs_roctable_HGSOC_output20251020.png")
 
 # Find the max width to align both
 roc_info <- image_info(roc_image2)
@@ -366,7 +366,7 @@ combined_image2 <- image_append(c(roc_image2, table_image2), stack = T)
 
 # Save the combined image
 image_write(combined_image2, 
-            "met_exrs_ROCTABLE_HGSOC_output20250530.png")
+            "met_exrs_ROCTABLE_HGSOC_output20251020.png")
 
 ## Compare expression to ALX4 methylation HGSOC vs benign###########
 roc.test(roc_results_tumor_bh[["CTNNB1"]], roc_results_tumor_bh[["ALX4"]])#  5.069e-05

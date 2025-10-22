@@ -47,7 +47,7 @@ each.vs.ref_sig_tumor <- tibble::tribble(
   "Gerybiniai",   "KV", 0.059, -2, "ARID1A",
   "Gerybiniai",   "KV", 0.0000201, 0, "CTNNB1",
   "Gerybiniai",   "KV", 0.000176, -4, "FBXW7",
-  "Gerybiniai",   "KV", 0.842, -4, "JAG2",
+  #"Gerybiniai",   "KV", 0.842, -4, "JAG2",
   "Gerybiniai",   "KV", 0.00044, -5, "DLL1",
   "Gerybiniai",   "KV", 0.002, -2, "HES1",
 )
@@ -86,7 +86,7 @@ tumor_plot #
 #set directory for saving
 setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
 #save
-png("met_exprs_boxplot_OVca_output05030.png", width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+png("met_exprs_boxplot_OVca_output1020.png", width = 3000, height = 2700, res = 400) # width and height in pixels, resolution in dpi
 tumor_plot #
 dev.off() # Close the PNG device
 
@@ -193,13 +193,13 @@ custom_colors <- c("HGSOC" = "#cf5784","Kiti KV" = "pink", "Gerybiniai" = "#929c
 HOB_x <- ggplot(HOB_table, aes(x=tumor , y=value, fill = variable)) +
   geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = tumor )) +
   geom_jitter(aes(color = tumor ), size=2, alpha=0.5) +
-  ylab(label = expression("Santykinė raiška, normalizuota pagal " * italic("GAPDH"))) + 
+  ylab(label = expression("Santykinė raiška, normalizuota pagal " * italic("  GAPDH"))) + 
   facet_wrap(.~ variable, nrow = 2, scales = "free") +
   add_pvalue(each.vs.ref_sig_HOB, label = "p.adj_custom") + #pvalue
   theme_minimal()+
   theme(
     strip.text.x = element_text(
-      size = 12, face = "bold.italic"
+      size = 11, face = "bold.italic"
     ),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
@@ -213,8 +213,8 @@ HOB_x <- ggplot(HOB_table, aes(x=tumor , y=value, fill = variable)) +
 HOB_x
 
 #SAVE PNG
-png("met_exprs_boxplot_3groups_output0530.png",
-    width = 3500, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+png("met_exprs_boxplot_3groups_output1020.png",
+    width = 4200, height = 3000, res = 400) # width and height in pixels, resolution in dpi
 HOB_x #
 dev.off() # Close the PNG device
 
@@ -320,7 +320,8 @@ grade_plot
 
 #SAVE PNG AT THE SAME SIZE
 
-png("metexprs_BOXPLOT_grade_output0530.png", width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+png("metexprs_BOXPLOT_grade_output1020.png",
+    width = 3000, height = 2600, res = 400) # width and height in pixels, resolution in dpi
 grade_plot #
 dev.off() # Close the PNG device
 
@@ -402,7 +403,8 @@ stage4_plot <- ggplot(stage4_table, aes(x=Stage4, y=value, fill = variable)) +
 stage4_plot #
 
 #SAVE PNG
-png("met_exprs_BOXPLOT_HGSOC_stage_output0701.png", width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+png("met_exprs_BOXPLOT_HGSOC_stage_output1020.png", 
+    width = 3000, height = 2700, res = 400) # width and height in pixels, resolution in dpi
 stage4_plot #
 dev.off() # Close the PNG device
 
