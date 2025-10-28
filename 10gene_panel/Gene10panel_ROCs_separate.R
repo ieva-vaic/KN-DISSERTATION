@@ -323,7 +323,7 @@ roc_plot3 <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor_OC[["EXO1"]], print.auc = F, col = "#dcbeff",
            cex.main=0.8, 
-           main ="Gerybinių pokyčių atskyrimas nuo KV atvejų", 
+           main ="Gerybinių pakitimų atskyrimas nuo KV atvejų", 
            xlab = "Specifiškumas", 
            ylab = "Jautrumas") #title
   lines(roc_results_tumor_OC[["RAD50"]], col = "#911eb4", lwd =2) 
@@ -356,7 +356,7 @@ roc_plot3 <- function() {
 
 roc_plot3()
 ## Save the plot as a PNG file#########################
-png("10_genes_roc_oc_20250623.png",
+png("10_genes_roc_oc_20251020.png",
     width = 1000, height = 1000, res = 200)
 roc_plot3()
 dev.off()
@@ -409,7 +409,7 @@ gt_table_tumor_OC <- results_tumor_OC %>%
   gt() %>%
   tab_header(
     title = "ROC kriterijai",
-    subtitle = "Gerybinių pokyčių atskyrimas nuo KV atvejų") %>%
+    subtitle = "Gerybinių pakitimų atskyrimas nuo KV atvejų") %>%
   fmt_number(
     columns = everything(),
     decimals = 3
@@ -423,17 +423,17 @@ gt_table_tumor_OC
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_tumor_OC,
-       filename = "10_genes_roc_table_oc_20250623.png")
+       filename = "10_genes_roc_table_oc_20251020.png")
 
 #Combine the images
-roc_image3 <- image_read("10_genes_roc_oc_20250623.png")
-table_image3 <- image_read("10_genes_roc_table_oc_20250623.png")
+roc_image3 <- image_read("10_genes_roc_oc_20251020.png")
+table_image3 <- image_read("10_genes_roc_table_oc_20251020.png")
 
 combined_image3 <- image_append(c(roc_image3, table_image3), stack = F)
 
 # Save the combined image
 image_write(combined_image3, 
-"10_genes_roc_combined_OC_2025060909.png")
+"10_genes_roc_combined_OC_2025061020.png")
 
 #combine HGSOC vs benign ####################################################
 #2 best genes is GRB7 and TCEAL4
