@@ -42,8 +42,9 @@ roc_plot <- function() {
   plot.roc(roc_results_tumor[["EXO1"]], print.auc = F, col = "#dcbeff",
            cex.main=0.8, 
            main ="Gerybinių pakitimų atskyrimas nuo HGSOC",
-           xlab = "Specifiškumas", 
-           ylab = "Jautrumas") #title
+           xlab = "1 - Specifiškumas", 
+           ylab = "Jautrumas", 
+           legacy.axes = T) #title
   lines(roc_results_tumor[["RAD50"]], col = "#911eb4", lwd =2) 
   lines(roc_results_tumor[["PPT2"]], col ="#ffd8b1", lwd =2) 
   lines(roc_results_tumor[["LUC7L2"]], col = "#42d4f4", lwd =2) 
@@ -74,7 +75,7 @@ roc_plot <- function() {
 
 roc_plot()
 ## Save the plot as a PNG file###################################
-png("10_genes_roc_hgsoc_benign_20251020.png",
+png("10_genes_roc_hgsoc_benign_20251121.png",
     width = 1000, height = 1000, res = 200)
 roc_plot()
 dev.off()
@@ -121,7 +122,7 @@ gtsave(gt_table_tumor,
        filename = "10_genes_roc_table_hgsoc_benign_20251020.png")
 
 #Combine the images
-roc_image1<- image_read("10_genes_roc_hgsoc_benign_20251020.png")
+roc_image1<- image_read("10_genes_roc_hgsoc_benign_20251121.png")
 table_image1 <- image_read("10_genes_roc_table_hgsoc_benign_20251020.png")
 
 combined_image1 <- image_append(c(roc_image1, table_image1), stack = F)
@@ -138,7 +139,7 @@ table_image1_padded <- image_extent(table_image1, geometry = geometry_area(max_w
 combined_image1 <- image_append(c(roc_image1_padded, table_image1_padded), stack = T)
 # Save the combined image
 image_write(combined_image1, 
-            "10_genes_roc_combined_hgsoc_benign_20251020.png")
+            "10_genes_roc_combined_hgsoc_benign_20251121.png")
 
 
 ##CA125 ROC HGSOC vs benign for comparison###################################
@@ -182,8 +183,9 @@ roc_plot2 <- function() {
   plot.roc(roc_results_tumor_others[["EXO1"]], print.auc = F, col = "#dcbeff",
            cex.main=0.8, 
            main ="HGSOC navikų atskyrimas nuo kitų KV atvejų",
-           xlab = "Specifiškumas", 
-           ylab = "Jautrumas") #title
+           xlab = "1 - Specifiškumas", 
+           ylab = "Jautrumas", 
+           legacy.axes = T)
   lines(roc_results_tumor_others[["RAD50"]], col = "#911eb4", lwd =2) 
   lines(roc_results_tumor_others[["PPT2"]], col ="#ffd8b1", lwd =2) 
   lines(roc_results_tumor_others[["LUC7L2"]], col = "#42d4f4", lwd =2) 
@@ -214,7 +216,7 @@ roc_plot2 <- function() {
 
 roc_plot2()
 ## Save the plot as a PNG file#######################
-png("10_genes_roc_hgsoc_others_20250623.png",
+png("10_genes_roc_hgsoc_others_20251121.png",
     width = 1000, height = 1000, res = 200)
 roc_plot2()
 dev.off()
@@ -300,14 +302,15 @@ gtsave(gt_table_tumor_others,
        filename = "10_genes_roc_table_hgsoc_other_20250623.png")
 
 #Combine the images
-roc_image2<- image_read("10_genes_roc_hgsoc_others_20250623.png")
+roc_image2<- image_read("10_genes_roc_hgsoc_others_20251121.png")
 table_image2 <- image_read("10_genes_roc_table_hgsoc_other_20250623.png")
 
 combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
 
 # Save the combined image
 image_write(combined_image2, 
-            "10_genes_roc_combined_hgsoc_others_20250623.png")
+            "10_genes_roc_combined_hgsoc_others_20251121.png")
+#UGLY PLOTS ###################################################
 #ROC OVCa vs benign############################################
 #ROC w OVCa vs benign
 roc_results_tumor_OC<- lapply(expression, function(col) {
@@ -324,8 +327,9 @@ roc_plot3 <- function() {
   plot.roc(roc_results_tumor_OC[["EXO1"]], print.auc = F, col = "#dcbeff",
            cex.main=0.8, 
            main ="Gerybinių pakitimų atskyrimas nuo KV atvejų", 
-           xlab = "Specifiškumas", 
-           ylab = "Jautrumas") #title
+           xlab = "1 - Specifiškumas", 
+           ylab = "Jautrumas", 
+           legacy.axes = T) #title
   lines(roc_results_tumor_OC[["RAD50"]], col = "#911eb4", lwd =2) 
   lines(roc_results_tumor_OC[["PPT2"]], col ="#ffd8b1", lwd =2) 
   lines(roc_results_tumor_OC[["LUC7L2"]], col = "#42d4f4", lwd =2) 
@@ -356,7 +360,7 @@ roc_plot3 <- function() {
 
 roc_plot3()
 ## Save the plot as a PNG file#########################
-png("10_genes_roc_oc_20251020.png",
+png("10_genes_roc_oc_20251121.png",
     width = 1000, height = 1000, res = 200)
 roc_plot3()
 dev.off()
@@ -426,14 +430,14 @@ gtsave(gt_table_tumor_OC,
        filename = "10_genes_roc_table_oc_20251020.png")
 
 #Combine the images
-roc_image3 <- image_read("10_genes_roc_oc_20251020.png")
+roc_image3 <- image_read("10_genes_roc_oc_20251121.png")
 table_image3 <- image_read("10_genes_roc_table_oc_20251020.png")
 
 combined_image3 <- image_append(c(roc_image3, table_image3), stack = F)
 
 # Save the combined image
 image_write(combined_image3, 
-"10_genes_roc_combined_OC_2025061020.png")
+"10_genes_roc_combined_OC_2025061121.png")
 
 #combine HGSOC vs benign ####################################################
 #2 best genes is GRB7 and TCEAL4
@@ -656,8 +660,7 @@ roc_plot_en <- function() {
   plot.roc(roc_results_tumor[["EXO1"]], print.auc = F, col = "#dcbeff",
            cex.main=0.8, 
            main ="Separation of Benign ovarian tumors form HGSOC",
-           xlab = "Specificity", 
-           ylab = "Sensitivity") #title
+           legacy.axes = TRUE) #title
   lines(roc_results_tumor[["RAD50"]], col = "#911eb4", lwd =2) 
   lines(roc_results_tumor[["PPT2"]], col ="#ffd8b1", lwd =2) 
   lines(roc_results_tumor[["LUC7L2"]], col = "#42d4f4", lwd =2) 
@@ -690,7 +693,7 @@ roc_plot_en <- function() {
 
 roc_plot_en()
 ## Save the plot as a PNG file###################################
-png("10_genes_roc_hgsoc_benign_20250922_en.png",
+png("10_genes_roc_hgsoc_benign_20251110_en.png",
     width = 1000, height = 1000, res = 200)
 roc_plot_en()
 dev.off()
@@ -708,7 +711,7 @@ coords_results_tumor_en
 results_tumor_en<- data.frame(
   Predictor = expression,
   AUC =  auc_values_tumor,
-  do.call(rbind,coords_results_tumor) 
+  do.call(rbind,coords_results_tumor_en) 
 )
 
 # Create a new row for CA125
@@ -723,7 +726,7 @@ results_tumor_en <- rbind(results_tumor_en, ca125_row)
 
 
 #nice formating of the Table metrics for ROC OC
-gt_table_tumor_en <- results_tumor %>%
+gt_table_tumor_en <- results_tumor_en %>%
   gt() %>%
   tab_header(
     title = "ROC measures", 
@@ -744,7 +747,7 @@ gtsave(gt_table_tumor_en,
        filename = "10_genes_roc_table_hgsoc_benign_20250922en.png")
 
 #Combine the images
-roc_image1en <- image_read("10_genes_roc_hgsoc_benign_20250922_en.png")
+roc_image1en <- image_read("10_genes_roc_hgsoc_benign_20251110_en.png")
 table_image1en <- image_read("10_genes_roc_table_hgsoc_benign_20250922en.png")
 
 combined_image1en <- image_append(c(roc_image1en, table_image1en), stack = F)
@@ -761,4 +764,4 @@ table_image1_paddeden <- image_extent(table_image1en, geometry = geometry_area(m
 combined_image1en <- image_append(c(roc_image1_paddeden, table_image1_paddeden), stack = T)
 # Save the combined image
 image_write(combined_image1en, 
-            "10_genes_roc_combined_hgsoc_benign_20250922en.png")
+            "10_genes_roc_combined_hgsoc_benign_20251110en.png")
