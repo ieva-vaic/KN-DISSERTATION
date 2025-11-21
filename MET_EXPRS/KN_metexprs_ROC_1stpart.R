@@ -77,8 +77,9 @@ par(pty = "s") #sets square
 plot.roc(roc_results_tumor[["NOTCH1"]], print.auc = F, col = "#dcbeff",
          cex.main=0.8,
          main ="Gerybinių pakitimų atskyrimas nuo visų KV atvejų", 
-         xlab = "Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
-         ylab = "Jautrumas") #7
+         xlab = "1 - Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
+         ylab = "Jautrumas", 
+         legacy.axes = T) #7
 lines(roc_results_tumor[["NOTCH2"]], col = "#911eb4", lwd =2) #6
 lines(roc_results_tumor[["NOTCH3"]], col ="#ffd8b1", lwd =2) #8
 lines(roc_results_tumor[["NOTCH4"]], col = "#42d4f4", lwd =2) #4-5
@@ -116,7 +117,7 @@ col = c("#f032e6", "#f58231","#808000", "#469990", "#42d4f4",
 cex = 0.7, lwd =3)
 }
 roc_plot()
-png("met_exprs_roc_OC_output20251020.png", width = 1000, height = 1000, res = 150)
+png("met_exprs_roc_OC_output20251121.png", width = 1000, height = 1000, res = 150)
 roc_plot()
 dev.off()
 
@@ -184,14 +185,14 @@ gtsave(gt_table_tumor,
        filename = "met_exprs_roctable_OC_output20251020.png")
 
 #Combine the images 
-roc_image2<- image_read("met_exprs_roc_OC_output20251020.png")
+roc_image2<- image_read("met_exprs_roc_OC_output20251121.png")
 table_image2 <- image_read("met_exprs_roctable_OC_output20251020.png")
 
 combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
 
 # Save the combined image
 image_write(combined_image2, 
-            "met_exprs_ROC_TABLE_OC_outputs20251020.png")
+            "met_exprs_ROC_TABLE_OC_outputs20251121.png")
 
 ## Compare with CA125 OVCa #############
 #using only ovarian cancer data
@@ -245,8 +246,9 @@ roc_plot2 <- function() {
 par(pty = "s") #sets square
 plot.roc(roc_results_tumor_bh[["NOTCH1"]], print.auc = F, col = "#dcbeff",
          cex.main=0.8, main ="Gerybinių pakitimų atskyrimas nuo HGSOC atvejų", 
-         xlab = "Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
-         ylab = "Jautrumas") #7
+         xlab = "1 - Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
+         ylab = "Jautrumas", 
+         legacy.axes = T) #7
 lines(roc_results_tumor_bh[["NOTCH2"]], col = "#911eb4", lwd =2) #6
 lines(roc_results_tumor_bh[["NOTCH3"]], col ="#ffd8b1", lwd =2) #8
 lines(roc_results_tumor_bh[["NOTCH4"]], col = "#42d4f4", lwd =2) #4-5
@@ -285,7 +287,7 @@ cex = 0.8, lwd =3)
 }
 roc_plot2()
 # Save the plot as a PNG file
-png("met_exrs_roc_HGSOC_output20251020.png", width = 1000, height = 1000, res = 150)
+png("met_exrs_roc_HGSOC_output20251121.png", width = 1000, height = 1000, res = 150)
 roc_plot2()
 dev.off()
 
@@ -350,7 +352,7 @@ gt_table_tumor_bh
 gtsave(gt_table_tumor_bh, filename = "met_exprs_roctable_HGSOC_output20251020.png")
 
 #Combine the images 
-roc_image2<- image_read("met_exrs_roc_HGSOC_output20251020.png")
+roc_image2<- image_read("met_exrs_roc_HGSOC_output20251121.png")
 table_image2 <- image_read("met_exprs_roctable_HGSOC_output20251020.png")
 
 # Find the max width to align both
@@ -366,7 +368,7 @@ combined_image2 <- image_append(c(roc_image2, table_image2), stack = T)
 
 # Save the combined image
 image_write(combined_image2, 
-            "met_exrs_ROCTABLE_HGSOC_output20251020.png")
+            "met_exrs_ROCTABLE_HGSOC_output20251121.png")
 
 ## Compare expression to ALX4 methylation HGSOC vs benign###########
 roc.test(roc_results_tumor_bh[["CTNNB1"]], roc_results_tumor_bh[["ALX4"]])#  5.069e-05
@@ -431,8 +433,9 @@ roc_plot3 <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor_oh[["NOTCH1"]], print.auc = F, col = "#dcbeff",
            cex.main=0.8, main ="HGSOC navikų atskyrimas nuo kitų KV atvejų", 
-           xlab = "Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
-           ylab = "Jautrumas") #7
+           xlab = "1 - Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
+           ylab = "Jautrumas", 
+           legacy.axes = T) #7
   lines(roc_results_tumor_oh[["NOTCH2"]], col = "#911eb4", lwd =2) #6
   lines(roc_results_tumor_oh[["NOTCH3"]], col ="#ffd8b1", lwd =2) #8
   lines(roc_results_tumor_oh[["NOTCH4"]], col = "#42d4f4", lwd =2) #4-5
@@ -472,7 +475,7 @@ roc_plot3 <- function() {
 
 roc_plot3()
 # Save the plot as a PNG file
-png("met_exprs_ROC_HGSOC_others_output20250623.png", width = 1000, height = 1000, res = 150)
+png("met_exprs_ROC_HGSOC_others_output20251121.png", width = 1000, height = 1000, res = 150)
 roc_plot3()
 dev.off()
 
@@ -538,14 +541,14 @@ gt_table_tumor_oh
 gtsave(gt_table_tumor_oh, filename = "met_exprs_table_HGSOC_others_output20250623.png")
 
 #Combine the images
-roc_image2<- image_read("met_exprs_ROC_HGSOC_others_output20250623.png")
+roc_image2<- image_read("met_exprs_ROC_HGSOC_others_output20251121.png")
 table_image2 <- image_read("met_exprs_table_HGSOC_others_output20250623.png")
 
 combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
 
 # Save the combined image
 image_write(combined_image2, 
-            "met_exprs_ROCTABLE_HGSOC_others_output20250623.png")
+            "met_exprs_ROCTABLE_HGSOC_others_output20251121.png")
 
 ## Compare with CA125 HGSOC vs others #############
 KN_CA3 <- KN_OTHER_HGSOC[!is.na(KN_OTHER_HGSOC$CA125_f), ] #remove empty
