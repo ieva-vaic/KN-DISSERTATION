@@ -607,7 +607,7 @@ dev.off() # Close the PNG device
 target_time <- 60        
 time_index <- which(rez_list2_notch_OC[[1]]$times == target_time)
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test20250924x.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test20251124x.png",
     width = 1800, height = 1800, res = 220) # width and height in pixels, resolution in dpi
 # Set up base plot with gene 1
 par(pty="s")
@@ -618,7 +618,7 @@ plot(
   type = "l",
   col = 1,
   lwd = 2,
-  xlab = "Specifiškumas",
+  xlab = "1 - Specifiškumas",
   ylab = "Jautrumas",
   main = paste("Nuo laiko priklausomos ROC kreivės,
 5 metai po diagnozės audinių imtyje"),
@@ -693,7 +693,7 @@ dev.off() # Close the PNG device
 target_time <- 60        
 time_index <- which(rez_list2_notch_OC[[1]]$times == target_time)
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissuesNO_AUCS_OCtimeROC_test20251013.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissuesNO_AUCS_OCtimeROC_test20251124.png",
     width = 1500, height = 1500, res = 200) # width and height in pixels, resolution in dpi
 
 par(pty="s")
@@ -705,7 +705,7 @@ plot(
   type = "l",
   col = 1,
   lwd = 2,
-  xlab = "Specifiškumas",
+  xlab = "1 - Specifiškumas",
   ylab = "Jautrumas",
   main = paste("Nuo laiko priklausomos ROC kreivės,\n",
                "5 metai po diagnozės audinių imtyje"),
@@ -881,14 +881,14 @@ gtsave(gt_table_roc_60,
        filename = "timeroc_table_20251003.png")
 
 #Combine the images
-roc_image <- image_read("tissuesNO_AUCS_OCtimeROC_test20251013.png")
+roc_image <- image_read("tissuesNO_AUCS_OCtimeROC_test20251124.png")
 table_image <- image_read("timeroc_table_20251003.png")
 
 combined_image <- image_append(c(roc_image, table_image), stack = F)
 
 # Save the combined image
 image_write(combined_image, 
-            "roc_notch_all_oc_with_table_20251013.png")
+            "roc_notch_all_oc_with_table_20251123.png")
 
 #compare time rocs ##################################################
 #separate

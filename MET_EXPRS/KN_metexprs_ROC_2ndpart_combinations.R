@@ -135,8 +135,9 @@ roc_plot_3 <- function() {
 par(pty = "s") #sets square
 plot.roc(roc_curve1, print.auc = F, col = "#911eb4",
          cex.main=0.8, main ="Gerybinių pakitimų atskyrimas nuo KV atvejų",
-         xlab = "Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
-         ylab = "Jautrumas") #7
+         xlab = "1 - Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
+         ylab = "Jautrumas", 
+         legacy.axes = T) #7
 lines(roc_curve1.2, col = "#dcbeff", lwd =2, ) #6
 lines(roc_curve1.3, col ="#fabed4", lwd =2, lty = 2) #8
 lines(roc_curve1.4, col ="darkred", lwd =2) 
@@ -159,7 +160,7 @@ legend("bottomright", legend = c( expression(italic("Genų raiškos žymenų kom
 saved_plot <- recordPlot(roc_plot_3())
 
 # Save the plot as a PNG file
-png("metexprs_roc_combinations_OVCa_output20251020.png", width = 1000, height = 1000, res = 150)
+png("metexprs_roc_combinations_OVCa_output20251124.png", width = 1000, height = 1000, res = 150)
 roc_plot_3()
 dev.off()
 
@@ -214,14 +215,14 @@ gt_table
 gtsave(gt_table, filename = "metexprs_table_combinations_OVCa_output20251020.png", vheight = 800)
 
 #Combine the images
-roc_image2<- image_read("metexprs_roc_combinations_OVCa_output20251020.png")
+roc_image2<- image_read("metexprs_roc_combinations_OVCa_output20251124.png")
 table_image2 <- image_read("metexprs_table_combinations_OVCa_output20251020.png")
 
 combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
 
 # Save the combined image
 image_write(combined_image2, 
-            "metexprs_roctable_combinations_OVCa_output20251020.png")
+            "metexprs_roctable_combinations_OVCa_output20251124.png")
 # center
 # Find the max width to align both
 roc_info <- image_info(roc_image2)
@@ -237,14 +238,14 @@ combined_image2 <- image_append(c(roc_image2_padded, table_image2_padded), stack
 
 # Save the combined image
 image_write(combined_image2, 
-            "metexprs_roc_combinations_OVCa_v2_output20251020.png")
+            "metexprs_roc_combinations_OVCa_v2_output20251124.png")
 
 #non staked version
 combined_image2.2 <- image_append(c(roc_image2, table_image2), stack = F)
 
 # Save the combined image
 image_write(combined_image2.2, 
-            "metexprs_roc_combinations_OVCa_v1_output20251020.png")
+            "metexprs_roc_combinations_OVCa_v1_output20251124.png")
 ##delong tests with CA125 OVCa#################################
 roc.test(roc_curve_CA, roc_curve1)#0.03112 10 genes
 roc.test(roc_curve_CA, roc_curve1.2)#0.3226 4 methyl
@@ -348,8 +349,9 @@ roc_plot_4 <- function() {
 par(pty = "s") #sets square
 plot.roc(roc_curve2, print.auc = F, col = "#911eb4", lty = 2,
          cex.main=0.8, main ="Gerybinių pakitimų atskyrimas nuo HGSOC atvejų",
-         xlab = "Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
-         ylab = "Jautrumas") #7
+         xlab = "1 - Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
+         ylab = "Jautrumas", 
+         legacy.axes = T) #7
 lines(roc_curve2.2, col = "#dcbeff", lwd =2 ) #6
 lines(roc_curve2.3, col ="#fabed4", lwd =2, lty = 4) #8
 lines(roc_curve2.4, col ="darkred", lwd =2, lty = 3) 
@@ -369,7 +371,7 @@ legend("bottomright", legend = c( expression(italic("Genų raiškos žymenų kom
        cex = 0.8, lwd =3)
 }
 # Save the plot as a PNG file
-png("metexprs_roc_HGSOC_output20251020.png", width = 1000, height = 1000, res = 150)
+png("metexprs_roc_HGSOC_output20251124.png", width = 1000, height = 1000, res = 150)
 roc_plot_4()
 dev.off()
 
@@ -425,7 +427,7 @@ gtsave(gt_table2,vwidth = 800,
        filename = "metexprs_table_HGSOC_output20251020.png")
 
 #Combine the images
-roc_image2<- image_read("metexprs_roc_HGSOC_output20251020.png")
+roc_image2<- image_read("metexprs_roc_HGSOC_output20251124.png")
 table_image2 <- image_read("metexprs_table_HGSOC_output20251020.png")
 
 
@@ -443,7 +445,7 @@ combined_image2 <- image_append(c(roc_image2_padded, table_image2_padded), stack
 
 # Save the combined image
 image_write(combined_image2, 
-            "metexprs_Roctable_HGSOC_output20251020.png")
+            "metexprs_Roctable_HGSOC_output20251124.png")
 
 ##delong tests with CA125 HGSOC##########################
 roc.test(roc_curve_CA2, roc_curve2)#0.0397 10 genes
@@ -550,8 +552,9 @@ roc_plot_5 <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_curvex, print.auc = F, col = "#911eb4", 
            cex.main=0.8, main ="HGSOC atskyrimas nuo kitų KV atvejų",
-           xlab = "Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
-           ylab = "Jautrumas") #7
+           xlab = "1 - Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
+           ylab = "Jautrumas", 
+           legacy.axes =  T) #7
   lines(roc_curvex.1, col = "#dcbeff", lwd =2 ) #6
   lines(roc_curvex.3, col ="#fabed4", lwd =2) #8
   lines(roc_curvex.4, col ="darkred", lwd =2 ) 
@@ -572,7 +575,7 @@ roc_plot_5 <- function() {
 }
 
 # Save the plot as a PNG file
-png("metexprs_roc_HGSOC_OTHERS_MODELS_output20250610.png", width = 1000, height = 1000, res = 150)
+png("metexprs_roc_HGSOC_OTHERS_MODELS_output20251124.png", width = 1000, height = 1000, res = 150)
 roc_plot_5()
 dev.off()
 
@@ -629,7 +632,7 @@ gtsave(gt_tablex,vwidth = 800,
        filename = "metexprs_table_HGSOC_OTHERS_MODELS_output20250610.png")
 
 #Combine the images
-roc_image2<- image_read("metexprs_roc_HGSOC_OTHERS_MODELS_output20250610.png")
+roc_image2<- image_read("metexprs_roc_HGSOC_OTHERS_MODELS_output20251124.png")
 table_image2 <- image_read("metexprs_table_HGSOC_OTHERS_MODELS_output20250610.png")
 
 # Find the max width to align both
@@ -646,7 +649,7 @@ combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
 
 # Save the combined image
 image_write(combined_image2, 
-            "metexprs_tableroc_HGSOC_OTHERS_MODELS_output20250610.png")
+            "metexprs_tableroc_HGSOC_OTHERS_MODELS_output20251124.png")
 ##delong tests with CA125 for comparisons######################################
 roc.test(roc_curve_CA2X, roc_curvex)#9.907e-12 10 genes
 roc.test(roc_curve_CA2X, roc_curvex.1)#0.3469 4 methyl
