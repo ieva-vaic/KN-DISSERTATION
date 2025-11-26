@@ -350,7 +350,7 @@ target_time <- 1825   # choose year 5
 time_index <- which(rez_list[[1]]$times == target_time)
 
 # plot with save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test20250925.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test20251124.png",
     width = 1000, height = 1000, res = 200)
 
 par(pty="s")
@@ -362,7 +362,7 @@ plot(
   type = "l",
   col = 1,
   lwd = 2,
-  xlab = "Specifiškumas",
+  xlab = "1 - Specifiškumas",
   ylab = "Jautrumas",
   main = paste("Nuo laiko priklausomos ROC kreivės,\n5 metai po diagnozės testavimo imtyje"),
   xlim = c(0, 1),
@@ -428,7 +428,7 @@ extract_coords <- function(roc, gene, timepoint = 1825) {
   tibble(
     gene = gene,
     time = roc$times[idx],
-    auc = roc$AUC[idx] * 100,
+    auc = roc$AUC[idx] ,
     sens = sens[best_idx],
     spec = spec[best_idx],
     cutoff = roc$cutoffs[best_idx]
@@ -478,17 +478,17 @@ gt_table_roc_60
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_roc_60,
-       filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20250925.png")
+       filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20251002.png")
 
 #Combine the images
-roc_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test20250925.png")
-table_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20250925.png")
+roc_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test20251124.png")
+table_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20251002.png")
 
 combined_image <- image_append(c(roc_image, table_image), stack = F)
 
 # Save the combined image
 image_write(combined_image, 
-            "C:/Users/Ieva/rprojects/outputs_all/DISS/TESTROC_W_TABLE2025925.png")
+            "C:/Users/Ieva/rprojects/outputs_all/DISS/TESTROC_W_TABLE20251124.png")
 
 #KM plot with RISK SCORE#################
 #Kaplan-meier plot ##################################
@@ -1157,7 +1157,7 @@ target_time <- 1825   # choose year 5
 time_index <- which(rez_list[[1]]$times == target_time)
 
 # plot with save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test20250925EN.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test202501023EN.png",
     width = 1000, height = 1000, res = 200)
 
 par(pty="s")
@@ -1171,7 +1171,7 @@ plot(
   lwd = 2,
   xlab = "Specificity",
   ylab = "Sensitivity",
-  main = paste("ROC curves,\n5 years form diagnosis, Test cohort"),
+  main = paste("ROC curves,\n5 years from diagnosis, Test cohort"),
   xlim = c(0, 1),
   ylim = c(0, 1),
   asp = 1
@@ -1246,7 +1246,7 @@ extract_coords <- function(roc, gene, timepoint = 1825) {
 sens_spec_auc_60 <- map_dfr(names(rez_list), ~ extract_coords(rez_list[[.x]], .x, 1825))
 
 # Apply to risk score
-risk_score_row <- extract_coords(roc_result, "10 Genų raiškos rizikos balas", 1825)
+risk_score_row <- extract_coords(roc_result, "Risk score", 1825)
 
 # Combine into one tibble
 sens_spec_auc_60_all <- bind_rows(sens_spec_auc_60, risk_score_row)
@@ -1285,14 +1285,15 @@ gt_table_roc_60
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_roc_60,
-       filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20250925EN.png")
+       filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20251023EN.png")
 
 #Combine the images
-roc_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test20250925EN.png")
-table_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20250925EN.png")
+roc_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test202501023EN.png")
+table_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20251023EN.png")
 
 combined_image <- image_append(c(roc_image, table_image), stack = F)
 
 # Save the combined image
 image_write(combined_image, 
-            "C:/Users/Ieva/rprojects/outputs_all/DISS/TESTROC_W_TABLE2025925EN.png")
+            "C:/Users/Ieva/rprojects/outputs_all/DISS/TESTROC_W_TABLE20251023EN.png")
+
