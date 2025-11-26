@@ -84,9 +84,10 @@ roc.test(roc_curve_tceal4, roc_curve2)#0.2758
 roc_plot_custom <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_curve2, print.auc = F, col = "deeppink", 
-           cex.main=0.8, main ="Gerybinių pokyčių atskyrimas HGSOC atvejų",
-           xlab = "Specifiškumas",   # Custom x-axis label 
-           ylab = "Jautrumas") #7
+           cex.main=0.8, main ="Gerybinių pakitimų atskyrimas HGSOC atvejų",
+           xlab = "1 - Specifiškumas",   # Custom x-axis label 
+           ylab = "Jautrumas",
+           legacy.axes = T) #7
   lines(roc_curve10, col = "blue", lwd =2, lty = 2 ) #6
   lines(roc_curve_CA2X, col = "grey", lwd = 2)
   # Add legend
@@ -100,7 +101,7 @@ roc_plot_custom <- function() {
 #show plot
 roc_plot_custom()
 # Save the plot as a PNG file
-png("FIG_best3_HSGOC_BENIGN20250718.png", width = 1000, height = 1000, res = 150)
+png("FIG_best3_HSGOC_BENIGN20251124.png", width = 1000, height = 1000, res = 150)
 roc_plot_custom()
 mtext("B", side = 3, adj = 0, line = 2.5, cex = 1.5, font = 2)
 dev.off()
@@ -128,7 +129,7 @@ gt_table_cut <- results_roc_custom %>%
   gt() %>%
   tab_header(
     title = "ROC kriterijai",
-    subtitle = "Gerybinių pokyčių atskyrimas nuo HGSOC atvejų",
+    subtitle = "Gerybinių pakitimų atskyrimas nuo HGSOC atvejų",
   ) %>%
   fmt_number(
     columns = everything(),
@@ -143,11 +144,11 @@ gt_table_cut
 
 #there is no other convieneat way to save gt outputs
 gtsave(gt_table_cut,vwidth = 800,
-  filename = "FIG_tabbest3_HGSOC_BENIGN20250624.png")
+  filename = "FIG_tabbest3_HGSOC_BENIGN20251020.png")
 
 #Combine the images
-roc_image2<- image_read("FIG_best3_HSGOC_BENIGN20250718.png")
-table_image2 <- image_read("FIG_tabbest3_HGSOC_BENIGN20250624.png")
+roc_image2<- image_read("FIG_best3_HSGOC_BENIGN20251124.png")
+table_image2 <- image_read("FIG_tabbest3_HGSOC_BENIGN20251020.png")
 
 # Find the max width to align both
 roc_info <- image_info(roc_image2)
@@ -163,7 +164,7 @@ combined_image2 <- image_append(c(roc_image2_padded, table_image2_padded), stack
 
 # Save the combined image
 image_write(combined_image2, 
-            "FIG_COMBINED_best3_HGSOC_BENIGN20250909.png")
+            "FIG_COMBINED_best3_HGSOC_BENIGN20251124.png")
 
 #OVCa vs BENIGN MODELS################################################################
 ##manually make combination of the best two OVCa vs benign#####
@@ -210,9 +211,10 @@ coords_ca2Xx
 roc_plot_customx <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_curve2, print.auc = F, col = "lightpink", 
-           cex.main=0.8, main ="Gerybinių pokyčių atskyrimas KV atvejų",
-           xlab = "Specifiškumas",   # Custom x-axis label 
-           ylab = "Jautrumas") #7
+           cex.main=0.8, main ="Gerybinių pakitimų atskyrimas KV atvejų",
+           xlab = "1 - Specifiškumas",   # Custom x-axis label 
+           ylab = "Jautrumas", 
+           legacy.axes = T) #7
   lines(roc_curve10, col = "darkgreen", lwd =2, lty = 2 ) #6
   lines(roc_curve_CA2X, col = "grey", lwd = 2)
   
@@ -228,7 +230,7 @@ roc_plot_customx <- function() {
 roc_plot_customx()
 
 # Save the plot as a PNG file
-png("FIG_best3ocfull_for_genes20250818.png", width = 1000, height = 1000, res = 150)
+png("FIG_best3ocfull_for_genes20251124.png", width = 1000, height = 1000, res = 150)
 roc_plot_customx()
 mtext("A", side = 3, adj = 0, line = 2.5, cex = 1.5, font = 2)
 dev.off()
@@ -255,7 +257,7 @@ gt_table_cutx <- results_roc_customx %>%
   gt() %>%
   tab_header(
     title = "ROC kriterijai",
-    subtitle = "Gerybinių pokyčių atskyrimas nuo KV atvejų",
+    subtitle = "Gerybinių pakitimų atskyrimas nuo KV atvejų",
   ) %>%
   fmt_number(
     columns = everything(),
@@ -270,11 +272,11 @@ gt_table_cutx
 
 #there is no other convieneat way to save gt outputs
 gtsave(gt_table_cutx,vwidth = 800, 
- filename = "FIG_tabbest3ocfull_for_genes20250624.png")
+ filename = "FIG_tabbest3ocfull_for_genes20251020.png")
 
 #Combine the images
-roc_image2x<- image_read("FIG_best3ocfull_for_genes20250818.png")
-table_image2x <- image_read("FIG_tabbest3ocfull_for_genes20250624.png")
+roc_image2x<- image_read("FIG_best3ocfull_for_genes20251124.png")
+table_image2x <- image_read("FIG_tabbest3ocfull_for_genes20251020.png")
 
 # Find the max width to align both
 roc_infox <- image_info(roc_image2x)
@@ -290,7 +292,7 @@ combined_image2x <- image_append(c(roc_image2_paddedx, table_image2_paddedx), st
 
 # Save the combined image
 image_write(combined_image2x, 
-            "FIG_COMBINED_forOC_full_genes20250909.png")
+            "FIG_COMBINED_forOC_full_genes20251124.png")
 
 #HGSOC vs OTHERS MODELS###############################
 ##combination of the best 6 HGSOC vs others#####
@@ -352,9 +354,10 @@ coords22
 roc_plot_customo <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_curve6, print.auc = F, col = "lightpink", 
-           cex.main=0.8, main ="HGSOC atskyrimas kitų KV atvejų",
-           xlab = "Specifiškumas",   # Custom x-axis label 
-           ylab = "Jautrumas") #7
+           cex.main=0.8, main ="HGSOC atskyrimas nuo kitų KV atvejų",
+           xlab = "1 - Specifiškumas",   # Custom x-axis label 
+           ylab = "Jautrumas", 
+           legacy.axes = T) #7
   lines(roc_curve22, col = "darkgreen", lwd =2)
   lines(roc_curve10o, col = "darkblue", lwd =2)
   lines(roc_curve_CA2Xo, col = "grey", lwd = 2)
@@ -372,7 +375,7 @@ roc_plot_customo <- function() {
 roc_plot_customo()
 
 # Save the plot as a PNG file
-png("FIG_bestHGSOC_VS_others20250624.png", width = 1000, height = 1000, res = 150)
+png("FIG_bestHGSOC_VS_others20251124.png", width = 1000, height = 1000, res = 150)
 roc_plot_customo()
 dev.off()
 
@@ -418,7 +421,7 @@ gtsave(gt_table_cuto,vwidth = 800,
     filename = "FIG_besttableHGSOC_VS_others20250624.png")
 
 #Combine the images
-roc_image2o<- image_read("FIG_bestHGSOC_VS_others20250624.png")
+roc_image2o<- image_read("FIG_bestHGSOC_VS_others20251124.png")
 table_image2o <- image_read("FIG_besttableHGSOC_VS_others20250624.png")
 
 # Find the max width to align both
@@ -435,7 +438,7 @@ combined_image2o <- image_append(c(roc_image2_paddedo, table_image2_paddedo), st
 
 # Save the combined image
 image_write(combined_image2o, 
-            "FIG_COMBINED_forHGSOC_others_genes20250625.png")
+            "FIG_COMBINED_forHGSOC_others_genes20251124.png")
 
 #horizontal version
 # Now append vertically
@@ -443,7 +446,7 @@ combined_image2o2 <- image_append(c(roc_image2o, table_image2o), stack = F)
 
 # Save the combined image
 image_write(combined_image2o2, 
-            "FIG_COMBINED_forHGSOC_others_genes20250923.png")
+            "FIG_COMBINED_forHGSOC_others_genes20251124h.png")
 
 ##compare HGSOC vs OTHERs ###################################
 roc.test(roc_curve10, roc_curve22, method = "delong")

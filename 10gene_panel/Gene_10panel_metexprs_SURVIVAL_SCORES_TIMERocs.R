@@ -316,7 +316,7 @@ auc_table
 target_time <- 60        
 time_index <- which(rez_list[[1]]$times == target_time)
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test2025925EN.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test20251124LT.png",
     width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
 # Set up base plot with gene 1
 par(pty="s")
@@ -327,7 +327,7 @@ plot(
   type = "l",
   col = 1,
   lwd = 2,
-  xlab = "Specifiškumas",
+  xlab = "1 - Specifiškumas",
   ylab = "Jautrumas",
   main = paste("Nuo laiko priklausomos ROC kreivės,
 5 metai po diagnozės audinių imtyje"),
@@ -549,14 +549,14 @@ gtsave(gt_table_roc_60,
        filename = "10genetimeroc_table_20251002.png")
 
 #Combine the images
-roc_image <- image_read("tissues_OCtimeROC_test2025925LT.png")
+roc_image <- image_read("tissues_OCtimeROC_test20251124LT.png")
 table_image <- image_read("10genetimeroc_table_20251002.png")
 
 combined_image <- image_append(c(roc_image, table_image), stack = F)
 
 # Save the combined image
 image_write(combined_image, 
-            "tissues_OCtimeROCw_table_test20251002.png")
+            "tissues_OCtimeROCw_table_test202511124.png")
 
 
 
