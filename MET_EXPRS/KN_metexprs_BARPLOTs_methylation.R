@@ -514,3 +514,298 @@ png("met_BARPLOT_HGSOC_FIGO_output20251020.png",
     width = 4000, height = 2500, res = 400) # width and height in pixels, resolution in dpi
 plot33# Render the heatmap
 dev.off() # Close the PNG device
+
+#ENGLISH PLOTS ####################################
+##EN OC barplot ########
+metilinimas_tumor_tableEN <- metilinimas_tumor_table  %>%
+  mutate(tumor = recode(tumor, "KV" = "OC", "Gerybinis" = 
+                          "Benign")) 
+
+met_long_tumorEN <- pivot_longer(metilinimas_tumor_tableEN, 
+                                 cols = -tumor, 
+                                 names_to = "biomarker", 
+                                 values_to = "value")
+
+# Rename biomarker column
+met_long_tumorEN <- met_long_tumorEN %>%
+  # Rename
+  mutate(biomarker = recode(biomarker, 
+                            "HOPX_met" = "HOPX",      
+                            "ALX4_met" = "ALX4",   
+                            "CDX2_met" = "CDX2",
+                            "ARID1A_met" = "ARID1A")) %>%
+  mutate(
+    value = case_when(
+      value == "1" ~ "methylated",
+      value == "0" ~ "not methylated",
+      TRUE ~ as.character(value)  # Keep other values unchanged
+    ),
+    value = factor(value, levels = c( "not methylated", "methylated"))
+  )
+
+# Calculate counts
+df_perc_tumorEN <- met_long_tumorEN %>%
+  group_by(tumor, biomarker, value) %>%
+  summarise(count = n()) %>%
+  group_by(tumor, biomarker) %>%
+  mutate(percentage = count / sum(count) * 100) %>%
+  ungroup() %>%
+  mutate(value = factor(value, levels = c( "not methylated", "methylated")))  
+# Ensuring factor levels for consistent ordering
+
+# Plot stacked barplots
+p1EN <- ggplot(df_perc_tumorEN, aes(x = tumor, y = percentage, fill = value)) +
+  geom_bar(stat = "identity")  +
+  facet_wrap(~ biomarker, scales = "free_y", nrow = 1, ncol = 4) +
+  labs(x = "Tumor type", y = "Promoter methylation, %", fill = "Value") +
+  theme_minimal()+
+  labs(x=NULL,  
+       #title = "Promoter methylation in gynecologic tumors"
+  )+
+  theme(legend.position = "bottom",
+        strip.text.x = element_text(
+          size = 15, face = "bold.italic"
+        ),
+        legend.text = element_text(face = "italic"),
+        plot.title = element_text(hjust = 0.5))+
+  labs(fill = "Promoter methylation") 
+p1EN
+
+#add p values
+anno <- data.frame(x1 = c(1, 1, 1, 1), x2 = c(2, 2, 2, 2), 
+                   y1 = c(101, 101, 101, 101), y2 = c(102, 102, 102, 102), 
+                   xstar = c(1.5, 1.5, 1.5, 1.5), ystar = c(104, 104, 104, 104),
+                   lab = c("p = 0,023", "p = 0,027" , "p = 0,036", "p = 1"),
+                   biomarker = c("HOPX", "CDX2", "ALX4", "ARID1A"), 
+                   value = c("not methylated", "not methylated", "not methylated", "not methylated"))
+anno
+
+new_value_colors <- c("methylated" = "#cf5784", "not methylated" = "#dcbeff") #spalvos BUVO #CBC3E3 ; #AFE1AF
+
+pp1EN <- p1EN+
+  geom_text(data = anno, aes(x = xstar,  y = ystar, label = lab))+ #pvalues
+  geom_text(aes(label = paste0(round(percentage), "%")), #balti skaiciai
+            position = position_stack(vjust = 0.5), 
+            size = 5, 
+            color = "white", 
+            fontface = "bold") +
+  geom_segment(data = anno, aes(x = x1, xend = x1,  #visu 3 reikia nubraizyti brakets
+                                y = y1, yend = y2),
+               colour = "black") +
+  geom_segment(data = anno, aes(x = x2, xend = x2, 
+                                y = y1, yend = y2),
+               colour = "black") +
+  geom_segment(data = anno, aes(x = x1, xend = x2, 
+                                y = y2, yend = y2),
+               colour = "black") +
+  scale_fill_manual(values = new_value_colors, labels = c( 'not methylated', 'methylated'))
+pp1EN
+
+#save
+#set directory for saving
+setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
+#save
+png("met_exprs_boxplot_OVca_ENoutput20251212.png", width = 3000, height = 2700, res = 400) # width and height in pixels, resolution in dpi
+pp1EN #
+dev.off() # Close the PNG device
+
+## 3 group EN plot ########################
+metilinimas_group_tableEN <- KN_data[, colnames(KN_data) %in% c(metilinimas, "Grupė_Ieva")]
+
+met_long_groupEN <- pivot_longer(metilinimas_group_tableEN, 
+                                 cols = -Grupė_Ieva, 
+                                 names_to = "biomarker", 
+                                 values_to = "value")
+
+# Rename biomarker column
+met_long_groupEN <- met_long_groupEN %>%
+  # Rename
+  mutate(biomarker = recode(biomarker, 
+                            "HOPX_met" = "HOPX",      
+                            "ALX4_met" = "ALX4",   
+                            "CDX2_met" = "CDX2",
+                            "ARID1A_met" = "ARID1A")) %>%
+  mutate(
+    value = case_when(
+      value == "0" ~ "not methylated",
+      value == "1" ~ "methylated",
+      TRUE ~ as.character(value)  # Keep other values unchanged
+    ),
+    value = factor(value, levels = c("methylated", "not methylated"))
+  )
+
+# Calculate counts
+df_perc_groupEN <- met_long_groupEN %>%
+  group_by(Grupė_Ieva, biomarker, value) %>%
+  summarise(count = n()) %>%
+  group_by(Grupė_Ieva, biomarker) %>%
+  mutate(percentage = count / sum(count) * 100) %>%
+  ungroup() %>%
+  mutate(value = factor(value, levels = c("not methylated", "methylated")))  
+# Ensuring factor levels for consistent ordering
+
+# Plot stacked barplots
+p3EN <- ggplot(df_perc_groupEN, aes(x = Grupė_Ieva, y = percentage, fill = value)) +
+  geom_bar(stat = "identity")  +
+  facet_wrap(~ biomarker, scales = "free_y", nrow = 1, ncol = 4) +
+  labs(x = "Tumor type", y = "Promoter methylation, %", fill = "Value") +
+  theme_minimal()+
+  labs(x=NULL,  
+       #title = "Promoter methylation in gynecologic tumors"
+  )+
+  theme(legend.position = "bottom",  
+        strip.text.x = element_text(
+          size = 15, face = "bold.italic"
+        ),
+        legend.text = element_text(face = "italic"),
+        plot.title = element_text(hjust = 0.5))+
+  labs(fill = "Promoter methylation") 
+p3EN
+
+#add p values HGSOC VS BENIGN
+annoEN <- data.frame(x1 = c(1, 1, 1, 1), x2 = c(2, 2, 2, 2), 
+                     y1 = c(101, 101, 101, 101), y2 = c(102, 102, 102, 102), 
+                     xstar = c(1.5, 1.5, 1.5, 1.5), ystar = c(104, 104, 104, 104),
+                     lab = c("p = 0,043", "p = 0,06" , "p = 0,06", "p = 1"),
+                     biomarker = c("HOPX", "CDX2", "ALX4", "ARID1A"), 
+                     value = c("not methylated", "not methylated", "not methylated", "not methylated"))
+annoEN
+
+pp3EN<- p3EN+
+  geom_text(data = annoEN, aes(x = xstar,  y = ystar, label = lab))+ #pvalues
+  geom_text(aes(label = paste0(round(percentage), "%")), #balti skaiciai
+            position = position_stack(vjust = 0.5), 
+            size = 5, 
+            color = "white", 
+            fontface = "bold") +
+  geom_segment(data = annoEN, aes(x = x1, xend = x1,  #visu 3 reikia nubraizyti brakets
+                                y = y1, yend = y2),
+               colour = "black") +
+  geom_segment(data = annoEN, aes(x = x2, xend = x2, 
+                                y = y1, yend = y2),
+               colour = "black") +
+  geom_segment(data = annoEN, aes(x = x1, xend = x2, 
+                                y = y2, yend = y2),
+               colour = "black") +
+  scale_fill_manual(values = new_value_colors, labels = c('not methylated', 'methylated'))
+pp3EN
+
+#benign vs others
+anno2EN <- data.frame(x1 = c(1, 1,1,1), x2 = c(3, 3, 3, 3), 
+                      y1 = c(105, 105, 105, 105), y2 = c(107, 107, 107, 107), 
+                      xstar = c(2, 2, 2,2), ystar = c(109, 109, 109, 109),
+                      lab = c("p = 0,048", "p = 0,01" , "p = 0,08", "p = 1"),
+                      biomarker = c("HOPX", "CDX2", "ALX4", "ARID1A"), 
+                      value = c("not methylated", "not methylated", "not methylated", "not methylated"))
+anno2EN
+
+ppp3EN <- pp3EN +
+  geom_text(data = anno2, aes(x = xstar,  y = ystar, label = lab))+ #pvalues
+  geom_segment(data = anno2, aes(x = x1, xend = x1,  #visu 3 reikia nubraizyti brakets
+                                 y = y1, yend = y2),
+               colour = "black") +
+  geom_segment(data = anno2, aes(x = x2, xend = x2, 
+                                 y = y1, yend = y2),
+               colour = "black") +
+  geom_segment(data = anno2, aes(x = x1, xend = x2, 
+                                 y = y2, yend = y2),
+               colour = "black") +
+  scale_fill_manual(values = new_value_colors, labels = c('not methylated', 'methylated'))
+
+ppp3EN
+
+#save
+png("met_exprs_boxplot_HGSOC_ENoutput20251212.png", width = 4000, height = 2700, res = 400) # width and height in pixels, resolution in dpi
+ppp3EN #
+dev.off() # Close the PNG device
+
+##EN Barplot HGSOC 4 FIGO stages################################
+table(KN_HGSOC$Stage4, KN_HGSOC$ARID1A_met, useNA = "a")
+#barplot 3  groups
+metilinimas_stage_table <- KN_HGSOC[, colnames(KN_HGSOC) %in%
+                                      c(metilinimas, "Stage4")]
+
+met_long_stageEN <- pivot_longer(metilinimas_stage_table, 
+                                 cols = -Stage4, 
+                                 names_to = "biomarker", 
+                                 values_to = "value")
+
+# Rename biomarker column
+met_long_stageEN <- met_long_stage %>%
+  # Rename
+  mutate(biomarker = recode(biomarker, 
+                            "HOPX_met" = "HOPX",      
+                            "ALX4_met" = "ALX4",   
+                            "CDX2_met" = "CDX2",
+                            "ARID1A_met" = "ARID1A")) %>%
+  mutate(
+    value = case_when(
+      value == "0" ~ "not methylated",
+      value == "1" ~ "methylated",
+      TRUE ~ as.character(value)  # Keep other values unchanged
+    ),
+    value = factor(value, levels = c("methylated", "not methylated"))
+  )
+
+# Calculate counts
+df_perc_stageEN <- met_long_stageEN %>%
+  group_by(Stage4, biomarker, value) %>%
+  summarise(count = n()) %>%
+  group_by(Stage4, biomarker) %>%
+  mutate(percentage = count / sum(count) * 100) %>%
+  ungroup() %>%
+  mutate(value = factor(value, levels = c("not methylated", "methylated")))  
+df_perc_stageEN
+# Ensuring factor levels for consistent ordering
+
+# Plot stacked barplots
+plot3EN <- ggplot(df_perc_stageEN, aes(x = Stage4, y = percentage, fill = value)) +
+  geom_bar(stat = "identity")  +
+  facet_wrap(~ biomarker, scales = "free_y", nrow = 1, ncol = 4) +
+  labs(x = "Tumor FIGO stage", y = "Promoter methylation, %", fill = "Value") +
+  theme_minimal()+
+  labs(x=NULL,  
+       #title = "Promoter methylation in HGSOC according to FIGO stage"
+  )+
+  theme(legend.position = "bottom",
+        strip.text.x = element_text(
+          size = 15, face = "bold.italic"
+        ),
+        legend.text = element_text(face = "italic"),
+        plot.title = element_text(hjust = 0.5))+
+  labs(fill = "Promoter methylation") 
+plot3EN
+
+#add p values HGSOC VS BENIGN
+anno_plotEN <- data.frame(x1 = c(1, 1, 1, 1), x2 = c(3, 3, 3, 3), 
+                          y1 = c(101, 101, 101, 101), y2 = c(102, 102, 102, 102), 
+                          xstar = c(2, 2, 2, 2), ystar = c(104, 104, 104, 104),
+                          lab = c("p = 0,9", "p = 0,3" , "p = 1", "p = 0,048"),
+                          biomarker = c("HOPX", "CDX2", "ALX4", "ARID1A"), 
+                          value = c("not methylated", "not methylated", "not methylated", "not methylated"))
+anno_plotEN
+
+plot33EN <- plot3EN+
+  geom_text(data = anno_plotEN, aes(x = xstar,  y = ystar, label = lab))+ #pvalues
+  geom_text(aes(label = paste0(round(percentage), "%")), #balti skaiciai
+            position = position_stack(vjust = 0.5), 
+            size = 5, 
+            color = "white", 
+            fontface = "bold") +
+  geom_segment(data = anno_plotEN, aes(x = x1, xend = x1,  #visu 3 reikia nubraizyti brakets
+                                       y = y1, yend = y2),
+               colour = "black") +
+  geom_segment(data = anno_plotEN, aes(x = x2, xend = x2, 
+                                       y = y1, yend = y2),
+               colour = "black") +
+  geom_segment(data = anno_plotEN, aes(x = x1, xend = x2, 
+                                       y = y2, yend = y2),
+               colour = "black") +
+  scale_fill_manual(values = new_value_colors, labels = c('not methylated', 'methylated'))
+plot33EN
+
+#save
+png("met_exprs_boxplot_HGSOCSTAGE_ENoutput20251212.png", width = 3000, height = 2000, res = 400) # width and height in pixels, resolution in dpi
+plot33EN #
+dev.off() # Close the PNG device
+

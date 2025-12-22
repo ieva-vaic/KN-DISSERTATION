@@ -156,11 +156,11 @@ legend("bottomright", legend = c( expression(italic("Genų raiškos žymenų kom
                "deeppink", "grey" ), lty = 1, 
        cex = 0.8, lwd =3)
 }
-# Save the plot to a variable
-saved_plot <- recordPlot(roc_plot_3())
+#show
+roc_plot_3()
 
 # Save the plot as a PNG file
-png("metexprs_roc_combinations_OVCa_output20251124.png", width = 1000, height = 1000, res = 150)
+png("metexprs_roc_combinations_OVCa_output20251205.png", width = 1200, height = 1200, res = 180)
 roc_plot_3()
 dev.off()
 
@@ -181,14 +181,14 @@ results_roc1<- data.frame(
                   coords1.4$sensitivity, coords1.5$sensitivity, coords_ca$sensitivity),
   specifiškumas = c(coords1$specificity, coords1.2$specificity, coords1.3$specificity,
                   coords1.4$specificity, coords1.5$specificity, coords_ca$specificity),
-  ppv  = c(coords1$precision, coords1.2$precision, coords1.3$precision,
-                 coords1.4$precision,coords1.5$precision,coords_ca$precision ),
-  npv  = c(coords1$npv, coords1.2$npv, coords1.3$npv,
-           coords1.4$npv, coords1.5$npv, coords_ca$npv),
-  tpr  = c(coords1$tpr, coords1.2$tpr, coords1.3$tpr,
-           coords1.4$tpr,coords1.5$tpr,coords_ca$tpr),
-  fpr  = c(coords1$fpr, coords1.2$fpr, coords1.3$fpr,
-           coords1.4$fpr, coords1.5$fpr,coords_ca$fpr),
+  # ppv  = c(coords1$precision, coords1.2$precision, coords1.3$precision,
+  #                coords1.4$precision,coords1.5$precision,coords_ca$precision ),
+  # npv  = c(coords1$npv, coords1.2$npv, coords1.3$npv,
+  #          coords1.4$npv, coords1.5$npv, coords_ca$npv),
+  # tpr  = c(coords1$tpr, coords1.2$tpr, coords1.3$tpr,
+  #          coords1.4$tpr,coords1.5$tpr,coords_ca$tpr),
+  # fpr  = c(coords1$fpr, coords1.2$fpr, coords1.3$fpr,
+  #          coords1.4$fpr, coords1.5$fpr,coords_ca$fpr),
   check.names = FALSE
 )
 rownames(results_roc1) <- NULL
@@ -212,17 +212,19 @@ gt_table <- results_roc1 %>%
 gt_table
 
 #there is no other convieneat way to save gt outputs
-gtsave(gt_table, filename = "metexprs_table_combinations_OVCa_output20251020.png", vheight = 800)
+gtsave(gt_table,
+       filename = "metexprs_table_combinations_OVCa_output20251205.png",
+       vwidth = 600)
 
 #Combine the images
-roc_image2<- image_read("metexprs_roc_combinations_OVCa_output20251124.png")
-table_image2 <- image_read("metexprs_table_combinations_OVCa_output20251020.png")
+roc_image2<- image_read("metexprs_roc_combinations_OVCa_output20251205.png")
+table_image2 <- image_read("metexprs_table_combinations_OVCa_output20251205.png")
 
 combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
 
 # Save the combined image
 image_write(combined_image2, 
-            "metexprs_roctable_combinations_OVCa_output20251124.png")
+            "metexprs_roctable_combinations_OVCa_output20251205.png")
 # center
 # Find the max width to align both
 roc_info <- image_info(roc_image2)
@@ -238,20 +240,94 @@ combined_image2 <- image_append(c(roc_image2_padded, table_image2_padded), stack
 
 # Save the combined image
 image_write(combined_image2, 
-            "metexprs_roc_combinations_OVCa_v2_output20251124.png")
+            "metexprs_roc_combinations_OVCa_v2_output20251205.png")
 
 #non staked version
 combined_image2.2 <- image_append(c(roc_image2, table_image2), stack = F)
 
 # Save the combined image
 image_write(combined_image2.2, 
-            "metexprs_roc_combinations_OVCa_v1_output20251124.png")
+            "metexprs_roc_combinations_OVCa_v1_output20251205.png")
 ##delong tests with CA125 OVCa#################################
-roc.test(roc_curve_CA, roc_curve1)#0.03112 10 genes
-roc.test(roc_curve_CA, roc_curve1.2)#0.3226 4 methyl
-roc.test(roc_curve_CA, roc_curve1.3)#0.03112 14 biomakers
-roc.test(roc_curve_CA, roc_curve1.4)#0.04916 notch
-roc.test(roc_curve_CA, roc_curve1.5)#0.4405 #methyl
+# roc.test(roc_curve_CA, roc_curve1)#0.03112 10 genes
+# roc.test(roc_curve_CA, roc_curve1.2)#0.3226 4 methyl
+# roc.test(roc_curve_CA, roc_curve1.3)#0.03112 14 biomakers
+# roc.test(roc_curve_CA, roc_curve1.4)#0.04916 notch
+# roc.test(roc_curve_CA, roc_curve1.5)#0.4405 #methyl
+
+##EN PLOT ROC COMBINATIONS OVCa  ######################################
+roc_plot_3EN <- function() {
+  par(pty = "s") #sets square
+  plot.roc(roc_curve1, print.auc = F, col = "#911eb4",
+           cex.main=0.8, main ="Separation of benign ovarian tumors form ovarian cancer",
+           xlab = "1 - Specificity",   # Custom x-axis label (e.g., in Lithuanian)
+           ylab = "Sensitivity", 
+           legacy.axes = T) #7
+  lines(roc_curve1.2, col = "#dcbeff", lwd =2, ) #6
+  lines(roc_curve1.3, col ="#fabed4", lwd =2, lty = 2) #8
+  lines(roc_curve1.4, col ="darkred", lwd =2) 
+  lines(roc_curve1.5, col ="deeppink", lwd =2) 
+  lines(roc_curve_CA, col = "grey", lwd = 2)
+  
+  # Add legend
+  legend("bottomright", legend = c( expression(italic("Notch, Wnt and ARID1A gene expression combination")), 
+                                    expression(italic("Promoter methylation combination")),
+                                    expression(italic("14 biomarker combination ")), 
+                                    expression(italic("Notch gene expression combination")),
+                                    expression(italic("HOX promoter methylation combination")),
+                                    expression(italic("Serum CA125 status")))
+         ,
+         col = c("#911eb4","#dcbeff", "#fabed4", "darkred",
+                 "deeppink", "grey" ), lty = 1, 
+         cex = 0.8, lwd =3)
+}
+# show plot
+roc_plot_3EN()
+# Save the plot as a PNG file
+png("metexprs_roc_combinations_OVCa_outputEN20251215.png", width = 1000, height = 1000, res = 180)
+roc_plot_3EN()
+dev.off()
+
+#rename plot to en
+results_roc1EN <- results_roc1
+colnames(results_roc1EN) <- c("Predictor", "AUC", "threshold", "accuracy", "sensitivity", "specificity")
+results_roc1EN$Predictor <- c("Notch, Wnt and ARID1A gene expression combination",
+                              "Promoter methylation combination",
+                              "14 biomarker combination ",
+                              "Notch gene expression combination",
+                              "HOX promoter methylation combination",
+                              "Serum CA125 status")
+gt_tableEN <- results_roc1EN %>%
+  gt() %>%
+  tab_header(
+    title = "ROC metrics",
+    subtitle = "Separation of benign ovarian tumors form ovarian cancer"
+  ) %>%
+  fmt_number(
+    columns = everything(),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Predictor))
+  )
+#show
+gt_tableEN
+
+#there is no other convieneat way to save gt outputs
+gtsave(gt_tableEN,
+       filename = "metexprs_table_combinations_OVCa_outputEN20251215.png",
+       vwidth = 500)
+
+#Combine the images
+roc_image2EN<- image_read("metexprs_roc_combinations_OVCa_outputEN20251215.png")
+table_image2EN <- image_read("metexprs_table_combinations_OVCa_outputEN20251215.png")
+
+combined_image2EN <- image_append(c(roc_image2EN, table_image2EN), stack = F)
+
+# Save the combined image
+image_write(combined_image2EN, 
+            "metexprs_roctable_combinations_OVCa_outputEN20251215.png")
 
 #ROC COMBINATIONS HGSOC###################
 # HGSOC vs benign df
@@ -371,7 +447,7 @@ legend("bottomright", legend = c( expression(italic("Genų raiškos žymenų kom
        cex = 0.8, lwd =3)
 }
 # Save the plot as a PNG file
-png("metexprs_roc_HGSOC_output20251124.png", width = 1000, height = 1000, res = 150)
+png("metexprs_roc_HGSOC_output20251205.png", width = 1200, height = 1200, res = 180)
 roc_plot_4()
 dev.off()
 
@@ -392,14 +468,14 @@ results_roc2<- data.frame(
                   coords2.4$sensitivity, coords2.5$sensitivity, coords_ca2$sensitivity),
   specifiškumas = c(coords2$specificity, coords2.2$specificity, coords2.3$specificity,
                   coords2.4$specificity, coords2.5$specificity, coords_ca2$specificity),
-  ppv  = c(coords2$precision, coords2.2$precision, coords2.3$precision,
-                 coords2.4$precision,coords2.5$precision,coords_ca2$precision ),
-  npv  = c(coords2$npv, coords2.2$npv, coords2.3$npv,
-           coords2.4$npv, coords2.5$npv, coords_ca2$npv),
-  tpr  = c(coords2$tpr, coords2.2$tpr, coords2.3$tpr,
-           coords2.4$tpr,coords2.5$tpr,coords_ca2$tpr),
-  fpr  = c(coords2$fpr, coords2.2$fpr, coords2.3$fpr,
-           coords2.4$fpr, coords2.5$fpr,coords_ca2$fpr),
+  # ppv  = c(coords2$precision, coords2.2$precision, coords2.3$precision,
+  #                coords2.4$precision,coords2.5$precision,coords_ca2$precision ),
+  # npv  = c(coords2$npv, coords2.2$npv, coords2.3$npv,
+  #          coords2.4$npv, coords2.5$npv, coords_ca2$npv),
+  # tpr  = c(coords2$tpr, coords2.2$tpr, coords2.3$tpr,
+  #          coords2.4$tpr,coords2.5$tpr,coords_ca2$tpr),
+  # fpr  = c(coords2$fpr, coords2.2$fpr, coords2.3$fpr,
+  #          coords2.4$fpr, coords2.5$fpr,coords_ca2$fpr),
   check.names = FALSE
 )
 rownames(results_roc2) <- NULL
@@ -423,12 +499,12 @@ gt_table2 <- results_roc2 %>%
 gt_table2
 
 #there is no other convenient way to save gt outputs
-gtsave(gt_table2,vwidth = 800,
-       filename = "metexprs_table_HGSOC_output20251020.png")
+gtsave(gt_table2,vwidth = 600,
+       filename = "metexprs_table_HGSOC_output20251205.png")
 
 #Combine the images
-roc_image2<- image_read("metexprs_roc_HGSOC_output20251124.png")
-table_image2 <- image_read("metexprs_table_HGSOC_output20251020.png")
+roc_image2<- image_read("metexprs_roc_HGSOC_output20251205.png")
+table_image2 <- image_read("metexprs_table_HGSOC_output20251205.png")
 
 
 # Find the max width to align both
@@ -445,17 +521,92 @@ combined_image2 <- image_append(c(roc_image2_padded, table_image2_padded), stack
 
 # Save the combined image
 image_write(combined_image2, 
-            "metexprs_Roctable_HGSOC_output20251124.png")
-
+            "metexprs_Roctable_HGSOC_output20251205.png")
+#non staked version
+image_write(image_append(c(roc_image2, table_image2), stack = FALSE), 
+            "metexprs_Roctable_HGSOC_output_non_stacked20251205.png")
 ##delong tests with CA125 HGSOC##########################
-roc.test(roc_curve_CA2, roc_curve2)#0.0397 10 genes
-roc.test(roc_curve_CA2, roc_curve2.2)#0.4493 4 methyl
-roc.test(roc_curve_CA2, roc_curve2.3)#0.0397 14 biomakers
-roc.test(roc_curve_CA2, roc_curve2.4)#0.0397 notch
-roc.test(roc_curve_CA2, roc_curve2.5)#0.5977 #methyl HOX
-#compare together
-roc.test(roc_curve2.4, roc_curve2.5, method = "delong")#0.004806 #methyl vs notch
-roc.test(roc_curve2.4, roc_curve2.2, method = "delong")#0.004806 #methyl 4 vs notch
+# roc.test(roc_curve_CA2, roc_curve2)#0.0397 10 genes
+# roc.test(roc_curve_CA2, roc_curve2.2)#0.4493 4 methyl
+# roc.test(roc_curve_CA2, roc_curve2.3)#0.0397 14 biomakers
+# roc.test(roc_curve_CA2, roc_curve2.4)#0.0397 notch
+# roc.test(roc_curve_CA2, roc_curve2.5)#0.5977 #methyl HOX
+# #compare together
+# roc.test(roc_curve2.4, roc_curve2.5, method = "delong")#0.004806 #methyl vs notch
+# roc.test(roc_curve2.4, roc_curve2.2, method = "delong")#0.004806 #methyl 4 vs notch
+# 
+
+##EN PLOT ROC COMBINATIONS HGSOC ##########################
+#HGSOC vs benign models
+roc_plot_4EN <- function() {
+  par(pty = "s") #sets square
+  plot.roc(roc_curve2, print.auc = F, col = "#911eb4", lty = 2,
+           cex.main=0.8, main ="Separation of benign ovarian tumors from HGSOC",
+           xlab = "1 - Specificity",   # Custom x-axis label (e.g., in Lithuanian)
+           ylab = "Sensitivity", 
+           legacy.axes = T) #7
+  lines(roc_curve2.2, col = "#dcbeff", lwd =2 ) #6
+  lines(roc_curve2.3, col ="#fabed4", lwd =2, lty = 4) #8
+  lines(roc_curve2.4, col ="darkred", lwd =2, lty = 3) 
+  lines(roc_curve2.5, col ="deeppink", lwd =2) 
+  lines(roc_curve_CA2, col = "grey", lwd = 2)
+  
+  # Add legend
+  legend("bottomright", legend = c( expression(italic("Notch, Wnt and ARID1A gene expression combination")), 
+                                    expression(italic("Promoter methylation combination")),
+                                    expression(italic("14 biomarker combination ")), 
+                                    expression(italic("Notch gene expression combination")),
+                                    expression(italic("HOX promoter methylation combination")),
+                                    expression(italic("Serum CA125 status")))
+         ,
+         col = c("#911eb4","#dcbeff", "#fabed4", "darkred",
+                 "deeppink", "grey" ), lty = 1, 
+         cex = 0.8, lwd =3)
+}
+# Save the plot as a PNG file
+png("metexprs_roc_HGSOC_outputEN20251215.png", width = 1000, height = 1000, res = 180)
+roc_plot_4EN()
+dev.off()
+
+results_roc2EN <- results_roc2
+colnames(results_roc2EN) <- c("Predictor", "AUC", "threshold", "accuracy", "sensitivity", "specificity")
+results_roc2EN$Predictor <- c("Notch, Wnt and ARID1A gene expression combination",
+                              "Promoter methylation combination",
+                              "14 biomarker combination ",
+                              "Notch gene expression combination",
+                              "HOX promoter methylation combination",
+                              "Serum CA125 status")
+
+gt_table2EN <- results_roc2EN %>%
+  gt() %>%
+  tab_header(
+    title = "ROC metrics", 
+    subtitle = "Separation of benign ovarian tumors from HGSOC",
+  ) %>%
+  fmt_number(
+    columns = everything(),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Predictor))
+  )
+#show
+gt_table2EN
+
+#there is no other convenient way to save gt outputs
+gtsave(gt_table2EN,vwidth = 500, 
+       filename = "metexprs_table_HGSOC_outputEN20251215.png")
+
+#Combine the images
+roc_image2EN<- image_read("metexprs_roc_HGSOC_outputEN20251215.png")
+table_image2EN <- image_read("metexprs_table_HGSOC_outputEN20251215.png")
+
+combined_image2EN <- image_append(c(roc_image2EN, table_image2EN), stack = F)
+
+# Save the combined image
+image_write(combined_image2EN, 
+            "metexprs_tableroc_HGSOC_BENIGN_MODELS_outputEN20251215.png")
 
 #ROC COMBINATIONS hgsoc vs other #####################
 # HGSOC vs other df
@@ -575,7 +726,7 @@ roc_plot_5 <- function() {
 }
 
 # Save the plot as a PNG file
-png("metexprs_roc_HGSOC_OTHERS_MODELS_output20251124.png", width = 1000, height = 1000, res = 150)
+png("metexprs_roc_HGSOC_OTHERS_MODELS_output20251205.png", width = 1200, height = 1200, res = 180)
 roc_plot_5()
 dev.off()
 
@@ -597,14 +748,14 @@ results_rocx<- data.frame(
                 coordsx.4$sensitivity, coordsX.5$sensitivity, coords_ca2X$sensitivity),
   specifiškumas = c(coordsx$specificity, coordsx.1$specificity, coordsx.3$specificity,
                     coordsx.4$specificity, coordsX.5$specificity, coords_ca2X$specificity),
-  ppv  = c(coordsx$precision, coordsx.1$precision, coordsx.3$precision,
-           coordsx.4$precision,coordsX.5$precision,coords_ca2X$precision ),
-  npv  = c(coordsx$npv, coordsx.1$npv, coordsx.3$npv,
-           coordsx.4$npv, coordsX.5$npv, coords_ca2X$npv),
-  tpr  = c(coordsx$tpr, coordsx.1$tpr, coordsx.3$tpr,
-           coordsx.4$tpr,coordsX.5$tpr,coords_ca2X$tpr),
-  fpr  = c(coordsx$fpr, coordsx.1$fpr, coordsx.3$fpr,
-           coordsx.4$fpr, coordsX.5$fpr,coords_ca2X$fpr),
+  # ppv  = c(coordsx$precision, coordsx.1$precision, coordsx.3$precision,
+  #          coordsx.4$precision,coordsX.5$precision,coords_ca2X$precision ),
+  # npv  = c(coordsx$npv, coordsx.1$npv, coordsx.3$npv,
+  #          coordsx.4$npv, coordsX.5$npv, coords_ca2X$npv),
+  # tpr  = c(coordsx$tpr, coordsx.1$tpr, coordsx.3$tpr,
+  #          coordsx.4$tpr,coordsX.5$tpr,coords_ca2X$tpr),
+  # fpr  = c(coordsx$fpr, coordsx.1$fpr, coordsx.3$fpr,
+  #          coordsx.4$fpr, coordsX.5$fpr,coords_ca2X$fpr),
   check.names = FALSE
 )
 rownames(results_rocx) <- NULL
@@ -628,12 +779,12 @@ gt_tablex <- results_rocx %>%
 gt_tablex
 
 #there is no other convieneat way to save gt outputs
-gtsave(gt_tablex,vwidth = 800,
-       filename = "metexprs_table_HGSOC_OTHERS_MODELS_output20250610.png")
+gtsave(gt_tablex,vwidth = 600,
+       filename = "metexprs_table_HGSOC_OTHERS_MODELS_output20251205.png")
 
 #Combine the images
-roc_image2<- image_read("metexprs_roc_HGSOC_OTHERS_MODELS_output20251124.png")
-table_image2 <- image_read("metexprs_table_HGSOC_OTHERS_MODELS_output20250610.png")
+roc_image2<- image_read("metexprs_roc_HGSOC_OTHERS_MODELS_output20251205.png")
+table_image2 <- image_read("metexprs_table_HGSOC_OTHERS_MODELS_output20251205.png")
 
 # Find the max width to align both
 roc_info <- image_info(roc_image2)
@@ -649,14 +800,89 @@ combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
 
 # Save the combined image
 image_write(combined_image2, 
-            "metexprs_tableroc_HGSOC_OTHERS_MODELS_output20251124.png")
-##delong tests with CA125 for comparisons######################################
-roc.test(roc_curve_CA2X, roc_curvex)#9.907e-12 10 genes
-roc.test(roc_curve_CA2X, roc_curvex.1)#0.3469 4 methyl
-roc.test(roc_curve_CA2X, roc_curvex.3)#8.825e-14 14 biomakers
-roc.test(roc_curve_CA2X, roc_curvex.4)#2.548e-10 notch
-roc.test(roc_curve_CA2X, roc_curveX.5)#0.5977 #methyl
-roc.test(roc_curvex.3, roc_curvex, method = "delong")#0.4405 #methyl
+            "metexprs_tableroc_HGSOC_OTHERS_MODELS_output20251205.png")
+##delong tests with CA125 for comparisons#########
+# roc.test(roc_curve_CA2X, roc_curvex)#9.907e-12 10 genes
+# roc.test(roc_curve_CA2X, roc_curvex.1)#0.3469 4 methyl
+# roc.test(roc_curve_CA2X, roc_curvex.3)#8.825e-14 14 biomakers
+# roc.test(roc_curve_CA2X, roc_curvex.4)#2.548e-10 notch
+# roc.test(roc_curve_CA2X, roc_curveX.5)#0.5977 #methyl
+# roc.test(roc_curvex.3, roc_curvex, method = "delong")#0.4405 #methyl
+
+
+##EN PLOT ROC COMBINATIONS HGSOC vs OTHERS##########################
+roc_plot_5EN <- function() {
+  par(pty = "s") #sets square
+  plot.roc(roc_curvex, print.auc = F, col = "#911eb4", 
+           cex.main=0.8, main ="Separation of HGSOC from other ovarian cancer",
+           xlab = "1 - Specificity",   # Custom x-axis label (e.g., in Lithuanian)
+           ylab = "Sensitivity", 
+           legacy.axes =  T) #7
+  lines(roc_curvex.1, col = "#dcbeff", lwd =2 ) #6
+  lines(roc_curvex.3, col ="#fabed4", lwd =2) #8
+  lines(roc_curvex.4, col ="darkred", lwd =2 ) 
+  lines(roc_curveX.5, col ="deeppink", lwd =2) 
+  lines(roc_curve_CA2X, col = "grey", lwd = 2)
+  
+  # Add legend
+  legend("bottomright", legend = c( expression(italic("Notch, Wnt and ARID1A gene expression combination")), 
+                                    expression(italic("Promoter methylation combination")),
+                                    expression(italic("14 biomarker combination ")), 
+                                    expression(italic("Notch gene expression combination")),
+                                    expression(italic("HOX promoter methylation combination")),
+                                    expression(italic("Serum CA125 status")))
+         ,
+         col = c("#911eb4","#dcbeff", "#fabed4", "darkred",
+                 "deeppink", "grey" ), lty = 1, 
+         cex = 0.73, lwd =3)
+}
+
+# Save the plot as a PNG file
+png("metexprs_roc_HGSOC_OTHERS_MODELS_outputEN20251215.png", width = 1000, height = 1000, res = 180)
+roc_plot_5EN()
+dev.off()
+
+results_rocxEN <- results_rocx
+colnames(results_rocxEN) <- c("Predictor", "AUC", "threshold", "accuracy", "sensitivity", "specificity")
+results_rocxEN$Predictor <- c("Notch, Wnt and ARID1A gene expression combination",
+                              "Promoter methylation combination",
+                              "14 biomarker combination ",
+                              "Notch gene expression combination",
+                              "HOX promoter methylation combination",
+                              "Serum CA125 status")
+
+gt_tablexEN <- results_rocxEN %>%
+  gt() %>%
+  tab_header(
+    title = "ROC metrics",
+    subtitle = "Separation of HGSOC from other ovarian cancer",
+  ) %>%
+  fmt_number(
+    columns = everything(),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Predictor))
+  )
+#show
+gt_tablexEN
+
+
+#there is no other convieneat way to save gt outputs
+gtsave(gt_tablexEN,vwidth = 500,
+       filename = "metexprs_table_HGSOC_OTHERS_MODELS_outputEN20251215.png")
+
+#Combine the images
+roc_image2EN<- image_read("metexprs_roc_HGSOC_OTHERS_MODELS_outputEN20251215.png")
+table_image2EN <- image_read("metexprs_table_HGSOC_OTHERS_MODELS_outputEN20251215.png")
+
+# Now append vertically
+combined_image2EN <- image_append(c(roc_image2EN, table_image2EN), stack = F)
+
+# Save the combined image
+image_write(combined_image2EN, 
+            "metexprs_tableroc_HGSOC_OTHERS_MODELS_outputEN20251215.png")
 
 #save objects####################################################
 # Save the list

@@ -12,6 +12,7 @@ library(reshape2)
 library(rstatix) 
 library(ggprism)
 library(gridExtra)
+
 #DATA - FROM THE PUBLICATION MET_EXPRS
 KN_data <- readRDS("C:/Users/Ieva/rprojects/OTHER DATA/KN-DISSERTATION FILES/KN_data1114_essential.rds")
 colnames(KN_data)
@@ -26,7 +27,7 @@ KN_data$tumor <- recode(KN_data$tumor, OvCa = "OC", Benign ="Benign")
 
 #EXPR BOXPLOT OVca##############################################
 #melt table for expression
-tumor_table <- melt(KN_data, id.vars="tumor",  measure.vars=raiska)
+tumor_table <- reshape2::melt(KN_data, id.vars="tumor",  measure.vars=raiska)
 tumor_table <- tumor_table %>%
   mutate(tumor = recode(tumor, "OC" = "KV", "Benign" = 
                           "Gerybiniai")) 
@@ -63,7 +64,9 @@ tumor_plot <- ggplot(tumor_table, aes(x=tumor, y=value, fill = variable)) +
   geom_jitter(aes(color = tumor), size=2, alpha=0.5) +
   ylab(label = expression("Santykinė raiška, normalizuota pagal  " * italic("GAPDH"))) + 
   facet_wrap(.~ variable, nrow = 2, scales = "free") +
-  add_pvalue(each.vs.ref_sig_tumor, label = "p.adj_custom") + #pvalue
+  add_pvalue(each.vs.ref_sig_tumor,
+             label = "p.adj_custom",
+             size = 10) + #pvalue
   theme_minimal()+
   theme(
     strip.text.x = element_text(
@@ -86,7 +89,7 @@ tumor_plot #
 #set directory for saving
 setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
 #save
-png("met_exprs_boxplot_OVca_output1020.png", width = 3000, height = 2700, res = 400) # width and height in pixels, resolution in dpi
+png("met_exprs_boxplot_OVca_output1020.png", width = 3000, height = 2700, res = 450) # width and height in pixels, resolution in dpi
 tumor_plot #
 dev.off() # Close the PNG device
 
@@ -132,7 +135,7 @@ mean_expression_tumor2#biger values
 
 #EXPR BOXPLOT 3 groups ########################
 #melt table for expression
-HOB_table <- melt(KN_data, id.vars="Grupė_Ieva",  measure.vars=raiska)
+HOB_table <- reshape2::melt(KN_data, id.vars="Grupė_Ieva",  measure.vars=raiska)
 
 HOB_table <- HOB_table %>%
   mutate(tumor = recode(Grupė_Ieva, "Other" = "Kiti KV", "Benign" = 
@@ -195,11 +198,13 @@ HOB_x <- ggplot(HOB_table, aes(x=tumor , y=value, fill = variable)) +
   geom_jitter(aes(color = tumor ), size=2, alpha=0.5) +
   ylab(label = expression("Santykinė raiška, normalizuota pagal " * italic("  GAPDH"))) + 
   facet_wrap(.~ variable, nrow = 2, scales = "free") +
-  add_pvalue(each.vs.ref_sig_HOB, label = "p.adj_custom") + #pvalue
+  add_pvalue(each.vs.ref_sig_HOB, 
+             label = "p.adj_custom",
+             size = 12) + #pvalue
   theme_minimal()+
   theme(
     strip.text.x = element_text(
-      size = 11, face = "bold.italic"
+      size = 12, face = "bold.italic"
     ),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
@@ -267,7 +272,7 @@ table(KN_data$Grade2, KN_data$Grupė_Ieva, useNA = "a")
 Grade_data <- KN_data[!is.na(KN_data$Grade2),]
 
 #melt table for expression
-grade_table <- melt(Grade_data, id.vars="Grade2",  measure.vars=raiska)
+grade_table <- reshape2::melt(Grade_data, id.vars="Grade2",  measure.vars=raiska)
 #t test
 stat.test_grade2 <- grade_table %>%
   group_by(variable) %>%
@@ -349,7 +354,7 @@ KN_HGSOC$Grupė_Ieva <- droplevels(KN_HGSOC$Grupė_Ieva)
 table(KN_HGSOC$Grupė_Ieva) #42 left
 table(KN_HGSOC$Stage4, useNA = "a")
 
-stage4_table <- melt(KN_HGSOC, id.vars = "Stage4", measure.vars= raiska)
+stage4_table <- reshape2::melt(KN_HGSOC, id.vars = "Stage4", measure.vars= raiska)
 #wilcox test
 stat.test_stage4_w <- stage4_table %>%
   group_by(variable) %>%
@@ -528,6 +533,62 @@ exp_df5 <- raiska_df5 %>%
 mean_expression_ca125<- exp_df5 %>%
   mutate(fold_change_ca125 = `CA125 increase` / `Norm`) 
 mean_expression_ca125
+#coreliation with CA125 at diagnosis#################
+shapiro_results_CA125 <- KN_data[, c(6, 18:27 )] %>%
+  map(~ shapiro.test(.x)$p.value) 
+shapiro_results_CA125 # notch4, notch1 and ca125 not normal 
+CA125_test <- KN_data[, colnames(KN_data) %in% c(raiska, "CA125")]
+
+results_nn1 <- lapply(KN_data[, colnames(KN_data) %in% raiska], 
+                      function(x) cor.test(x, KN_data$CA125, method = "spearman"))
+results_nn1
+
+
+# Spearman results (nn)
+df_spearman1 <- data.frame(
+  variable = names(results_nn1),
+  R = sapply(results_nn1, function(x) if (is.list(x)) x$estimate else NA),
+  p_value = sapply(results_nn1, function(x) if (is.list(x)) x$p.value else NA),
+  method = "Spearman"
+)
+
+
+##plot ca125 corr #######################
+# Create the plot list
+plot_list1 <- lapply(df_spearman1$variable, function(gene) {
+  method <- df_spearman1$method[df_spearman1$variable == gene]
+  r_val <- round(df_spearman1$R[df_spearman1$variable == gene], 2)
+  p_val <- signif(df_spearman1$p_value[df_spearman1$variable == gene], 2)
+  
+  ggplot(CA125_test, aes_string(x = "CA125", y = gene)) +
+    geom_point(color = "steelblue") +
+    geom_smooth(method = "lm", se = FALSE, color = "darkred") +
+    labs(
+      #title = bquote("CA125 koncentracija vs"~italic(.(gene))),
+      subtitle = paste0( 
+        "  R = ", r_val, 
+        " | p = ", p_val),
+      x = "CA125 U/ml",
+      y = bquote("Raiška"~italic(.(gene)))
+    ) +
+    theme_minimal() +
+    theme(plot.subtitle = element_text(size = 10, face = "italic", color = "gray30"))
+})
+# Show plots one by one (optional)
+for (p in plot_list1) print(p)
+
+# Combine into one figure
+combined_plot1 <- wrap_plots(plot_list1, ncol = 2) +
+  plot_annotation(title = "Koreliacija tarp CA125 koncentracijos ir genų raiškos")
+combined_plot1
+
+
+
+png("notchgenests_CA125_20251222.png"
+    , width = 3000, height = 5000, res = 300) # width and height in pixels, resolution in dpi
+combined_plot1
+dev.off() # 
+
 
 #EXPR age test########################
 shapiro_results <- lapply(KN_data[,colnames(KN_data)%in% c(raiska, "Amžius")], shapiro.test)
@@ -588,4 +649,229 @@ corr_plot <- ggplot(plot_df, aes(x = Amžius, y = value)) +
 #SAVE PNG 
 png("met_exprs_CORELATION_age_output0530.png", width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
 corr_plot #
+dev.off() # Close the PNG device
+
+# ENGLISH PLOTS #############
+## EN OC boxplot ##############
+tumor_tableEN <- tumor_table %>%
+  mutate(tumor = recode(tumor, "KV" = "OC", "Gerybiniai" = 
+                          "Benign")) 
+
+each.vs.ref_sig_tumorEN <- tibble::tribble(
+  ~group1, ~group2, ~p.adj,   ~y.position, ~variable,
+  "Benign",   "OC", 0.013, -5, "NOTCH1", 
+  "Benign",   "OC", 0.000238,  -2, "NOTCH2",
+  "Benign",   "OC", 0.026,  -2, "NOTCH3",
+  "Benign",   "OC", 0.000426, -3, "NOTCH4",
+  "Benign",   "OC", 0.059, -2, "ARID1A",
+  "Benign",   "OC", 0.0000201, 0, "CTNNB1",
+  "Benign",   "OC", 0.000176, -4, "FBXW7",
+  # "Benign",   "OC", 0.842, -4, "JAG2",
+  "Benign",   "OC", 0.00044, -5, "DLL1",
+  "Benign",   "OC", 0.002, -2, "HES1",
+)
+# iki 3 skaiciu po kablelio numazinimas
+each.vs.ref_sig_tumorEN$p.adj_custom <- ifelse(each.vs.ref_sig_tumorEN$p.adj < 0.001, 
+                                               "p < 0.001", 
+                                               paste0("p = ", sprintf("%.3f",
+                                                                      each.vs.ref_sig_tumorEN$p.adj)))
+#plot
+custom_colorsEN <- c("OC" = "#cf5784", "Benign" = "#929cef")
+tumor_plotEN <- ggplot(tumor_tableEN, aes(x=tumor, y=value, fill = variable)) +
+  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = tumor)) +
+  geom_jitter(aes(color = tumor), size=2, alpha=0.5) +
+  ylab(label = expression("Relative expression, normalized to " * italic("GAPDH"))) + 
+  facet_wrap(.~ variable, nrow = 2, scales = "free") +
+  add_pvalue(each.vs.ref_sig_tumorEN, label = "p.adj_custom") + #pvalue
+  theme_minimal()+
+  theme(
+    strip.text.x = element_text(
+      size = 12, face = "bold.italic"
+    ),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5))+
+  labs(x=NULL)+
+  stat_boxplot(geom ='errorbar')+
+  #labs(tag = "A")+ 
+  scale_fill_manual(values = custom_colorsEN) +
+  scale_color_manual(values = custom_colorsEN) +
+  scale_y_continuous(labels = function(x) gsub("-", "\u2212", x))+
+  scale_y_continuous(labels = function(x) 
+    gsub("-", "\u2212", as.character(x))) #add long "-" signs
+
+tumor_plotEN #
+
+#SAVE PNG
+png("met_exprs_boxplot_2groups_ENoutput20251212.png",
+    width = 4200, height = 3000, res = 400) # width and height in pixels, resolution in dpi
+tumor_plotEN #
+dev.off() # Close the PNG device
+
+
+# EN 3 groups ################################
+HOB_tableEN <- HOB_table %>%
+  mutate(tumor = recode(Grupė_Ieva, "Other" = "Other OC")) 
+
+
+#fill in the values
+each.vs.ref_sig_HOB_EN <-  tibble::tribble(
+  ~group1, ~group2, ~p.adj,   ~y.position, ~variable,
+  "Benign",   "HGSOC",    0.036, -5, "NOTCH1",
+  "Benign",   "HGSOC",    0.000333,  -2, "NOTCH2",
+  "Benign",   "HGSOC", 0.0000852, -3, "NOTCH4", 
+  "Benign",   "HGSOC", 0.000000522, -0.5, "CTNNB1",
+  "Benign",   "HGSOC",0.00000357, -4, "FBXW7",
+  "Benign",   "HGSOC", 0.0000852, -4, "DLL1",
+  "Benign",   "HGSOC",0.00000357, -3, "HES1",
+  "Other OC",   "HGSOC", 0.02, -5, "DLL1",
+  "Other OC",   "HGSOC",0.000214, -2, "HES1",
+  "Other OC",   "Benign", 0.002,  -1, "NOTCH2",
+  "Other OC",   "Benign", 0.002, 0, "CTNNB1"
+)
+
+# iki 3 skaiciu po kablelio numazinimas
+each.vs.ref_sig_HOB_EN$p.adj_custom <- ifelse(each.vs.ref_sig_HOB_EN$p.adj < 0.001, 
+                                              "p < 0.001", 
+                                              paste0("p = ", sprintf("%.3f", each.vs.ref_sig_HOB_EN$p.adj)))
+custom_colors_ENN <- c("HGSOC" = "#cf5784","Other OC" = "pink", "Benign" = "#929cef") 
+HOB_x_EN <- ggplot(HOB_tableEN, aes(x=tumor , y=value, fill = variable)) +
+  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = tumor )) +
+  geom_jitter(aes(color = tumor ), size=2, alpha=0.5) +
+  ylab(label = expression("Relative expression, normalized to " * italic("GAPDH"))) + 
+  facet_wrap(.~ variable, nrow = 2, scales = "free") +
+  add_pvalue(each.vs.ref_sig_HOB_EN, label = "p.adj_custom") + #pvalue
+  theme_minimal()+
+  theme(
+    strip.text.x = element_text(
+      size = 11, face = "bold.italic"
+    ),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5))+
+  labs(x=NULL)+
+  stat_boxplot(geom ='errorbar')+
+  scale_fill_manual(values = custom_colors_ENN) +
+  scale_color_manual(values = custom_colors_ENN) +
+  scale_y_continuous(labels = function(x) 
+    gsub("-", "\u2212", as.character(x))) #add long "-" signs
+
+HOB_x_EN
+
+
+#SAVE PNG
+png("met_exprs_boxplot_3groups_ENoutput20251212.png",
+    width = 4200, height = 3000, res = 400) # width and height in pixels, resolution in dpi
+HOB_x_EN #
+dev.off() # Close the PNG device
+
+#EN grade #####################################
+#plot
+custom_colors <- c("G3" = "#CF5784", "G1" = "#929cef", "NA" = "grey")
+grade_plotEN <- ggplot(grade_table, aes(x=Grade2, y=value, fill = variable)) +
+  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = Grade2)) +
+  geom_jitter(aes(color = Grade2), size=2, alpha=0.5) +
+  ylab(label = expression("Relative expression, normalized to " * italic("GAPDH"))) + 
+  facet_wrap(.~ variable, nrow = 2, scales = "free") +
+  add_pvalue(each.vs.ref_sig_grade, label = "p.adj_custom") + #pvalue
+  theme_minimal()+
+  theme(
+    strip.text.x = element_text(
+      size = 12, face = "bold.italic"
+    ),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5))+
+  labs(x=NULL)+
+  stat_boxplot(geom ='errorbar')+
+  #labs(tag = "A")+ 
+  scale_fill_manual(values = custom_colors) +
+  scale_color_manual(values = custom_colors) +
+  scale_y_continuous(labels = function(x) 
+    gsub("-", "\u2212", as.character(x))) #add long "-" signs
+
+grade_plotEN
+
+#SAVE PNG
+png("met_exprs_boxplot_grade_ENoutput20251212.png",
+    width = 4200, height = 3000, res = 400) # width and height in pixels, resolution in dpi
+grade_plotEN #
+dev.off() # Close the PNG device
+
+# EN HGSOC STAGE #####################################
+#plot
+custom_colors <- c("IV" = "#cf5784","III" = "pink", "II" = "#929cef")
+stage4_plotEN <- ggplot(stage4_table, aes(x=Stage4, y=value, fill = variable)) +
+  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = Stage4)) +
+  geom_jitter(aes(color = Stage4), size=2, alpha=0.5) +
+  ylab(label = expression("Relative expression, normalized to " * italic("GAPDH"))) + 
+  facet_wrap(.~ variable, nrow = 2, scales = "free") +
+  add_pvalue(each.vs.ref_sig_stage4, label = "p.adj_custom") + #pvalue
+  theme_minimal()+
+  xlab("") +
+  theme(
+    strip.text.x = element_text(
+      size = 12, face = "bold.italic"
+    ),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5))+
+  #labs(x=NULL, title ="Gene expression in relation to FIGO stage in HGSOC")+
+  stat_boxplot(geom ='errorbar')+
+  scale_fill_manual(values = custom_colors) +
+  scale_color_manual(values = custom_colors) +
+  scale_y_continuous(labels = function(x) 
+    gsub("-", "\u2212", as.character(x))) #add long "-" signs
+
+stage4_plotEN #
+
+#SAVE PNG
+png("met_exprs_boxplot_HSGOC_STAGE_ENoutput20251212.png",
+    width = 4200, height = 3000, res = 400) # width and height in pixels, resolution in dpi
+stage4_plotEN #
+dev.off() # Close the PNG device
+
+#EN  CA125 ###########################
+ca_tableEN <- melt(KN_data, id.vars="CA125_f",  measure.vars=raiska)
+ca_tableEN <- ca_tableEN %>%
+  drop_na()
+each.vs.ref_sig_caEN <- tibble::tribble(
+  ~group1, ~group2, ~p.adj,   ~y.position, ~variable,
+  "Norm",   "CA125 increase",0.042,  -1, "NOTCH2",
+  "Norm",   "CA125 increase",0.0494, -2, "NOTCH3",
+  "Norm",   "CA125 increase",0.016, -4, "NOTCH4", 
+  "Norm",   "CA125 increase",0.029, -0.5, "CTNNB1", #not normal
+  "Norm",   "CA125 increase",0.023, -4, "FBXW7",
+  "Norm",   "CA125 increase",0.031, -1.5, "HES1"
+)
+
+# 3 digtits over the dot
+each.vs.ref_sig_caEN$p.adj_custom <- ifelse(each.vs.ref_sig_caEN$p.adj < 0.001, 
+                                            "p < 0.001", 
+                                            paste0("p = ", sprintf("%.3f", 
+                                                                   each.vs.ref_sig_caEN$p.adj)))
+custom_colors4EN <- c("Norm" = "#929cef", "CA125 increase" = "#cf5784")
+ca_expr_plotEN <- ggplot(ca_tableEN, aes(x=CA125_f, y=value)) +
+  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = CA125_f)) +
+  geom_jitter(aes(color = CA125_f), size=2, alpha=0.5) +
+  ylab(label = expression("Relative expression, normalized to " * italic("GAPDH"))) + 
+  facet_wrap(.~ variable, nrow = 2, scales = "free") +
+  add_pvalue(each.vs.ref_sig_caEN, label = "p.adj_custom") + #pvalue
+  theme_minimal()+
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1), #turn
+    strip.text.x = element_text(
+      size = 12, face = "bold.italic"
+    ),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5))+
+  labs(x=NULL)+
+  stat_boxplot(geom ='errorbar')+
+  scale_colour_manual(values = custom_colors4EN)+
+  scale_fill_manual(values = custom_colors4EN)+
+  scale_y_continuous(labels = function(x) 
+    gsub("-", "\u2212", as.character(x))) #add long "-" signs
+
+ca_expr_plotEN
+
+#SAVE PNG 
+png("met_exprs_BOXPLOT__ca125_ENoutput20251212.png",
+    width = 3000, height = 2300, res = 300) 
+ca_expr_plotEN #
 dev.off() # Close the PNG device

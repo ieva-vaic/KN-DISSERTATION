@@ -43,7 +43,7 @@ clinical2$CA125_status_post_op <-replace(clinical2$CA125_status_post_op,
                                         is.na(clinical2$CA125_status_post_op), "NA" )
 
 #get survival data as of 2025-09-11
-SURVIVAL_KN <- openxlsx::read.xlsx("../../OTHER DATA/KN-DISSERTATION FILES/KN_MIRTIES_FAILAS_20250911.xlsx")
+SURVIVAL_KN <- openxlsx::read.xlsx("C:/Users/Ieva/rprojects/OTHER DATA/KN-DISSERTATION FILES/KN_MIRTIES_FAILAS_20250911.xlsx")
 #make only surv df
 SURV <- SURVIVAL_KN[, c(2, 3,20, 21)]
 head(SURV)
@@ -113,12 +113,12 @@ order_hist <- c( "Riziką mažinanti operacija", "Mioma",  "Cista", "Endometrioz
                  "Granuloza", "Mucininis", "Šviesių lastelių", "Serozinis", "HGSOC" )
 merged_df$Histology <- factor(merged_df$Histology, levels = order_hist)
 merged_df <- merged_df[order(merged_df$Histology, merged_df$Tumor), ]
-order_list <- merged_df$KN
+#order_list <- merged_df$KN
 #final heatmap
 heatmap_raiska <- Heatmap(as.matrix(Heat_data),cluster_columns = TRUE,
                           name = "Santykinė genų raiška",  
                           right_annotation = row_ha, col = col_fun, 
-                          row_order = order_list,
+                          #row_order = order_list,
                           row_split = clinical$Tumor, 
                           column_names_gp = gpar(fontface = "italic"),
                           column_title = "Santykinė genų raiška", 
