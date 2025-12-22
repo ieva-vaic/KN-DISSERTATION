@@ -15,6 +15,9 @@ gtex_counts_train <- readRDS("train_gtcga_normcounts_prot_2025.RDS")
 gtex_genes <- readRDS("gtcga_elastic_2025.RDS") #only the genes left after lasso
 gtex_filtered_counts_train <- gtex_counts_train[colnames(gtex_counts_train) %in% gtex_genes] 
 dim(gtex_filtered_counts_train) #489 samples
+#get the rank 
+res_coef_gtex_R <- readRDS("C:/Users/Ieva/rprojects/TCGA-OV-RISK-PROJECT/Public data RDSs/elastic_net_model_gtex_2025.RDS" )
+RANK <- names(res_coef_gtex_R)
 #get TCGA df
 gtex_filtered_counts_train2 <- as.data.frame(t(gtex_filtered_counts_train))
 gtex_filtered_counts_train2 <- gtex_filtered_counts_train2 %>%  dplyr::select(starts_with("TCGA")) 
@@ -136,7 +139,9 @@ heatmap_tcga <- Heatmap(as.matrix(gtex_filtered_counts_train),
                         row_names_gp = gpar(fontsize = 2), # 
                         heatmap_legend_param = list(title = "Gene Expression"),
                         right_annotation = row_ha,
-                        cluster_rows = F)
+                        cluster_rows = F,
+                        cluster_columns = F,
+                        column_order = RANK)
 
 #save tcga heatmap
 png("C:/Users/Ieva/rprojects/outputs_all/DISS/gtextcga_heatmap2025-04-010.png",
@@ -205,7 +210,7 @@ pheno_best$AGE2 <- ifelse(!is.na(pheno_best$AGE),
 pheno_best$AGE2 <- factor(pheno_best$AGE2, levels = levels(pheno_best$AGE))
 pheno_best$AGE2
 #SAVE
-write.csv(pheno_best, "C:/Users/Ieva/rprojects/outputs_all/DISS/pheno_best202520619.csv")
+#write.csv(pheno_best, "C:/Users/Ieva/rprojects/outputs_all/DISS/pheno_best202520619.csv")
 
 #CREATE HEATMAP CLINICAL DATA FEATURES with GTEX AGE######################
 row_ha2 = rowAnnotation(Race  = pheno_best$race, 
@@ -363,9 +368,11 @@ heatmap_tcga4 <- Heatmap(as.matrix(gtex_filtered_counts_train),
                          row_names_gp = gpar(fontsize = 2), # 
                          heatmap_legend_param = list(title = "Genų raiška"),
                          right_annotation = row_ha2,
-                         cluster_rows = F)
+                         cluster_rows = F,
+                         cluster_columns = F,
+                         column_order = RANK)
 #save lithuanian heatmap
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/big_elastic_net_heatmap20250617.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/big_elastic_net_heatmap20251208.png",
     width = 7000, height = 3000, res = 350) 
 heatmap_tcga4 
 dev.off()
@@ -375,3 +382,9 @@ pheno_best$id <-  substr(trimws(pheno_best$barcode), 1, 4)
 
 table(pheno_best$AGE2, pheno_best$id, useNA = "a")
 table(pheno_best$id, useNA = "a")
+
+#BONUS: chek if my other genes are in the 214 gene list
+full214 <- rownames(gtex_filtered_counts_train2)
+expression <- c("EXO1", "RAD50","PPT2", "LUC7L2","PKP3", "CDCA5","ZFPL1","VPS33B", "GRB7","TCEAL4", 
+                "NOTCH1", "NOTCH2", "NOTCH3", "NOTCH4", "ARID1A", "CTNNB1", "FBXW7", "JAG2", "DLL1", "HES1")
+expression[expression %in% full214] #not in the list

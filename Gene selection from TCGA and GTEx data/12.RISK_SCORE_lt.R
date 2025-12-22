@@ -26,7 +26,7 @@ library(multcomp)
 library(FSA)
 library(cowplot)
 #set directory of the data
-setwd("../TCGA-OV-RISK-PROJECT/Public data RDSs/")
+setwd("C:/Users/Ieva/rprojects/TCGA-OV-RISK-PROJECT/Public data RDSs/")
 # Load train data ###################################
 gtex_counts_train <- readRDS("train_gtcga_normcounts_prot_2025.RDS")
 #filter for lasso genes
@@ -408,7 +408,7 @@ target_time <- 1825   # choose year 5
 time_index <- which(rez_list2[[1]]$times == target_time)
 
 # plot with save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20251124.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20251215.png",
     width = 1000, height = 1000, res = 200)
 
 par(pty="s")
@@ -779,7 +779,7 @@ t.test_gtex <- gtcga_table_full %>%
 t.test_gtex
 #make a tibble of p values: ~group1, ~group2, ~p.adj,   ~y.position, ~variable
 t.test_gtex_tibble <- t.test_gtex %>% 
-  select(group1, group2, p, variable) %>%
+  dplyr::select(group1, group2, p, variable) %>%
   mutate(
     y.position = c(6, 8, 8, 9, 10, 
                    8, 6, 6, 12, 12) #choose where to plot p values
@@ -947,7 +947,11 @@ t.train_stage_tibble <-  tibble::tribble(
     ~group1, ~group2, ~p,   ~y.position, ~variable,
     "II stadija",   "IV stadija", 0.0661, 6, "EXO1", #dunn
   )
-
+#set order
+stage_table_train_full$variable <- factor(
+  stage_table_train_full$variable,
+  levels = expression
+)
 #get colors 
 custom_colors_stage <- c("I stadija" = "turquoise","II stadija" = "lightblue",
                          "III stadija" = "blue", "IV stadija"= "darkblue") 
@@ -956,7 +960,7 @@ stage_plot <- ggplot(stage_table_train_full, aes(x=clinicalstage2 , y=value, fil
   geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = clinicalstage2 )) +
   geom_jitter(aes(color = clinicalstage2 ), size=1, alpha=0.5) +
   ylab(label = expression("Genų raiška")) + 
-  facet_wrap(.~ variable, nrow = 2, scales = "free") +
+  facet_wrap(.~ factor(variable), nrow = 2, scales = "free") +
   add_pvalue(t.train_stage_tibble, label = "p") + #pvalue
   theme_minimal()+
   theme(
@@ -969,14 +973,14 @@ stage_plot <- ggplot(stage_table_train_full, aes(x=clinicalstage2 , y=value, fil
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_stage) +
   scale_color_manual(values = custom_colors_stage) +
-  ggtitle("Genų raiškos koreliacija su stadija mokymosi imtyje")
+  ggtitle("Genų raiška pagal stadiją mokymosi imtyje")
 
 stage_plot2 <- ggdraw(stage_plot) +
   draw_plot_label(label = "A", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
 
 stage_plot2
 #save stage plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_stage_barplot_20250925.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_stage_barplot_20251211.png",
     width = 2200, height = 1300, res = 180) # width and height in pixels, resolution in dpi
 stage_plot2 #
 dev.off() # Close the PNG device
@@ -1029,7 +1033,7 @@ grade_plot <- ggplot(grade_table_full, aes(x=grade , y=value, fill = variable)) 
   geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = grade )) +
   geom_jitter(aes(color = grade ), size=1, alpha=0.5) +
   ylab(label = expression("Genų raiška")) + 
-  facet_wrap(.~ variable, nrow = 2, scales = "free") +
+  facet_wrap(.~ factor(variable), nrow = 2, scales = "free") +
   add_pvalue(t.train_grade_tibble, label = "p") + #pvalue
   theme_minimal()+
   theme(
@@ -1042,15 +1046,15 @@ grade_plot <- ggplot(grade_table_full, aes(x=grade , y=value, fill = variable)) 
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_stage) +
   scale_color_manual(values = custom_colors_stage) +
-  ggtitle("Genų raiškos koreliacija su naviko diferenciacijos laipsniu mokymosi imtyje")
+  ggtitle("Genų raiškoa pagal naviko diferenciacijos laipsnį mokymosi imtyje")
 
 grade_plot
 
 grade_plot2 <- ggdraw(grade_plot) +
-  draw_plot_label(label = "B", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
+  draw_plot_label(label = "A", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
 
 #save grade plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_grade_barplot_20251001.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_grade_barplot_20251211.png",
     width = 2200, height = 1300, res = 200) 
 grade_plot2 
 dev.off() 
@@ -1134,7 +1138,7 @@ lymph_plot <- ggplot(lymph_table_full, aes(x=lymphaticinvasion , y=value, fill =
   geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = lymphaticinvasion )) +
   geom_jitter(aes(color = lymphaticinvasion ), size=1, alpha=0.5) +
   ylab(label = expression("Genų raiška")) + 
-  facet_wrap(.~ variable, nrow = 2, scales = "free") +
+  facet_wrap(.~ factor(variable), nrow = 2, scales = "free") +
   add_pvalue(t.train_lymph_tibble, label = "p") + #pvalue
   theme_minimal()+
   theme(
@@ -1147,7 +1151,7 @@ lymph_plot <- ggplot(lymph_table_full, aes(x=lymphaticinvasion , y=value, fill =
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_lymph) +
   scale_color_manual(values = custom_colors_lymph) +
-  ggtitle("Genų raiškos koreliacija su invazija į limfmazgius mokymosi imtyje")
+  ggtitle("Genų raiška pagal invaziją į limfmazgius mokymosi imtyje")
 
 lymph_plot
 
@@ -1156,7 +1160,7 @@ lymph_plot2 <- ggdraw(lymph_plot) +
 
 lymph_plot2
 #save lymphovascular invasion plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_lymph_barplot_20251001.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_lymph_barplot_20251211.png",
     width = 2450, height = 1300, res = 200) # width and height in pixels, resolution in dpi
 lymph_plot2 #
 dev.off() # Close the PNG device
@@ -1275,7 +1279,7 @@ res_plot <- ggplot(residual_table_full, aes(x=tumorresidualdisease , y=value, fi
   geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = tumorresidualdisease )) +
   geom_jitter(aes(color = tumorresidualdisease ), size=1, alpha=0.5) +
   ylab(label = expression("Genų raiška")) + 
-  facet_wrap(.~ variable, nrow = 2, scales = "free") +
+  facet_wrap(.~ factor(variable), nrow = 2, scales = "free") +
   add_pvalue(t.train_res_tibble, label = "p") + #pvalue
   theme_minimal()+
   theme(
@@ -1289,16 +1293,16 @@ res_plot <- ggplot(residual_table_full, aes(x=tumorresidualdisease , y=value, fi
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_res) +
   scale_color_manual(values = custom_colors_res) +
-  ggtitle("Genų raiškos koreliacija su likutiniu naviku mokymosi imtyje")
+  ggtitle("Genų raiška pagal likutinį naviką mokymosi imtyje")
 
 res_plot
 
 res_plot2 <- ggdraw(res_plot) +
-  draw_plot_label(label = "B", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
+  draw_plot_label(label = "A", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
 
 res_plot2
 #save residual tumor plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_res_barplot_20251001.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_res_barplot_20251211.png",
     width = 2450, height = 1300, res = 170) # width and height in pixels, resolution in dpi
 res_plot2 #
 dev.off() # Close the PNG device
@@ -1310,7 +1314,7 @@ target_time <- 1825   # choose year 5
 time_index <- which(rez_list2[[1]]$times == target_time)
 
 # plot with save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20251023EN.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20251215EN.png",
     width = 1000, height = 1000, res = 200)
 
 par(pty="s")
@@ -1367,7 +1371,7 @@ legend(
 )
 
 # Add panel label
-mtext("A", side = 3, line = 2.5, adj = -0.2, font = 2, cex = 1.5)
+#mtext("A", side = 3, line = 2.5, adj = -0.2, font = 2, cex = 1.5)
 
 dev.off()
 
@@ -1421,7 +1425,7 @@ roc_table_display <- sens_spec_auc_60_all %>%
 gt_table_roc_60 <- roc_table_display %>%
   gt() %>%
   tab_header(
-    title = "ROC criteria",
+    title = "ROC metrics",
     subtitle = "Prognostic criteria for 5 year survival"
   ) %>%
   fmt_number(
@@ -1441,11 +1445,63 @@ gtsave(gt_table_roc_60,
        filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_timeroc_table_20250925EN.png")
 
 #Combine the images
-roc_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20251023EN.png")
+roc_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20251215EN.png")
 table_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_timeroc_table_20250925EN.png")
 
 combined_image <- image_append(c(roc_image, table_image), stack = F)
 
 # Save the combined image
 image_write(combined_image, 
-            "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_ROC_W_TABLE20251023EN.png")
+            "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_ROC_W_TABLE20251215EN.png")
+#EN plot GTEX vs TCGA ##########################
+gtex_plotEN <- ggplot(gtcga_table_full, aes(x=group , y=value, fill = variable)) +
+  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = group )) +
+  geom_jitter(aes(color = group ), size=1, alpha=0.5) +
+  ylab(label = expression("Gene expression")) + 
+  facet_wrap(.~ variable, nrow = 2, scales = "free") +
+  add_pvalue(t.test_gtex_tibble, label = "p_custom") + #pvalue
+  theme_minimal()+
+  theme(
+    strip.text.x = element_text(
+      size = 12, face = "bold.italic"
+    ),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5))+
+  labs(x=NULL)+
+  stat_boxplot(geom ='errorbar')+
+  scale_fill_manual(values = custom_colors) +
+  scale_color_manual(values = custom_colors) +
+  ggtitle("Gene expression in train cohort")
+
+gtex_plotEN
+
+#save
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_EN20251216.png",
+    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
+gtex_plotEN #
+dev.off() # Close the PNG device
+
+#EN KM train plot ##########################
+# Plot
+train_survEN <- ggsurvplot(
+  km_fit, 
+  data = clin_df_joined, 
+  pval = T,  # disable built-in
+  risk.table = TRUE,
+ # risk.table.title = "Pacienčių skaičius rizikos grupėje",
+  title = "Survival analysis in train cohort",
+  xlab = "Overall survival, days",
+ # ylab = "Išgyvenamumo tikimybė",
+  palette = c("turquoise", "deeppink"),
+ # legend.title = "Rizikos grupė", 
+  legend.labs = c("Low risk score", "High risk score")
+)
+
+# Add subtitle
+#train_survEN$plot <- train_survEN$plot + labs(subtitle = pval_text)
+print(train_survEN)
+#save
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_KM_risk_score_EN20251216.png",
+    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
+train_survEN #
+dev.off() # Close the PNG device
