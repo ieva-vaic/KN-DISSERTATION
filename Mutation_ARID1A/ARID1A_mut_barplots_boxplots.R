@@ -63,12 +63,12 @@ ARID1A_df$Histology <- ifelse(ARID1A_df$Histology == "Granuloza", "Granulosa",
                               ARID1A_df$Histology )
 ARID1A_df$Histology <- factor(ARID1A_df$Histology)
 #rename arid1a VUS
-ARID1A_df_mut$ARID1A_tumor_VUS[is.na(ARID1A_df_mut$ARID1A_tumor_VUS)] <- "Be mutaciju"
-ARID1A_df_mut$ARID1A_tumor_VUS <- ifelse(ARID1A_df_mut$ARID1A_tumor_VUS == "Pathogenic", "Patogeninė, VUS",
-                                         ARID1A_df_mut$ARID1A_tumor_VUS )
-ARID1A_df_mut$ARID1A_tumor_VUS <- ifelse(ARID1A_df_mut$ARID1A_tumor_VUS == "VUS, benign", "Gerybinė, VUS",
-                                         ARID1A_df_mut$ARID1A_tumor_VUS )
-ARID1A_df_mut$ARID1A_tumor_VUS
+ARID1A_df$ARID1A_tumor_VUS[is.na(ARID1A_df$ARID1A_tumor_VUS)] <- "Be mutaciju"
+ARID1A_df$ARID1A_tumor_VUS <- ifelse(ARID1A_df$ARID1A_tumor_VUS == "Pathogenic", "Patogeninė, VUS",
+                                     ARID1A_df$ARID1A_tumor_VUS )
+ARID1A_df$ARID1A_tumor_VUS <- ifelse(ARID1A_df$ARID1A_tumor_VUS == "VUS, benign", "Gerybinė, VUS",
+                                         ARID1A_df$ARID1A_tumor_VUS )
+ARID1A_df$ARID1A_tumor_VUS
 
 #Methylation vs expression ARID1A ##########################
 shapiro.test(ARID1A_df$ARID1A)
@@ -110,10 +110,56 @@ geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = ARID1A_met )) +
     gsub("-", "\u2212", as.character(x))) #add long "-" signs
 ARID1A_met
 #save plot
-png("ARID1A_MET_RAISKA_BOXPLOT_20250715.png", width = 500, height = 700,
-    res =  100, units = "px", pointsize = 12) # width and height in pixels, resolution in dpi
+png("ARID1A_MET_RAISKA_BOXPLOT_20251009.png", width = 400, height = 400,
+    res =  100, units = "px", pointsize = 14) # width and height in pixels, resolution in dpi
 ARID1A_met
 dev.off()
+
+##EN Methylation vs expression ARID1A ##########################
+p_df <- data.frame(
+  group1 = "Not methylated",
+  group2 = "Methylated",
+  y.position = max(ARID1A_df$ARID1A, na.rm = TRUE) + 0.5,
+  p.value = formatted_p,
+  inherit.aes = FALSE
+)
+ARID1A_dfEN <- ARID1A_df %>%
+  mutate(ARID1A_met = recode(ARID1A_met,
+                             "Nemetilintas" = "Not methylated",
+                             "Metilintas"   = "Methylated"))
+
+custom_gray_colorsEN = c("Methylated" = "lightpink", "Not methylated" = "lightblue4")
+ARID1A_metEN <- ggplot(ARID1A_dfEN, aes(x = ARID1A_met, y = ARID1A, fill = ARID1A_met))+
+  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = ARID1A_met )) +
+  geom_jitter(aes(color = ARID1A_met ), size=1, alpha=0.5) +
+  stat_pvalue_manual(p_df, label = "p.value",tip.length = 0.01,
+                     inherit.aes = FALSE) +
+  theme_minimal()+
+  theme(
+    strip.text.x = element_text(
+      size = 12, face = "bold.italic"
+    ),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5))+
+  labs(x=NULL)+
+  stat_boxplot(geom ='errorbar')+
+  annotate("text", x = -Inf, y = Inf, label = "A", hjust = -0.5, vjust = 1.5)+
+  scale_fill_manual(values = custom_gray_colorsEN) +
+  scale_color_manual(values = custom_gray_colorsEN)+
+  ggtitle(expression(italic("ARID1A") *" promoter methylation " 
+                     * italic("vs") * " expression"))+
+  ylab(label =
+         expression("Relative "* italic("ARID1A") *" expression, normalized to  " * italic("GAPDH")))+
+  scale_y_continuous(labels = function(x) 
+    gsub("-", "\u2212", as.character(x))) #add long "-" signs
+ARID1A_metEN
+
+#save plot
+png("ARID1A_MET_RAISKA_BOXPLOT_20251212.png", width = 400, height = 400,
+    res =  100, units = "px", pointsize = 14) # width and height in pixels, resolution in dpi
+ARID1A_metEN
+dev.off()
+
 #FC
 raiska_df <- ARID1A_df[, c("ARID1A_met", raiska, "KN")]
 rownames(raiska_df) <- raiska_df$KN
@@ -172,10 +218,55 @@ ARID1A_mut <- ggplot(ARID1A_df_mut, aes(x = ARID1A_tumor_mut, y = ARID1A, fill =
     gsub("-", "\u2212", as.character(x))) #add long "-" signs
 ARID1A_mut
 #save png
-png("ARID1A_MUT_RAISKA_BOXPLOT_20250715.png", width = 500, height = 700,
-    res =  100, units = "px", pointsize = 12) # width and height in pixels, resolution in dpi
+png("ARID1A_MUT_RAISKA_BOXPLOT_20251009.png", width = 400, height = 400,
+    res =  100, units = "px", pointsize = 14) # width and height in pixels, resolution in dpi
 ARID1A_mut# Render the heatmap
 dev.off() # Close the PNG device
+
+### EN mut  vs raiska arid1a##################################
+ARID1A_df_mutEN <- ARID1A_df_mut %>%
+  mutate(ARID1A_tumor_mut = recode(ARID1A_tumor_mut,
+                                   "Be mutacijų" = "No mutations",
+                                   "Mutacija"   = "Mutation"))
+
+p_df2EN <- data.frame(
+    group1 = "No mutations",
+    group2 = "Mutation",
+    y.position = max(ARID1A_df_mutEN$ARID1A, na.rm = TRUE) + 0.5,
+    p.value = formatted_p2
+  )
+custom_gray_colors2EN = c("Mutation" = "lightpink", "No mutations" = "lightblue4")
+ARID1A_mutEN <- ggplot(ARID1A_df_mutEN, aes(x = ARID1A_tumor_mut, y = ARID1A, fill = ARID1A_tumor_mut))+
+  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = ARID1A_tumor_mut )) +
+  geom_jitter(aes(color = ARID1A_tumor_mut ), size=1, alpha=0.5) +
+  theme_minimal()+
+  theme(
+    strip.text.x = element_text(
+      size = 12, face = "bold.italic"
+    ),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5))+
+  labs(x=NULL)+
+  annotate("text", x = -Inf, y = Inf, label = "B", hjust = -0.5, vjust = 1.5)+
+  stat_boxplot(geom ='errorbar')+
+  scale_fill_manual(values = custom_gray_colors2EN) +
+  scale_color_manual(values = custom_gray_colors2EN)+
+  stat_pvalue_manual(p_df2EN, label = "p.value",tip.length = 0.01,
+                     inherit.aes = FALSE) +
+  ggtitle(expression(italic("ARID1A") *" mutations " 
+                     * italic("vs") * " expression"))+
+  ylab(label =
+         expression("Relative "* italic("ARID1A") *" expression, normalized to  " * italic("GAPDH")))+
+  scale_y_continuous(labels = function(x) 
+    gsub("-", "\u2212", as.character(x))) #add long "-" signs
+ARID1A_mutEN
+
+#save png
+png("ARID1A_MUT__RAISKA_BOXPLOT_EN20251212.png", width = 400, height = 400,
+    res =  100, units = "px", pointsize = 14) 
+ARID1A_mutEN# 
+dev.off() 
+
 
 #FC
 raiska_df <- ARID1A_df_mut[, c("ARID1A_tumor_mut", raiska, "KN")]
@@ -194,61 +285,6 @@ mean_expression_tumor2 <- exp_df %>%
   mutate(fold_change_HB = log2(2^`Mutacija` / 2^`Be mutacijų`))
 mean_expression_tumor2#biger values
 
-##ARID1A VUS ANOVA#############################################
-model_Arid1a <- aov(ARID1A ~ ARID1A_tumor_VUS, data = ARID1A_df_mut) 
-summary(model_Arid1a)
-
-ARID1A_mut2 <- ggplot(ARID1A_df_mut, aes(x = ARID1A_tumor_VUS, y = ARID1A, fill = ARID1A_tumor_VUS))+
-  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = ARID1A_tumor_VUS )) +
-  geom_jitter(aes(color = ARID1A_tumor_VUS ), size=1, alpha=0.5) +
-  theme_minimal()+
-  theme(
-    strip.text.x = element_text(
-      size = 12, face = "bold.italic"
-    ),
-    legend.position = "none",
-    plot.title = element_text(hjust = 0.5))+
-  labs(x=NULL)+
-  stat_boxplot(geom ='errorbar')+
-  #annotate("text", x = 1.5, y = max(ARID1A_df_mut$ARID1A) + 0.5, label = p_text2)+
-  ylab(label =
-         expression("Santykinė "* italic("ARID1A") *" raiška, normalizuota pagal  " * italic("GAPDH")))+
-  scale_y_continuous(labels = function(x) 
-    gsub("-", "\u2212", as.character(x))) #add long "-" signs
-ARID1A_mut2
-
-##patogenic mut + methylation ################################
-table(ARID1A_df_mut$ARID1A_met, ARID1A_df_mut$ARID1A_tumor_VUS)
-
-ARID1A_df_mut <- ARID1A_df_mut %>%
-  mutate(met_mut_arid1a = paste(ARID1A_met, ARID1A_tumor_mut, sep = "_"))
-table(ARID1A_df_mut$met_mut_arid1a)
-# Run ANOVA for comparison with gene expression
-model_Arid1a3 <- aov(ARID1A ~ met_mut_arid1a, data = ARID1A_df_mut) 
-summary(model_Arid1a3)
-aovp_value <- summary(model_Arid1a3)[[1]][["Pr(>F)"]][1]
-aovp_value <- sprintf("p = %.3f", aovp_value)
-aovp_value_text <- paste("ANOVA,", aovp_value)
-#plot
-ARID1A_mut4 <- ggplot(ARID1A_df_mut, aes(x = met_mut_arid1a, y = ARID1A, fill = met_mut_arid1a))+
-  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = met_mut_arid1a )) +
-  geom_jitter(aes(color = met_mut_arid1a ), size=1, alpha=0.5) +
-  theme_minimal()+
-  theme(
-    strip.text.x = element_text(
-      size = 12, face = "bold.italic"
-    ),
-    legend.position = "none",
-    plot.title = element_text(hjust = 0.5))+
-  labs(x=NULL)+
-  stat_boxplot(geom ='errorbar')+
-  ggtitle(expression(italic("ARID1A") * " raiškos sąsaja su promotoriaus metilinimo ir mutacijų kombinacijomis"))+
-  annotate("text", x = 1.5, y = max(ARID1A_df_mut$ARID1A) + 0.5, label = aovp_value_text)+
-  ylab(label =
-         expression("Santykinė "* italic("ARID1A") *" raiška, normalizuota pagal  " * italic("GAPDH")))+
-  scale_y_continuous(labels = function(x) 
-    gsub("-", "\u2212", as.character(x))) #add long "-" signs
-ARID1A_mut4
 
 #simplify mut + mutacija #########################################
 table(ARID1A_df_mut$met_mut_arid1a)
@@ -298,8 +334,8 @@ ARID1A_met4 <- ggplot(ARID1A_df_mut, aes(x = arid1a_met_mut2, y = ARID1A, fill =
     gsub("-", "\u2212", as.character(x))) #add long "-" signs
 ARID1A_met4
 #save png
-png("ARID1A_MUT_MET_RAISKA_BOXPLOT_20250715.png", width = 650, height = 700,
-    res =  100, units = "px", pointsize = 12) 
+png("ARID1A_MUT_MET_RAISKA_BOXPLOT_20251009.png", width = 650, height = 400,
+    res =  100, units = "px", pointsize = 14) 
 ARID1A_met4# 
 dev.off() 
 
@@ -320,7 +356,7 @@ mean_expression_tumor2 <- exp_df %>%
   mutate(fold_change_HB = log2(2^`Metilinimas arba mutacija` / 2^`Nemetilintas, Be mutacijų`))
 mean_expression_tumor2
 
-#median values of gene expression#################
+#BOXPLOT mutation vs methyaltion################
 #median arid1a expression
 ARID1A_df_mut <- ARID1A_df_mut %>%
   mutate(ARID1A_expression_group = ifelse(ARID1A > median(ARID1A, na.rm = TRUE), "big", "small"))
@@ -355,7 +391,49 @@ barplot_arid <- ggplot(df, aes(x = Methylation, y = Percent, fill = Mutation)) +
 #show
 barplot_arid
 #save
-png("ARID1A_MUT_met_fishers_20250715.png", width = 500, height = 700,
+png("ARID1A_MUT_met_fishers_20250930.png", width = 700, height = 500,
     res =  100, units = "px", pointsize = 12) # width and height in pixels, resolution in dpi
-ARID1A_mut# Render the heatmap
+barplot_arid# Render the heatmap
+dev.off() # Close the PNG device
+
+
+#EN BOXPLOT MUTATIONS VS METHTLATION#################
+ARID1A_df_mutEN <- ARID1A_df_mutEN %>%
+  mutate(ARID1A_met = recode(ARID1A_met,
+                             "Nemetilintas" = "Not methylated",
+                             "Metilintas"   = "Methylated"))
+#median arid1a expression
+ARID1A_df_mutEN <- ARID1A_df_mutEN %>%
+  mutate(ARID1A_expression_group = ifelse(ARID1A > median(ARID1A, na.rm = TRUE), "big", "small"))
+# Prepare data
+tblEN <- table(ARID1A_df_mutEN$ARID1A_met, ARID1A_df_mutEN$ARID1A_tumor_mut)
+fisher_test <- fisher.test(tblEN)
+dfEN <- as.data.frame(tblEN)
+# Rename columns for clarity
+colnames(dfEN) <- c("Methylation", "Mutation", "Count")
+# Calculate percentages by methylation status 
+dfEN <- dfEN %>%
+  group_by(Methylation) %>%
+  mutate(Percent = Count / sum(Count))
+#plot
+barplot_aridEN <- ggplot(dfEN, aes(x = Methylation, y = Percent, fill = Mutation)) +
+  geom_bar(stat = "identity") +
+  geom_text(aes(label = scales::percent(Percent, accuracy = 1)),
+            position = position_stack(vjust = 0.5), size = 5,  color = "white") +
+  scale_y_continuous(labels = percent_format(accuracy = 1)) +
+  scale_fill_manual(values = c("pink", "hotpink")) +
+  labs(y = expression(italic("ARID1A") * " mutations, %"),
+       x = NULL,
+       fill = expression(italic("ARID1A") * " mutation"),
+       title = expression(italic("ARID1A") * " mutation " *
+                            italic("vs") * " promoter methylation"),
+       subtitle = paste("Fisher test p =", signif(fisher_test$p.value, 3))) +
+  theme_minimal(base_size = 14)
+#show
+barplot_aridEN
+
+#save
+png("ARID1A_MUT_met_fishers_EN20251212.png", width = 700, height = 500,
+    res =  100, units = "px", pointsize = 12) # width and height in pixels, resolution in dpi
+barplot_aridEN# Render the heatmap
 dev.off() # Close the PNG device

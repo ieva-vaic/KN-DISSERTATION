@@ -143,3 +143,53 @@ roc_obj <- timeROC(
 )
 plot(roc_obj, time = 60)   # ROC curve at 60 months
 roc_obj
+
+#coords
+# Extract index for 60 months
+idx <- which(roc_obj$times == 60)
+
+# Sensitivity (TPR) and Specificity (1 - FPR) at each cutoff
+sens_60 <- roc_obj$TP[, idx]
+spec_60 <- 1 - roc_obj$FP[, idx]
+
+results <- data.frame(
+  threshold = roc_obj$cutoffs,
+  sensitivity = sens_60,
+  specificity = spec_60
+)
+head(results)
+
+
+#english ARID1A KM################
+
+# make subtitle
+rms_subtitleEN <- paste0(
+  "Median survival, months: ",
+  "No mutations = ", round(rms_values["ARID1A_tumor_mut=Be mutacijų"], 1), ", ",
+  "Mutations = ", round(rms_values["ARID1A_tumor_mut=Mutacija"], 1),
+  "; Log-rank p = ", signif(p_val, 2)
+)
+
+# plot km
+test_survplot_AridEN <- ggsurvplot(
+  km_fit_ARID1A_mut,
+  data = MAIN_DF,
+  pval = FALSE,              
+  risk.table = TRUE,
+  title = expression( italic("ARID1A") * " mutations vs survival in the ovarian cancer group"),
+  #risk.table.title = "Pacientų skaičius rizikos grupėje",
+  subtitle = rms_subtitleEN,
+  xlab = "Overall survival, months",
+  #ylab = "Išgyvenamumo tikimybė",
+  palette = c("darkblue", "maroon"),
+  legend.title = "Mutation",
+  legend.labs = c("No mutations", "Mutation")
+)
+
+test_survplot_AridEN
+
+#save
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/ARID1A_mut_KM_ALL_EN20251215.png",
+    width = 1000, height = 600, res = 100) # width and height in pixels, resolution in dpi
+test_survplot_AridEN #
+dev.off() # Close the PNG device
