@@ -106,7 +106,7 @@ roc_plot_custom()
 mtext("B", side = 3, adj = 0, line = 2.5, cex = 1.5, font = 2)
 dev.off()
 
-#FIG: best 3 HGSOC vs benign PLOT TABLE #####################
+##TABLE: best 3 HGSOC vs benign #####################
 results_roc_custom <- data.frame(
   Biožymenys = c("GRB7 + TCEAL4", 
                  "10 genų raiškos kombinacija",
@@ -116,10 +116,10 @@ results_roc_custom <- data.frame(
   tikslumas = c(coords2$accuracy, coords10$accuracy , coords_ca2X$accuracy),
   jautrumas = c(coords2$sensitivity, coords10$sensitivity, coords_ca2X$sensitivity),
   specifiškumas = c(coords2$specificity, coords10$specificity, coords_ca2X$specificity),
-  ppv  = c(coords2$precision, coords10$precision, coords_ca2X$precision),
-  npv  = c(coords2$npv, coords10$npv, coords_ca2X$npv),
-  tpr  = c(coords2$tpr, coords10$tpr, coords_ca2X$tpr),
-  fpr  = c(coords2$fpr, coords10$fpr, coords_ca2X$fpr),
+ # ppv  = c(coords2$precision, coords10$precision, coords_ca2X$precision),
+ # npv  = c(coords2$npv, coords10$npv, coords_ca2X$npv),
+#  tpr  = c(coords2$tpr, coords10$tpr, coords_ca2X$tpr),
+ # fpr  = c(coords2$fpr, coords10$fpr, coords_ca2X$fpr),
   check.names = FALSE
 )
 rownames(results_roc_custom) <- NULL
@@ -144,11 +144,11 @@ gt_table_cut
 
 #there is no other convieneat way to save gt outputs
 gtsave(gt_table_cut,vwidth = 800,
-  filename = "FIG_tabbest3_HGSOC_BENIGN20251020.png")
+  filename = "FIG_tabbest3_HGSOC_BENIGN20251218.png")
 
 #Combine the images
 roc_image2<- image_read("FIG_best3_HSGOC_BENIGN20251124.png")
-table_image2 <- image_read("FIG_tabbest3_HGSOC_BENIGN20251020.png")
+table_image2 <- image_read("FIG_tabbest3_HGSOC_BENIGN20251218.png")
 
 # Find the max width to align both
 roc_info <- image_info(roc_image2)
@@ -164,7 +164,7 @@ combined_image2 <- image_append(c(roc_image2_padded, table_image2_padded), stack
 
 # Save the combined image
 image_write(combined_image2, 
-            "FIG_COMBINED_best3_HGSOC_BENIGN20251124.png")
+            "FIG_COMBINED_best3_HGSOC_BENIGN20251218.png")
 
 #OVCa vs BENIGN MODELS################################################################
 ##manually make combination of the best two OVCa vs benign#####
@@ -181,7 +181,7 @@ coords2x <- coords(roc_curve2x,
                   "best", ret=c("accuracy", "sensitivity", "specificity"), transpose = FALSE)
 coords2x$AUC <- AUC2x
 coords2x
-#all 10 combinations ##################
+##all 10 combinations ##################
 expr_tumor10x <- OC_full[colnames(OC_full) %in% expression]
 brglm.model_10x <- glm(OC_full$tumor ~ ., data = expr_tumor10x,
                       family = binomial("logit"), method = "brglm_fit") #no problems
@@ -206,7 +206,7 @@ coords_ca2Xx <- coords(roc_curve_CA2Xx, "best", ret=c("threshold", "accuracy", "
                                                     "tpr", "fpr"), transpose = FALSE)
 coords_ca2Xx
 
-##FIG best 3 OVCa vs benign PLOT ##########################
+##FIG: best 3 OVCa vs benign PLOT ##########################
 #OVCa vs benign models plot:
 roc_plot_customx <- function() {
   par(pty = "s") #sets square
@@ -234,7 +234,8 @@ png("FIG_best3ocfull_for_genes20251124.png", width = 1000, height = 1000, res = 
 roc_plot_customx()
 mtext("A", side = 3, adj = 0, line = 2.5, cex = 1.5, font = 2)
 dev.off()
-## FIG  best 3 OVCa vs benign TABLE #####################
+
+##TABLE:  best 3 OVCa vs benign #####################
 results_roc_customx <- data.frame(
   Biožymenys = c("GRB7 + TCEAL4", 
                  "10 genų raiškos kombinacija",
@@ -244,10 +245,10 @@ results_roc_customx <- data.frame(
   tikslumas = c(coords2$accuracy, coords10$accuracy , coords_ca2X$accuracy),
   jautrumas = c(coords2$sensitivity, coords10$sensitivity, coords_ca2X$sensitivity),
   specifiškumas = c(coords2$specificity, coords10$specificity, coords_ca2X$specificity),
-  ppv  = c(coords2$precision, coords10$precision, coords_ca2X$precision),
-  npv  = c(coords2$npv, coords10$npv, coords_ca2X$npv),
-  tpr  = c(coords2$tpr, coords10$tpr, coords_ca2X$tpr),
-  fpr  = c(coords2$fpr, coords10$fpr, coords_ca2X$fpr),
+  # ppv  = c(coords2$precision, coords10$precision, coords_ca2X$precision),
+  # npv  = c(coords2$npv, coords10$npv, coords_ca2X$npv),
+  # tpr  = c(coords2$tpr, coords10$tpr, coords_ca2X$tpr),
+  # fpr  = c(coords2$fpr, coords10$fpr, coords_ca2X$fpr),
   check.names = FALSE
 )
 rownames(results_roc_customx) <- NULL
@@ -272,11 +273,11 @@ gt_table_cutx
 
 #there is no other convieneat way to save gt outputs
 gtsave(gt_table_cutx,vwidth = 800, 
- filename = "FIG_tabbest3ocfull_for_genes20251020.png")
+ filename = "FIG_tabbest3ocfull_for_genes20251218.png")
 
 #Combine the images
 roc_image2x<- image_read("FIG_best3ocfull_for_genes20251124.png")
-table_image2x <- image_read("FIG_tabbest3ocfull_for_genes20251020.png")
+table_image2x <- image_read("FIG_tabbest3ocfull_for_genes20251218.png")
 
 # Find the max width to align both
 roc_infox <- image_info(roc_image2x)
@@ -292,7 +293,7 @@ combined_image2x <- image_append(c(roc_image2_paddedx, table_image2_paddedx), st
 
 # Save the combined image
 image_write(combined_image2x, 
-            "FIG_COMBINED_forOC_full_genes20251124.png")
+            "FIG_COMBINED_forOC_full_genes20251218.png")
 
 #HGSOC vs OTHERS MODELS###############################
 ##combination of the best 6 HGSOC vs others#####
@@ -379,7 +380,7 @@ png("FIG_bestHGSOC_VS_others20251124.png", width = 1000, height = 1000, res = 15
 roc_plot_customo()
 dev.off()
 
-##FIG: HGSOC vs OTHERS TABLE####################
+##TABLE: HGSOC vs OTHERS####################
 results_roc_customo <- data.frame(
   Biožymenys = c("6 genų raiškos kombinacija",
                  "EXO1 + TCEAL4",
@@ -390,10 +391,10 @@ results_roc_customo <- data.frame(
   tikslumas = c(coords6$accuracy, coords22$accuracy ,coords10o$accuracy , coords_ca2Xo$accuracy),
   jautrumas = c(coords6$sensitivity, coords22$sensitivity, coords10o$sensitivity, coords_ca2Xo$sensitivity),
   specifiškumas = c(coords6$specificity, coords22$specificity,  coords10$specificity,coords_ca2X$specificity),
-  ppv  = c(coords6$precision, coords22$precision,coords10o$precision, coords_ca2Xo$precision),
-  npv  = c(coords6$npv, coords22$npv,coords10o$npv, coords_ca2Xo$npv),
-  tpr  = c(coords6$tpr, coords22$tpr, coords10o$tpr, coords_ca2Xo$tpr),
-  fpr  = c(coords6$fpr, coords22$fpr, coords10o$fpr, coords_ca2Xo$fpr),
+  # ppv  = c(coords6$precision, coords22$precision,coords10o$precision, coords_ca2Xo$precision),
+  # npv  = c(coords6$npv, coords22$npv,coords10o$npv, coords_ca2Xo$npv),
+  # tpr  = c(coords6$tpr, coords22$tpr, coords10o$tpr, coords_ca2Xo$tpr),
+  # fpr  = c(coords6$fpr, coords22$fpr, coords10o$fpr, coords_ca2Xo$fpr),
   check.names = FALSE
 )
 rownames(results_roc_customo) <- NULL
@@ -418,11 +419,11 @@ gt_table_cuto
 
 #there is no other convieneat way to save gt outputs
 gtsave(gt_table_cuto,vwidth = 800, 
-    filename = "FIG_besttableHGSOC_VS_others20250624.png")
+    filename = "FIG_besttableHGSOC_VS_others20251218.png")
 
 #Combine the images
 roc_image2o<- image_read("FIG_bestHGSOC_VS_others20251124.png")
-table_image2o <- image_read("FIG_besttableHGSOC_VS_others20250624.png")
+table_image2o <- image_read("FIG_besttableHGSOC_VS_others20251218.png")
 
 # Find the max width to align both
 roc_infoo <- image_info(roc_image2o)
@@ -438,7 +439,7 @@ combined_image2o <- image_append(c(roc_image2_paddedo, table_image2_paddedo), st
 
 # Save the combined image
 image_write(combined_image2o, 
-            "FIG_COMBINED_forHGSOC_others_genes20251124.png")
+            "FIG_COMBINED_forHGSOC_others_genes20251218.png")
 
 #horizontal version
 # Now append vertically
@@ -455,3 +456,282 @@ roc.test(roc_curve6, roc_curve_CA2X)
 roc_curve_tceal4 <- roc(OC_HGSOC_OTHERS$tumor, OC_HGSOC_OTHERS$TCEAL4)
 roc.test(roc_curve_tceal4, roc_curve6)
 roc.test(roc_curve_tceal4, roc_curve22)
+
+#ENGLISH PLOTS #########################################
+##EN FIG: best 3 HGSOC vs benign PLOT ##########################
+#HGSOC vs benign models plot:
+roc_plot_customEN <- function() {
+  par(pty = "s") #sets square
+  plot.roc(roc_curve2, print.auc = F, col = "deeppink", 
+           cex.main=0.8, main ="Separation of benign ovarian tumors form HGSOC",
+           #xlab = "1 - Specifiškumas",   # Custom x-axis label 
+           #ylab = "Jautrumas",
+           legacy.axes = T) #7
+  lines(roc_curve10, col = "blue", lwd =2, lty = 2 ) #6
+  lines(roc_curve_CA2X, col = "grey", lwd = 2)
+  # Add legend
+  legend("bottomright", legend = c( expression(italic("GRB7 + TCEAL4")), 
+                                    expression(italic("10 gene expression combination")),
+                                    expression(italic("Serum CA125 status")))
+         ,
+         col = c("deeppink","blue", "grey" ), lty = 1, 
+         cex = 1, lwd =3)
+}
+#show plot
+roc_plot_customEN()
+# Save the plot as a PNG file
+png("FIG_best3_HSGOC_BENIGN20251218EN.png", width = 800, height = 800, res = 150)
+roc_plot_customEN()
+mtext("B", side = 3, adj = 0, line = 2.5, cex = 1.5, font = 2)
+dev.off()
+
+##EN TABLE: best 3 HGSOC vs benign #####################
+results_roc_customEN <- data.frame(
+  Predictor = c("GRB7 + TCEAL4", 
+                "10 gene expression combination",
+                "Serum CA125 status"),
+  AUC = c(roc_curve2$auc, roc_curve10$auc, roc_curve_CA2X$auc), 
+  threshold = c(coords2$threshold, coords10$threshold , coords_ca2X$threshold),
+  accuracy = c(coords2$accuracy, coords10$accuracy , coords_ca2X$accuracy),
+  sensitivity = c(coords2$sensitivity, coords10$sensitivity, coords_ca2X$sensitivity),
+  specificity = c(coords2$specificity, coords10$specificity, coords_ca2X$specificity),
+  # ppv  = c(coords2$precision, coords10$precision, coords_ca2X$precision),
+  # npv  = c(coords2$npv, coords10$npv, coords_ca2X$npv),
+  #  tpr  = c(coords2$tpr, coords10$tpr, coords_ca2X$tpr),
+  # fpr  = c(coords2$fpr, coords10$fpr, coords_ca2X$fpr),
+  check.names = FALSE
+)
+rownames(results_roc_customEN) <- NULL
+results_roc_customEN
+
+gt_table_cutEN <- results_roc_customEN %>%
+  gt() %>%
+  tab_header(
+    title = "ROC metrics",
+    subtitle = "Separation of benign ovarian tumors form HGSOC",
+  ) %>%
+  fmt_number(
+    columns = everything(),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Predictor))
+  )
+#show
+gt_table_cutEN
+
+#there is no other convieneat way to save gt outputs
+gtsave(gt_table_cutEN,vwidth = 600,
+       filename = "FIG_tabbest3_HGSOC_BENIGN20251218EN.png")
+
+#Combine the images
+roc_image2EN<- image_read("FIG_best3_HSGOC_BENIGN20251218EN.png")
+table_image2EN <- image_read("FIG_tabbest3_HGSOC_BENIGN20251218EN.png")
+
+# Find the max width to align both
+roc_infoEN <- image_info(roc_image2EN)
+table_infoEN <- image_info(table_image2EN)
+max_widthEN <- max(roc_infoEN$width, table_infoEN$width)
+
+# Pad each image to the max width
+roc_image2_paddedEN <- image_extent(roc_image2EN, 
+                                    geometry = geometry_area(max_widthEN, roc_infoEN$height),
+                                    gravity = "center", color = "white")
+table_image2_paddedEN <- image_extent(table_image2EN,
+                                      geometry = geometry_area(max_widthEN, table_infoEN$height),
+                                      gravity = "center", color = "white")
+
+# Now append vertically
+combined_image2EN <- image_append(c(roc_image2_paddedEN, table_image2_paddedEN), stack = TRUE)
+
+# Save the combined image
+image_write(combined_image2EN, 
+            "FIG_COMBINED_best3_HGSOC_BENIGN20251218EN.png")
+
+##EN FIG: best 3 OVCa vs benign PLOT ##########################
+#OVCa vs benign models plot:
+roc_plot_customxEN <- function() {
+  par(pty = "s") #sets square
+  plot.roc(roc_curve2, print.auc = F, col = "lightpink", 
+           cex.main=0.8, main ="Separation of benign ovarian tumors form ovarian cancer",
+           # xlab = "1 - Specifiškumas", 
+           # ylab = "Jautrumas", 
+           legacy.axes = T) #7
+  lines(roc_curve10, col = "darkgreen", lwd =2, lty = 2 ) #6
+  lines(roc_curve_CA2X, col = "grey", lwd = 2)
+  
+  # Add legend
+  legend("bottomright", legend = c( expression(italic("GRB7 + TCEAL4")), 
+                                    expression(italic("10 gene expression combination")),
+                                    expression(italic("Serum CA125 status")))
+         ,
+         col = c("lightpink","darkgreen", "grey" ), lty = 1, 
+         cex = 1, lwd =3)
+}
+# show plot
+roc_plot_customxEN()
+
+# Save the plot as a PNG file
+png("FIG_best3ocfull_for_genes20251218EN.png", width = 1000, height = 1000, res = 150)
+roc_plot_customxEN()
+mtext("A", side = 3, adj = 0, line = 2.5, cex = 1.5, font = 2)
+dev.off()
+
+##EN TABLE:  best 3 OVCa vs benign #####################
+results_roc_customxEN <- data.frame(
+  Predictor = c("GRB7 + TCEAL4", 
+                "10 gene expression combination",
+                "Serum CA125 status"),
+  AUC = c(roc_curve2$auc, roc_curve10$auc, roc_curve_CA2X$auc), 
+  threshold = c(coords2$threshold, coords10$threshold , coords_ca2X$threshold),
+  accuracy = c(coords2$accuracy, coords10$accuracy , coords_ca2X$accuracy),
+  sensitivity = c(coords2$sensitivity, coords10$sensitivity, coords_ca2X$sensitivity),
+  specificity = c(coords2$specificity, coords10$specificity, coords_ca2X$specificity),
+  # ppv  = c(coords2$precision, coords10$precision, coords_ca2X$precision),
+  # npv  = c(coords2$npv, coords10$npv, coords_ca2X$npv),
+  # tpr  = c(coords2$tpr, coords10$tpr, coords_ca2X$tpr),
+  # fpr  = c(coords2$fpr, coords10$fpr, coords_ca2X$fpr),
+  check.names = FALSE
+)
+rownames(results_roc_customxEN) <- NULL
+results_roc_customxEN
+
+gt_table_cutxEN <- results_roc_customxEN %>%
+  gt() %>%
+  tab_header(
+    title = "ROC metrics",
+    subtitle = "Separation of benign ovarian tumors form ovarian cancer",
+  ) %>%
+  fmt_number(
+    columns = everything(),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Predictor))
+  )
+#show
+gt_table_cutxEN
+
+#there is no other convieneat way to save gt outputs
+gtsave(gt_table_cutxEN,vwidth = 800, 
+       filename = "FIG_tabbest3ocfull_for_genes20251218EN.png")
+
+#Combine the images
+roc_image2xEN<- image_read("FIG_best3ocfull_for_genes20251218EN.png")
+table_image2xEN <- image_read("FIG_tabbest3ocfull_for_genes20251218EN.png")
+
+# Find the max width to align both
+roc_infoxEN <- image_info(roc_image2xEN)
+table_infoxEN <- image_info(table_image2xEN)
+max_widthxEN <- max(roc_infoxEN$width, table_infoxEN$width)
+
+# Pad each image to the max width
+roc_image2_paddedxEN <- image_extent(roc_image2xEN,
+                                     geometry = geometry_area(max_widthEN, roc_infoxEN$height),
+                                     gravity = "center", color = "white")
+table_image2_paddedxEN <- image_extent(table_image2xEN,
+                                       geometry = geometry_area(max_widthEN, table_infoxEN$height),
+                                       gravity = "center", color = "white")
+
+# Now append vertically
+combined_image2xEN <- image_append(c(roc_image2_paddedxEN, table_image2_paddedxEN), stack = TRUE)
+
+# Save the combined image
+image_write(combined_image2xEN, 
+            "FIG_COMBINED_forOC_full_genes20251218EN.png")
+
+##EN FIG: HGSOC vs OTHERS PLOT####################
+roc_plot_customoEN <- function() {
+  par(pty = "s") #sets square
+  plot.roc(roc_curve6, print.auc = F, col = "lightpink", 
+           cex.main=0.8, main ="Separation of HGSOC from other ovarian cancer cases",
+           # xlab = "1 - Specifiškumas",   # Custom x-axis label 
+           # ylab = "Jautrumas", 
+           legacy.axes = T) #7
+  lines(roc_curve22, col = "darkgreen", lwd =2)
+  lines(roc_curve10o, col = "darkblue", lwd =2)
+  lines(roc_curve_CA2Xo, col = "grey", lwd = 2)
+  
+  # Add legend
+  legend("bottomright", legend = c( expression(italic("6 gene expression combination")), 
+                                    expression(italic("EXO1 + TCEAL4")),
+                                    expression(italic("10 gene expression combination")),
+                                    expression(italic("Serum CA125 status")))
+         ,
+         col = c("lightpink","darkgreen","darkblue" , "grey" ), lty = 1, 
+         cex = 1, lwd =3)
+}
+# Save the plot to a variable
+roc_plot_customoEN()
+
+# Save the plot as a PNG file
+png("FIG_bestHGSOC_VS_others20251218EN.png", width = 1000, height = 1000, res = 150)
+roc_plot_customoEN()
+dev.off()
+
+##EN TABLE: HGSOC vs OTHERS####################
+results_roc_customoEN <- data.frame(
+  Predictor = c("6 gene expression combination",
+                "EXO1 + TCEAL4",
+                "10 gene expression combination",
+                "Serum CA125 status"),
+  AUC = c(roc_curve6$auc, roc_curve22$auc, roc_curve10o$auc, roc_curve_CA2Xo$auc), 
+  threshold = c(coords6$threshold, coords22$threshold ,  coords10o$threshold ,coords_ca2Xo$threshold),
+  accuracy = c(coords6$accuracy, coords22$accuracy ,coords10o$accuracy , coords_ca2Xo$accuracy),
+  sensitivity = c(coords6$sensitivity, coords22$sensitivity, coords10o$sensitivity, coords_ca2Xo$sensitivity),
+  specificity = c(coords6$specificity, coords22$specificity,  coords10$specificity,coords_ca2X$specificity),
+  # ppv  = c(coords6$precision, coords22$precision,coords10o$precision, coords_ca2Xo$precision),
+  # npv  = c(coords6$npv, coords22$npv,coords10o$npv, coords_ca2Xo$npv),
+  # tpr  = c(coords6$tpr, coords22$tpr, coords10o$tpr, coords_ca2Xo$tpr),
+  # fpr  = c(coords6$fpr, coords22$fpr, coords10o$fpr, coords_ca2Xo$fpr),
+  check.names = FALSE
+)
+rownames(results_roc_customoEN) <- NULL
+results_roc_customoEN
+
+gt_table_cutoEN <- results_roc_customoEN %>%
+  gt() %>%
+  tab_header(
+    title = "ROC metrics",
+    subtitle = "Separation of HGSOC from other ovarian cancer cases",
+  ) %>%
+  fmt_number(
+    columns = everything(),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Predictor))
+  )
+#show
+gt_table_cutoEN
+
+#there is no other convieneat way to save gt outputs
+gtsave(gt_table_cutoEN,vwidth = 1000, 
+       filename = "FIG_besttableHGSOC_VS_others20251218EN.png")
+
+#Combine the images
+roc_image2oEN<- image_read("FIG_bestHGSOC_VS_others20251218EN.png")
+table_image2oEN <- image_read("FIG_besttableHGSOC_VS_others20251218EN.png")
+
+# Find the max width to align both
+roc_infooEN <- image_info(roc_image2oEN)
+table_infooEN <- image_info(table_image2oEN)
+max_widthoEN <- max(roc_infooEN$width, table_infooEN$width)
+
+# Pad each image to the max width
+roc_image2_paddedoEN <- image_extent(roc_image2oEN,
+                                     geometry = geometry_area(max_widthEN, roc_infooEN$height),
+                                     gravity = "center", color = "white")
+table_image2_paddedoEN <- image_extent(table_image2oEN,
+                                       geometry = geometry_area(max_widthEN, table_infooEN$height),
+                                       gravity = "center", color = "white")
+
+# Now append vertically
+combined_image2oEN <- image_append(c(roc_image2_paddedoEN, table_image2_paddedoEN), stack = TRUE)
+
+# Save the combined image
+image_write(combined_image2oEN, 
+            "FIG_COMBINED_forHGSOC_others_genes20251218EN.png")

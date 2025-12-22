@@ -202,7 +202,8 @@ png("10gene_grade_20250623.png"
 Grade_plot 
 dev.off() # Close the PNG device
 
-#FC GRADE ##################
+
+##FC GRADE ##################
 expression_df_GRADE <- OC_only[, c("Grade2", expression, "KN")]
 rownames(expression_df_GRADE) <- expression_df_GRADE$KN
 expression_df_GRADE <- expression_df_GRADE[, -12]
@@ -222,6 +223,62 @@ exp_df_GRADE <- expression_df_GRADE %>%
 mean_expression_GRADE <- exp_df_GRADE %>%
   mutate(fold_change_3_1 = log2( 2^( `G3` -`G1`) ) )
 mean_expression_GRADE 
+#coreliation with CA125 at diagnosis#################
+shapiro_results_CA125 <- OC_full[, c(20, 3:12 )] %>%
+  map(~ shapiro.test(.x)$p.value) 
+shapiro_results_CA125 # all not normal
+CA125_test <- OC_full[, colnames(OC_full) %in% c(expression, "CA125")]
+
+results_nn1 <- lapply(OC_full[, colnames(OC_full) %in% expression], 
+                      function(x) cor.test(x, OC_full$CA125, method = "spearman"))
+results_nn1
+
+
+# Spearman results (nn)
+df_spearman1 <- data.frame(
+  variable = names(results_nn1),
+  R = sapply(results_nn1, function(x) if (is.list(x)) x$estimate else NA),
+  p_value = sapply(results_nn1, function(x) if (is.list(x)) x$p.value else NA),
+  method = "Spearman"
+)
+
+
+##plot ca125 corr #######################
+# Create the plot list
+plot_list1 <- lapply(df_spearman1$variable, function(gene) {
+  method <- df_spearman1$method[df_spearman1$variable == gene]
+  r_val <- round(df_spearman1$R[df_spearman1$variable == gene], 2)
+  p_val <- signif(df_spearman1$p_value[df_spearman1$variable == gene], 2)
+  
+  ggplot(CA125_test, aes_string(x = "CA125", y = gene)) +
+    geom_point(color = "steelblue") +
+    geom_smooth(method = "lm", se = FALSE, color = "darkred") +
+    labs(
+      #title = bquote("CA125 koncentracija vs"~italic(.(gene))),
+      subtitle = paste0( 
+        "  R = ", r_val, 
+        " | p = ", p_val),
+      x = "CA125 U/ml",
+      y = bquote("Raiška"~italic(.(gene)))
+    ) +
+    theme_minimal() +
+    theme(plot.subtitle = element_text(size = 10, face = "italic", color = "gray30"))
+})
+# Show plots one by one (optional)
+for (p in plot_list1) print(p)
+
+# Combine into one figure
+combined_plot1 <- wrap_plots(plot_list1, ncol = 2) +
+  plot_annotation(title = "Koreliacija tarp CA125 koncentracijos ir genų raiškos")
+combined_plot1
+
+
+
+png("10gene_CA125_20251222.png"
+    , width = 3000, height = 5000, res = 300) # width and height in pixels, resolution in dpi
+combined_plot1
+dev.off() # 
+
 
 #t tests CA125 pre op ####################
 #not normal GRB7, LUC7L2, PKP3, PPT2, TCEAL4
@@ -293,7 +350,7 @@ png("10_gene_boxplot_ca125_2025_06_23.png"
 Ca125_plot #
 dev.off() # Close the PNG device
 
-#FC CA125 pre op ########################
+##FC CA125 pre op ########################
 expression_df_ca125 <- OC_full[, c("CA125_f", expression, "KN")]
 rownames(expression_df_ca125) <- expression_df_ca125$KN
 expression_df_ca125 <- expression_df_ca125[, -12]
@@ -470,9 +527,9 @@ ggsave(
   height = 11,       # adjust height as needed
   dpi = 300         # high resolution
 )
-
-#CA125 plot but in english################################################
-##tribble CA125 pre op ################
+#ENGLISH PLOTS #####################################
+#EN CA125 plot################################################
+##tribble CA125 pre op\
 each.vs.ref_sig_ca125EN <- tibble::tribble(
   ~group1, ~group2, ~p.adj,   ~y.position, ~variable,
   "CA125 increase",   "Norm" , 0.0499, 2, "TCEAL4", #wilcox
@@ -515,7 +572,7 @@ dev.off() # Close the PNG device
 
 table(OC_full$CA125_f, useNA = "a")
 
-#ENGLISH coreliation with age#################
+#EN coreliation with age#################
 table(OC_full$Age, useNA ="a")
 age_test <- OC_full[, colnames(OC_full) %in% c(expression, "Age")]
 #not normal TCEAL4, GRB7, PKP3, LUC7L2
@@ -558,7 +615,7 @@ plot_list <- lapply(df_all$variable, function(gene) {
     geom_point(color = "steelblue") +
     geom_smooth(method = "lm", se = FALSE, color = "darkred") +
     labs(
-      title = bquote("Age vs"~italic(.(gene))),
+      #title = bquote("Age vs"~italic(.(gene))),
       subtitle = paste0( 
         "  R = ", r_val, 
         " | p = ", p_val),
@@ -572,15 +629,41 @@ plot_list <- lapply(df_all$variable, function(gene) {
 for (p in plot_list) print(p)
 
 # Combine into one figure
-combined_plot <- wrap_plots(plot_list, ncol = 2) +
-  plot_annotation(title = "Gene expression correlation with age at diagnosis")
+combined_plot <- wrap_plots(plot_list, ncol = 2) 
 combined_plot
 #save in english
 ggsave(
-  filename = "10_gene_age10genes20250027EN.png",
+  filename = "10_gene_age10genes202501023EN.png",
   plot = combined_plot,
   width = 8,       # adjust width as needed
   height = 11,       # adjust height as needed
-  dpi = 300         # high resolution
+  dpi = 500         # high resolution
 )
+#EN grade plot #############################
 
+Grade_plotEN <- ggplot(Grade_table_OC, aes(x=Grade2 , y=value, fill = variable)) +
+  geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = Grade2 )) +
+  geom_jitter(aes(color = Grade2 ), size=1, alpha=0.5) +
+  ylab(label = expression("Relative expression, normalized to  " * italic("GAPDH"))) + 
+  facet_wrap(.~ variable, nrow = 2, scales = "free") +
+  add_pvalue(each.vs.ref_sig_grade, label = "p.adj") + #pvalue
+  theme_minimal()+
+  theme(
+    strip.text.x = element_text(
+      size = 12, face = "bold.italic"
+    ),
+    legend.position = "none",
+    plot.title = element_text(hjust = 0.5))+
+  labs(x=NULL)+
+  stat_boxplot(geom ='errorbar')+
+  scale_fill_manual(values = custom_colors) +
+  scale_color_manual(values = custom_colors) + 
+  scale_y_continuous(labels = function(x) gsub("-", "\u2212", x))
+
+
+Grade_plotEN
+
+png("10gene_gradeEN_20251217.png"
+    , width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+Grade_plotEN
+dev.off() # Cl

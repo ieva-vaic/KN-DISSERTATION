@@ -1,6 +1,6 @@
 #KN-DISSERTATION project. 10 gene panel - genes selected via statistical analysis of TCGA and GTEx data
 #KN 10 gene analysis data (cv 2 %, one threshold, 65 cases!, restored KN-59) 2025-02-17
-#ANOVA
+#ANOVA: 3 groups of cancer, stage groups for HGSOC
 Sys.setenv(LANG = "en")
 #libraries
 library(tidyverse)
@@ -280,7 +280,7 @@ OC_plot_en <- ggplot(Group3_table_full_en, aes(x=type , y=value, fill = variable
 
 OC_plot_en
 
-png("10genes_boxplot3groups_EN_2025-09-22.png",
+png("10genes_boxplot3groups_EN_2025-12-17.png",
     width = 3200, height = 2300, res = 300) # width and height in pixels, resolution in dpi
 OC_plot_en #
 dev.off() # Close the PNG device
