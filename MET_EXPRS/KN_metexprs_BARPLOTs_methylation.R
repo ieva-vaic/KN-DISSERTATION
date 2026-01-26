@@ -145,8 +145,9 @@ pp1
 #set directory for saving plots
 setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
 #save
-png("met_BARPLOT_OVca_output20251020.png",
-    width = 3000, height = 2200, res = 360) # width and height in pixels, resolution in dpi
+png("met_BARPLOT_OVca_output20260121.png",
+   #width = 3000, height = 2200, res = 360) #old in px
+   width = 16, height = 15, res = 500, units = "cm")
 pp1# Render the heatmap
 dev.off() # Close the PNG device
 
@@ -213,7 +214,7 @@ df_perc_group <- met_long_group %>%
 p3 <- ggplot(df_perc_group, aes(x = Grupė_Ieva, y = percentage, fill = value)) +
   geom_bar(stat = "identity")  +
   facet_wrap(~ biomarker, scales = "free_y", nrow = 1, ncol = 4) +
-  labs(x = "Tumor type", y = "Promotorių metilinimas, procentais", fill = "Value") +
+  labs(x = "Tumor type", y = "Promotorių metilinimas, %", fill = "Value") +
   theme_minimal()+
   labs(x=NULL,  
        #title = "Promoter methylation in gynecologic tumors"
@@ -303,8 +304,8 @@ ppp3
 # ppp3_final
 
 #SAVE PNG 
-png("met_BARPLOT_3GR_output20251020.png", 
-    width = 3000, height = 2600, res = 370) # width and height in pixels, resolution in dpi
+png("met_BARPLOT_3GR_output20260121.png", 
+    width = 21, height = 15, res = 510, units = "cm") # width and height in pixels, resolution in dpi
 ppp3# Render the heatmap
 dev.off() # Close the PNG device
 
@@ -394,11 +395,10 @@ age_plot <- ggplot(age_table, aes(x=value, y=Amžius)) +
   stat_boxplot(geom ='errorbar')+
   add_pvalue(each.vs.ref_age, label = "p.adj")  #pvalue
 age_plot #
-
+#save
 png("met_BOXPLOT_age_20250602.png", width = 2000, height = 2000, res = 300) # width and height in pixels, resolution in dpi
 age_plot# Render the heatmap
 dev.off() # Close the PNG device
-
 
 #HGSOC only: Chek clinical features against methylation###########
 KN_HGSOC #HGSOC DF
@@ -466,7 +466,7 @@ df_perc_stage
 plot3 <- ggplot(df_perc_stage, aes(x = Stage4, y = percentage, fill = value)) +
   geom_bar(stat = "identity")  +
   facet_wrap(~ biomarker, scales = "free_y", nrow = 1, ncol = 4) +
-  labs(x = "Tumor FIGO stage", y = "Promotorių metilinimas, procentais", fill = "Value") +
+  labs(x = "Tumor FIGO stage", y = "Promotorių metilinimas, %", fill = "Value") +
   theme_minimal()+
   labs(x=NULL,  
        #title = "Promoter methylation in HGSOC according to FIGO stage"
@@ -509,9 +509,8 @@ plot33 <- plot3+
 plot33
 
 #SAVE PNG 
-
-png("met_BARPLOT_HGSOC_FIGO_output20251020.png",
-    width = 4000, height = 2500, res = 400) # width and height in pixels, resolution in dpi
+png("met_BARPLOT_HGSOC_FIGO_output20260121.png",
+    width = 21, height = 14, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 plot33# Render the heatmap
 dev.off() # Close the PNG device
 
@@ -602,10 +601,8 @@ pp1EN <- p1EN+
 pp1EN
 
 #save
-#set directory for saving
-setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
-#save
-png("met_exprs_boxplot_OVca_ENoutput20251212.png", width = 3000, height = 2700, res = 400) # width and height in pixels, resolution in dpi
+png("met_exprs_boxplot_OVca_ENoutput20260121.png",
+    width = 16, height = 15, res = 500, units = "cm")
 pp1EN #
 dev.off() # Close the PNG device
 
@@ -715,7 +712,8 @@ ppp3EN <- pp3EN +
 ppp3EN
 
 #save
-png("met_exprs_boxplot_HGSOC_ENoutput20251212.png", width = 4000, height = 2700, res = 400) # width and height in pixels, resolution in dpi
+png("met_exprs_boxplot_HGSOC_ENoutput20260121.png",
+    width = 21, height = 15, res = 510, units = "cm") # width and height in pixels, resolution in dpi
 ppp3EN #
 dev.off() # Close the PNG device
 
@@ -731,7 +729,7 @@ met_long_stageEN <- pivot_longer(metilinimas_stage_table,
                                  values_to = "value")
 
 # Rename biomarker column
-met_long_stageEN <- met_long_stage %>%
+met_long_stageEN <- met_long_stageEN %>%
   # Rename
   mutate(biomarker = recode(biomarker, 
                             "HOPX_met" = "HOPX",      
@@ -805,7 +803,8 @@ plot33EN <- plot3EN+
 plot33EN
 
 #save
-png("met_exprs_boxplot_HGSOCSTAGE_ENoutput20251212.png", width = 3000, height = 2000, res = 400) # width and height in pixels, resolution in dpi
+png("met_exprs_boxplot_HGSOCSTAGE_ENoutput20260121.png",
+    width = 21, height = 14, res = 500, units = "cm") 
 plot33EN #
 dev.off() # Close the PNG device
 

@@ -1,5 +1,5 @@
 #KN-DISSERTATION project. 10 gene panel - genes selected via statistical analysis of TCGA and GTEx data
-#KN 10 gene analysis data (cv 2 %, one threshold, 65 cases!, restored KN-59) 2025-02-17
+#KN 10 gene analysis data (cv 2 %, one threshold, 65 cases!, restored KN-59) 2026-01-20
 #KN-DISSERTATION project. MET_EXPRS - methylation, expression, mutation data
 #survival analysis, time rocs and models, only NOTCH
 Sys.setenv(LANG = "en")
@@ -125,24 +125,25 @@ test_survplot2_notch <- ggsurvplot(km_fit2notch, data = surv_df_test2notch,
                                    #pval = TRUE,  # Show p-value of the log-rank test
                                    risk.table = TRUE, 
                                    risk.table.title = "Pacienčių skaičius rizikos grupėje",
-                                   title = bquote("A    " ~
-                                                    "Notch, Wnt ir" ~ italic("ARID1A") ~ "genų raiškos kombinacija"),
+                                   title = expression(
+                                     bold("A ") * "Notch, Wnt ir " * italic("ARID1A") * " genų raiškos kombinacija"
+                                   ),
                                    xlab = "Bendras išgyvenamumo laikas, mėnesiais",
                                    ylab = "Išgyvenamumo tikimybė",
                                    palette = c("deeppink", "turquoise"),  # Color palette for groups
                                    legend.title = "Rizikos grupė", 
-                                   legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
+                                   legend.labs = c( "Didelės rizikos balas", "Mažos rizikos balas")) #changed form "mažas/ didelis rizikos balas"
 # Add subtitle form cox result
 test_survplot2_notch$plot <- test_survplot2_notch$plot +
   labs(subtitle = 
-       "Uni PR = 0,32 (95 % PI: 0,12–0,92);
-Multi PR = 0,32 (95 % PI: 0,10–1,06);
-Log-rank p = 0,03, n = 47")
+paste0("Uni PR = 0,32 (95 % PI: 0,12–0,92);\n",
+"Multi PR = 0,32 (95 % PI: 0,10–1,06);\n",
+"Log-rank p = 0,03, n = 47") )
 
 print(test_survplot2_notch)
 #save
-png("KM_plot_notch_arid1a_OC_w_HR20251222.png",
-    width = 1500, height = 1000, res = 200)
+png("KM_plot_notch_arid1a_OC_w_HR20260120short.png",
+    width = 700, height = 600, res = 120)
 print(test_survplot2_notch)  # print the full ggsurvplot object
 dev.off()
 
@@ -151,13 +152,14 @@ test_survplot2_notchEN <- ggsurvplot(km_fit2notch, data = surv_df_test2notch,
                                      #pval = TRUE,  # Show p-value of the log-rank test
                                      risk.table = TRUE, 
                                      # risk.table.title = "Pacienčių skaičius rizikos grupėje",
-                                     title = bquote("A    " ~
-                                                      "Notch, Wnt and" ~ italic("ARID1A") ~ "gene expression combination"),
+                                     title = expression(
+                                       bold("A ") * "Notch, Wnt and " * italic("ARID1A") * " gene expression combination"
+                                     ),
                                      xlab = "Overall survival, months",
                                      #ylab = "Išgyvenamumo tikimybė",
                                      palette = c("deeppink", "turquoise"),  # Color palette for groups
                                      #legend.title = "Rizikos grupė", 
-                                     legend.labs = c("Low risk score", "High risk score"))
+                                     legend.labs = c("High risk score", "Low risk score"))
 # Add subtitle form cox result
 test_survplot2_notchEN$plot <- test_survplot2_notchEN$plot +
   labs(subtitle = 
@@ -168,8 +170,8 @@ Log-rank p = 0.03, n = 47")
 print(test_survplot2_notchEN)
 
 #save
-png("KM_plot_notch_arid1a_OC_w_HR_EN20251222.png",
-    width = 1500, height = 1000, res = 200)
+png("KM_plot_notch_arid1a_OC_w_HR_EN20260120short.png",
+    width = 800, height = 600, res = 120)
 print(test_survplot2_notchEN)  # print the full ggsurvplot object
 dev.off()
 
@@ -217,23 +219,24 @@ test_survplot14<- ggsurvplot(km_fit14, data = surv_df_test14,
                              #pval = TRUE,  # Show p-value of the log-rank test
                              risk.table = TRUE,  # Add risk table below the plot
                              risk.table.title = "Pacienčių skaičius rizikos grupėje",
-                             title = bquote("B  " ~  
-                                              "Promotorių metilinimo, Notch, Wnt ir" ~ italic("ARID1A") ~ " raiškos kombinacija"),
+                             title = expression(
+                               bold("B ") * "Promotorių metilinimo, Notch, Wnt ir" * italic(" ARID1A") * " genų raiškos kombinacija"
+                             ),
                              xlab = "Bendras išgyvenamumo laikas, mėnesiais",
                              ylab = "Išgyvenamumo tikimybė",
                              palette = c( "deeppink", "turquoise"),  # Color palette for groups
                              legend.title = "Rizikos grupė", 
-                             legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
+                             legend.labs = c( "Didelės rizikos balas", "Mažos rizikos balas")) #changed form "mažs/didelės rizikos balas"
 # Add subtitle form cox result
 test_survplot14$plot <- test_survplot14$plot +
-  labs(subtitle = "Uni PR =  0.22  (95 % PI: 0,07–0,66);
-Multi PR = 0.22 (95 % PI: 0,06–0,77);
-Log-rank p = 0,003, n = 47")
+  labs(subtitle = paste0("Uni PR =  0.22  (95 % PI: 0,07–0,66);\n",
+"Multi PR = 0.22 (95 % PI: 0,06–0,77);\n",
+"Log-rank p = 0,003, n = 47") )
 
 print(test_survplot14)
 #save
-png("KM_plot_14_OC_w_HR202501222.png",
-    width = 1700, height = 1000, res = 170)
+png("KM_plot_14_OC_w_HR20260120short.png",
+    width = 700, height = 600, res = 90)
 print(test_survplot14)  # print the full ggsurvplot object
 dev.off()
 
@@ -242,24 +245,24 @@ test_survplot14EN<- ggsurvplot(km_fit14, data = surv_df_test14,
                                #pval = TRUE,  # Show p-value of the log-rank test
                                risk.table = TRUE,  # Add risk table below the plot
                                #risk.table.title = "Pacienčių skaičius rizikos grupėje",
-                               title = bquote("B  " ~  
-                                                "Promoter methylation, Notch, Wnt and " ~ italic("ARID1A") ~
-                                                " gene expression combination"),
+                               title = expression(
+                                 bold("B ") * "Promoter methylation, Notch, Wnt and" * italic(" ARID1A") * " gene expression combination"
+                               ),
                                xlab = "Overall survival, months",
                                #ylab = "Išgyvenamumo tikimybė",
                                palette = c( "deeppink", "turquoise"),  # Color palette for groups
                                #legend.title = "Rizikos grupė", 
-                               legend.labs = c("Low risk score", "High risk score"))
+                               legend.labs = c("High risk score", "Low risk score")) #changed places
 # Add subtitle form cox result
 test_survplot14EN$plot <- test_survplot14EN$plot +
-  labs(subtitle = "Uni HR =  0.22  (95 % CI: 0.07–0.66);
-Multi HR = 0.22 (95 % CI: 0.06–0.77);
-Log-rank p = 0.003, n = 47")
+  labs(subtitle = paste0("Uni HR =  0.22  (95 % CI: 0.07–0.66);\n",
+"Multi HR = 0.22 (95 % CI: 0.06–0.77);\n",
+"Log-rank p = 0.003, n = 47") )
 
 print(test_survplot14EN)
 #save
-png("KM_plot_14_OC_w_HR_en202501222.png",
-    width = 1700, height = 1000, res = 170)
+png("KM_plot_14_OC_w_HR_en20260120short.png",
+    width = 800, height = 600, res = 90)
 print(test_survplot14EN)  # print the full ggsurvplot object
 dev.off()
 
@@ -310,24 +313,25 @@ test_survplot_notch_hes <- ggsurvplot(km_fitnotch_hes, data = surv_df_testnotch_
                                       #pval = TRUE,  # Show p-value of the log-rank test
                                       risk.table = TRUE, 
                                       risk.table.title = "Pacienčių skaičius rizikos grupėje",
-                                      title = bquote("C    " ~
-                                                        italic("NOTCH3") ~ "ir" ~ italic("HES1") ~ "genų raiškos kombinacija"),
+                                      title =  expression(
+                                        bold("C ") * italic("NOTCH3") * " ir " * italic(" HES1") * " genų raiškos kombinacija"
+                                      ),
                                       xlab = "Bendras išgyvenamumo laikas, mėnesiais",
                                       ylab = "Išgyvenamumo tikimybė",
                                       palette = c( "deeppink", "turquoise"),  # Color palette for groups
                                       legend.title = "Rizikos grupė", 
-                                      legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
+                                      legend.labs = c( "Didelės rizikos balas", "Mažos rizikos balas")) #changed places form "mažas / didelis rizikos balas"
 # Add subtitle form cox result
 test_survplot_notch_hes$plot <- test_survplot_notch_hes$plot +
-  labs(subtitle = "Uni PR = 0,37  (95 % PI: 0,14–0,98);
-Multi PR = 0,50 (95 % PI: 0,17–1,47);
-Log-rank p = 0,04, n = 48")
+  labs(subtitle = paste0("Uni PR = 0,37  (95 % PI: 0,14–0,98);\n",
+"Multi PR = 0,50 (95 % PI: 0,17–1,47);\n",
+"Log-rank p = 0,04, n = 48") )
 
 print(test_survplot_notch_hes)
 
 #save
-png("KM_plot_notch_HES_OC_w_HR20251222.png",
-    width = 1500, height = 1000, res = 200)
+png("KM_plot_notch_HES_OC_w_HR20260120short.png",
+    width = 700, height = 600, res = 120)
 print(test_survplot_notch_hes)  # print the full ggsurvplot object
 dev.off()
 #EN  C Kaplan-Meier #############################
@@ -335,27 +339,72 @@ test_survplot_notch_hesEN <- ggsurvplot(km_fitnotch_hes, data = surv_df_testnotc
                                         #pval = TRUE,  # Show p-value of the log-rank test
                                         risk.table = TRUE, 
                                         #risk.table.title = "Pacienčių skaičius rizikos grupėje",
-                                        title = bquote("C    " ~
-                                                         italic("NOTCH3") ~ "and" ~ italic("HES1") ~ "gene expression combination"),
+                                        title =  expression(
+                                          bold("C ") * italic("NOTCH3") * " and " * italic(" HES1") * " gene expression combination"
+                                        ),
                                         xlab = "Overall survival, months",
                                         #ylab = "Išgyvenamumo tikimybė",
                                         palette = c( "deeppink", "turquoise"),  # Color palette for groups
                                         #legend.title = "Rizikos grupė", 
-                                        legend.labs = c("Low risk score", "High risk score"))
+                                        legend.labs = c("High risk score", "Low risk score")) #changed places
 # Add subtitle form cox result
 test_survplot_notch_hesEN$plot <- test_survplot_notch_hesEN$plot +
-  labs(subtitle = "Uni HR = 0.37  (95 % CI: 0.14–0.98);
-Multi HR = 0.50 (95 % CI: 0.17–1.47);
-Log-rank p = 0.04, n = 48")
+  labs(subtitle = paste0("Uni HR = 0.37  (95 % CI: 0.14–0.98);\n",
+"Multi HR = 0.50 (95 % CI: 0.17–1.47);\n",
+"Log-rank p = 0.04, n = 48") )
 
 print(test_survplot_notch_hesEN)
 
 #save
-png("KM_plot_notch_HES_OC_w_HREN20251222.png",
-    width = 1500, height = 1000, res = 200)
+png("KM_plot_notch_HES_OC_w_HREN20260120short.png",
+    width = 800, height = 600, res = 120)
 print(test_survplot_notch_hesEN)  # print the full ggsurvplot object
 dev.off()
+#COMBINE IMAGES##############################################
+img1 <- image_read("KM_plot_notch_arid1a_OC_w_HR20260120short.png")
+img2 <- image_read("KM_plot_14_OC_w_HR20260120short.png")
+img3 <- image_read("KM_plot_notch_HES_OC_w_HR20260120short.png")
 
+# Match heights to avoid misalignment
+target_height <- min(
+  image_info(img1)$height,
+  image_info(img2)$height,
+  image_info(img3)$height
+)
+
+img1 <- image_resize(img1, paste0("x", target_height))
+img2 <- image_resize(img2, paste0("x", target_height))
+img3 <- image_resize(img3, paste0("x", target_height))
+
+combined_km <- image_append(c(img1, img2, img3), stack = FALSE)
+
+image_write(
+  combined_km,
+  "KM_plots_combined_horizontal_20260121.png"
+)
+
+##combine EN image##################
+img1en <- image_read("KM_plot_notch_arid1a_OC_w_HR_EN20260120short.png")
+img2en <- image_read("KM_plot_14_OC_w_HR_en20260120short.png")
+img3en <- image_read("KM_plot_notch_HES_OC_w_HREN20260120short.png")
+
+# Match heights to avoid misalignment
+target_height <- min(
+  image_info(img1en)$height,
+  image_info(img2en)$height,
+  image_info(img3en)$height
+)
+
+img1en <- image_resize(img1en, paste0("x", target_height))
+img2en <- image_resize(img2en, paste0("x", target_height))
+img3en <- image_resize(img3en, paste0("x", target_height))
+
+combined_kmen <- image_append(c(img1en, img2en, img3en), stack = FALSE)
+
+image_write(
+  combined_kmen,
+  "KM_plots_combined_horizontal_EN20260121.png"
+)
 #TIME ROC, NOTCH, OC #########################################
 surv_df_notch_oc <- OC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in%
                                          c("OS", "STATUS", genes_notch, methylation, "RiskScore_notch", "RiskScore_14", "RiskScore_notch_hes", "patient_id_aud")]
@@ -514,8 +563,8 @@ cat("  Cutoff:", best_cutoff_60, "\n")
 target_time <- 12        
 time_index <- which(rez_list2_notch_OC[[1]]$times == target_time)
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OC_timeROC_12_test20250924.png",
-    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OC_timeROC_12_test20260121.png",
+    width = 15, height = 15, res = 510, units = "cm") 
 # Base ROC curve plot (same as before)
 par(pty="s")
 plot(
@@ -605,8 +654,8 @@ dev.off() # Close the PNG device
 target_time <- 36        
 time_index <- which(rez_list2_notch_OC[[1]]$times == target_time)
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OC_timeROC_36_test20250924.png",
-    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OC_timeROC_36_test20260121.png",
+    width = 15, height = 15, res = 510, units = "cm") # width and height in pixels, resolution in dpi
 # Set up base plot with gene 1
 par(pty="s")
 # Set up base plot with gene 1
@@ -686,8 +735,8 @@ dev.off() # Close the PNG device
 target_time <- 60        
 time_index <- which(rez_list2_notch_OC[[1]]$times == target_time)
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test20251124x.png",
-    width = 1800, height = 1800, res = 220) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test20260121_5yr.png",
+    width = 15, height = 15, res = 510, units = "cm") # width and height in pixels, resolution in dpi
 # Set up base plot with gene 1
 par(pty="s")
 # Set up base plot with gene 1
@@ -772,7 +821,7 @@ dev.off() # Close the PNG device
 target_time <- 60        
 time_index <- which(rez_list2_notch_OC[[1]]$times == target_time)
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissuesNO_AUCS_OCtimeROC_test20251208.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissuesNO_AUCS_OCtimeROC_test20202601215yr.png",
     width = 1500, height = 1500, res = 200) # width and height in pixels, resolution in dpi
 
 par(pty="s")
@@ -950,17 +999,31 @@ gt_table_roc_60
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_roc_60,
-       filename = "timeroc_table_20251208.png")
+       filename = "timeroc_table_20260121.png")
 
 #Combine the images
-roc_image <- image_read("tissuesNO_AUCS_OCtimeROC_test20251208.png")
-table_image <- image_read("timeroc_table_20251208.png")
+#save images together
+roc_image2   <- image_read("tissuesNO_AUCS_OCtimeROC_test20202601215yr.png")
+table_image2 <- image_read("timeroc_table_20260121.png")
 
-combined_image <- image_append(c(roc_image, table_image), stack = F)
+# Get height of ROC image
+roc_height <- image_info(roc_image2)$height
 
-# Save the combined image
-image_write(combined_image, 
-            "roc_notch_all_oc_with_table_20251208.png")
+# Resize table to same height (keeps aspect ratio)
+table_image2_resized <- image_resize(
+  table_image2,
+  geometry = paste0("x", roc_height)
+)
+
+combined_image2 <- image_append(
+  c(roc_image2, table_image2_resized),
+  stack = FALSE
+)
+
+image_write(
+  combined_image2,
+  "roc_notch_all_oc_with_table_20260121.png"
+)
 
 # ENGLSIH FINAL 5 year plot, no AUCs #######################
 # Choose target time
@@ -969,8 +1032,8 @@ time_index <- which(rez_list2_notch_OC[[1]]$times == target_time)
 #rename ARID1A_met
 names(rez_list2_notch_OC)[names(rez_list2_notch_OC) == "ARID1A_met"] <- 
   "ARID1A methylation"
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissuesNO_AUCS_OCtimeROC_testEN20251215.png",
-    width = 1500, height = 1500, res = 150) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissuesNO_AUCS_OCtimeROC_testEN20260121.png",
+    width = 20, height = 20, res = 510, units = "cm") # width and height in pixels, resolution in dpi
 
 par(pty="s")
 
@@ -1112,17 +1175,30 @@ gt_table_roc_60EN
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_roc_60EN,
-       filename = "timeroc_table_EN20251215.png")
+       filename = "timeroc_table_EN20260121.png")
 
-#Combine the images
-roc_imageEN <- image_read("tissuesNO_AUCS_OCtimeROC_testEN20251215.png")
-table_imageEN <- image_read("timeroc_table_EN20251215.png")
+#save images together
+roc_image2   <- image_read("tissuesNO_AUCS_OCtimeROC_testEN20260121.png")
+table_image2 <- image_read("timeroc_table_EN20260121.png")
 
-combined_image <- image_append(c(roc_imageEN, table_imageEN), stack = F)
+# Get height of ROC image
+roc_height <- image_info(roc_image2)$height
 
-# Save the combined image
-image_write(combined_image, 
-            "roc_notch_all_oc_with_table_en20251219.png")
+# Resize table to same height (keeps aspect ratio)
+table_image2_resized <- image_resize(
+  table_image2,
+  geometry = paste0("x", roc_height)
+)
+
+combined_image2 <- image_append(
+  c(roc_image2, table_image2_resized),
+  stack = FALSE
+)
+
+image_write(
+  combined_image2,
+  "roc_notch_all_oc_with_table_en20260121.png"
+)
 
 
 #compare time rocs ##################################################
@@ -1322,3 +1398,4 @@ roc_result_model_ARID1A_60 <- timeROC(
   iid = TRUE      )   # Compute confidence intervals
 
 compare(roc_result_model_notch_met_60, roc_result_model_ARID1A_60, adjusted = F) #0.1225441     
+

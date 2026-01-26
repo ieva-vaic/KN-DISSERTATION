@@ -118,7 +118,8 @@ roc_plot <- function() {
   cex = 0.7, lwd =3)
 }
 roc_plot()
-png("met_exprs_roc_OC_output20251205.png", width = 1200, height = 1200, res = 200)
+png("met_exprs_roc_OC_output20260121.png",
+    width = 15, height = 15, res = 510, units = "cm")
 roc_plot()
 dev.off()
 
@@ -182,19 +183,28 @@ gt_table_tumor <- tumor_lentele_atskiru %>%
 #show
 gt_table_tumor
 
-#there is no other convenient way to save gt outputs
-gtsave(gt_table_tumor,
-       filename = "met_exprs_roctable_OC_output20251205.png")
+#save both the same size together
+roc_image2   <- image_read("met_exprs_roc_OC_output20260121.png")
+table_image2 <- image_read("met_exprs_roctable_OC_output20260121.png")
 
-#Combine the images 
-roc_image2<- image_read("met_exprs_roc_OC_output20251205.png")
-table_image2 <- image_read("met_exprs_roctable_OC_output20251205.png")
+# Get height of ROC image
+roc_height <- image_info(roc_image2)$height
 
-combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
+# Resize table to same height (keeps aspect ratio)
+table_image2_resized <- image_resize(
+  table_image2,
+  geometry = paste0("x", roc_height)
+)
 
-# Save the combined image
-image_write(combined_image2, 
-            "met_exprs_ROC_TABLE_OC_outputs20251205.png")
+combined_image2 <- image_append(
+  c(roc_image2, table_image2_resized),
+  stack = FALSE
+)
+
+image_write(
+  combined_image2,
+  "met_exprs_ROC_TABLE_OC_outputs20260121.png"
+)
 
 ##roc figure OVCa######################################
 roc_plotEN <- function() {
@@ -243,7 +253,8 @@ roc_plotEN <- function() {
 }
 roc_plotEN()
 
-png("met_exprs_roc_OC_outputEN20251215.png", width = 1200, height = 1200, res = 200)
+png("met_exprs_roc_OC_outputEN20260121.png",
+    width = 15, height = 15, res = 510, units = "cm")
 roc_plotEN()
 dev.off()
 
@@ -273,17 +284,30 @@ gt_table_tumorEN
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_tumorEN,
-       filename = "met_exprs_roctable_OC_outputEN20251215.png")
+       filename = "met_exprs_roctable_OC_outputEN20260121.png")
 
 #Combine the images 
-roc_image2EN<- image_read("met_exprs_roc_OC_outputEN20251215.png")
-table_image2EN <- image_read("met_exprs_roctable_OC_outputEN20251215.png")
+roc_image2   <- image_read("met_exprs_roc_OC_outputEN20260121.png")
+table_image2 <- image_read("met_exprs_roctable_OC_outputEN20260121.png")
 
-combined_image2EN <- image_append(c(roc_image2EN, table_image2EN), stack = F)
+# Get height of ROC image
+roc_height <- image_info(roc_image2)$height
 
-# Save the combined image
-image_write(combined_image2EN, 
-            "met_exprs_ROC_TABLE_OC_outputsEN20251215.png")
+# Resize table to same height (keeps aspect ratio)
+table_image2_resized <- image_resize(
+  table_image2,
+  geometry = paste0("x", roc_height)
+)
+
+combined_image2 <- image_append(
+  c(roc_image2, table_image2_resized),
+  stack = FALSE
+)
+
+image_write(
+  combined_image2,
+  "met_exprs_ROC_TABLE_OC_outputsEN20260121.png"
+)
 
 
 #ROC HGSOC vs BENIGN###########################################
@@ -346,11 +370,12 @@ roc_plot2 <- function() {
   col = c("#f032e6", "#f58231","#808000", "#469990", "#42d4f4",
           "#911eb4", "#dcbeff", "#ffd8b1", "#fabed4", "#a9a9a9",
           "black", "red", "darkred", "deeppink"), lty = 1, 
-  cex = 0.8, lwd =3)
+  cex = 0.75, lwd =3)
 }
 roc_plot2()
 # Save the plot as a PNG file
-png("met_exrs_roc_HGSOC_output20251205.png", width = 1200, height = 1200, res = 200)
+png("met_exrs_roc_HGSOC_output20260121.png",
+    width = 15, height = 15, res = 510, units = "cm")
 roc_plot2()
 dev.off()
 
@@ -414,26 +439,30 @@ gt_table_tumor_bh <- tumor_lentele_atskiru_bh %>%
 gt_table_tumor_bh
 
 #there is no other convenient way to save gt outputs
-gtsave(gt_table_tumor_bh, filename = "met_exprs_roctable_HGSOC_output20251205.png")
+gtsave(gt_table_tumor_bh, filename = "met_exprs_roctable_HGSOC_output20260121.png")
 
 #Combine the images 
-roc_image2<- image_read("met_exrs_roc_HGSOC_output20251205.png")
-table_image2 <- image_read("met_exprs_roctable_HGSOC_output20251205.png")
+roc_image2   <- image_read("met_exrs_roc_HGSOC_output20260121.png")
+table_image2 <- image_read("met_exprs_roctable_HGSOC_output20260121.png")
 
-# Find the max width to align both
-roc_info <- image_info(roc_image2)
-table_info <- image_info(table_image2)
-max_width <- max(roc_info$width, table_info$width)
+# Get height of ROC image
+roc_height <- image_info(roc_image2)$height
 
-# Pad each image to the max width
-roc_image2_padded <- image_extent(roc_image2, geometry = geometry_area(max_width, roc_info$height), gravity = "center", color = "white")
-table_image2_padded <- image_extent(table_image2, geometry = geometry_area(max_width, table_info$height), gravity = "center", color = "white")
+# Resize table to same height (keeps aspect ratio)
+table_image2_resized <- image_resize(
+  table_image2,
+  geometry = paste0("x", roc_height)
+)
 
-combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
+combined_image2 <- image_append(
+  c(roc_image2, table_image2_resized),
+  stack = FALSE
+)
 
-# Save the combined image
-image_write(combined_image2, 
-            "met_exrs_ROCTABLE_HGSOC_output20251205.png")
+image_write(
+  combined_image2,
+  "met_exrs_ROCTABLE_HGSOC_output20260121.png"
+)
 
 ## HGSOC vs benign ROC EN version #########################
 roc_plot2EN <- function() {
@@ -477,12 +506,12 @@ roc_plot2EN <- function() {
   col = c("#f032e6", "#f58231","#808000", "#469990", "#42d4f4",
           "#911eb4", "#dcbeff", "#ffd8b1", "#fabed4", "#a9a9a9",
           "black", "red", "darkred", "deeppink"), lty = 1, 
-  cex = 0.8, lwd =3)
+  cex = 0.75, lwd =3)
 }
 roc_plot2EN()
 
-
-png("met_exprs_roc_OC_outputEN20251215.png", width = 1200, height = 1200, res = 200)
+png("met_exprs_roc_HGSOC_outputEN20260121.png",
+    width = 15, height = 15, res = 510, units = "cm")
 roc_plot2EN()
 dev.off()
 
@@ -509,17 +538,30 @@ gt_table_tumor_bhEN <- tumor_lentele_atskiru_bhEN %>%
 gt_table_tumor_bhEN
 
 #there is no other convenient way to save gt outputs
-gtsave(gt_table_tumor_bhEN, filename = "met_exprs_roctable_HGSOC_outputEN20251215.png")
+gtsave(gt_table_tumor_bhEN, filename = "met_exprs_roctable_HGSOC_outputEN20260121.png")
 
-#Combine the images 
-roc_image2EN<- image_read("met_exprs_roc_OC_outputEN20251215.png")
-table_image2EN <- image_read("met_exprs_roctable_HGSOC_outputEN20251215.png")
+#combine images
+roc_image2   <- image_read("met_exprs_roc_HGSOC_outputEN20260121.png")
+table_image2 <- image_read("met_exprs_roctable_HGSOC_outputEN20260121.png")
 
-combined_image2EN <- image_append(c(roc_image2EN, table_image2EN), stack = F)
+# Get height of ROC image
+roc_height <- image_info(roc_image2)$height
 
-# Save the combined image
-image_write(combined_image2EN, 
-            "met_exrs_ROCTABLE_HGSOC_outputEN20251215.png")
+# Resize table to same height (keeps aspect ratio)
+table_image2_resized <- image_resize(
+  table_image2,
+  geometry = paste0("x", roc_height)
+)
+
+combined_image2 <- image_append(
+  c(roc_image2, table_image2_resized),
+  stack = FALSE
+)
+
+image_write(
+  combined_image2,
+  "met_exrs_ROCTABLE_HGSOC_outputEN20260121.png"
+)
 #ROC HGSOC vs other###########################################
 # HGSOC vs other df
 KN_OTHER_HGSOC <- KN_data[KN_data$Grupė_Ieva != "Benign", ] 
@@ -580,12 +622,13 @@ roc_plot3 <- function() {
   col = c("#f032e6", "#f58231","#808000", "#469990", "#42d4f4",
           "#911eb4", "#dcbeff", "#ffd8b1", "#fabed4", "#a9a9a9",
           "black", "red", "darkred", "deeppink"), lty = 1, 
-  cex = 0.8, lwd =3)
+  cex = 0.7, lwd =3)
 }
 
 roc_plot3()
 # Save the plot as a PNG file
-png("met_exprs_ROC_HGSOC_others_output20251205.png", width = 1200, height = 1200, res = 200)
+png("met_exprs_ROC_HGSOC_others_output20260121.png",
+    width = 15, height = 15, res = 510, units = "cm")
 roc_plot3()
 dev.off()
 
@@ -651,17 +694,30 @@ gt_table_tumor_oh <- tumor_lentele_atskiru_oh %>%
 gt_table_tumor_oh
 
 #there is no other convenient way to save gt outputs
-gtsave(gt_table_tumor_oh, filename = "met_exprs_table_HGSOC_others_output20251205.png")
+gtsave(gt_table_tumor_oh, filename = "met_exprs_table_HGSOC_others_output20260121.png")
 
 #Combine the images
-roc_image2<- image_read("met_exprs_ROC_HGSOC_others_output20251205.png")
-table_image2 <- image_read("met_exprs_table_HGSOC_others_output20251205.png")
+roc_image2   <- image_read("met_exprs_ROC_HGSOC_others_output20260121.png")
+table_image2 <- image_read("met_exprs_table_HGSOC_others_output20260121.png")
 
-combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
+# Get height of ROC image
+roc_height <- image_info(roc_image2)$height
 
-# Save the combined image
-image_write(combined_image2, 
-            "met_exprs_ROCTABLE_HGSOC_others_output20251205.png")
+# Resize table to same height (keeps aspect ratio)
+table_image2_resized <- image_resize(
+  table_image2,
+  geometry = paste0("x", roc_height)
+)
+
+combined_image2 <- image_append(
+  c(roc_image2, table_image2_resized),
+  stack = FALSE
+)
+
+image_write(
+  combined_image2,
+  "met_exprs_ROCTABLE_HGSOC_others_output202602121.png"
+)
 
 ##roc figure HGSOC vs others ###################################
 roc_plot3EN <- function() {
@@ -705,12 +761,13 @@ roc_plot3EN <- function() {
   col = c("#f032e6", "#f58231","#808000", "#469990", "#42d4f4",
           "#911eb4", "#dcbeff", "#ffd8b1", "#fabed4", "#a9a9a9",
           "black", "red", "darkred", "deeppink"), lty = 1, 
-  cex = 0.8, lwd =3)
+  cex = 0.7, lwd =3)
 }
 
 roc_plot3EN()
 
-png("met_exprs_roc_HGSOC_Others_outputEN20251215.png", width = 1200, height = 1200, res = 200)
+png("met_exprs_roc_HGSOC_Others_outputEN20260121.png", 
+    width = 15, height = 15, res = 510, units = "cm")
 roc_plot3EN()
 dev.off()
 
@@ -739,14 +796,28 @@ gt_table_tumor_ohEN <- results_tumor_ohEN %>%
 gt_table_tumor_ohEN
 
 #there is no other convenient way to save gt outputs
-gtsave(gt_table_tumor_ohEN, filename = "met_exprs_table_HGSOC_others_outputEN20251215.png")
+gtsave(gt_table_tumor_ohEN,
+       filename = "met_exprs_table_HGSOC_others_outputEN20260121.png")
 
 #Combine the images
-roc_image2EN<- image_read("met_exprs_roc_HGSOC_Others_outputEN20251215.png")
-table_image2EN <- image_read("met_exprs_table_HGSOC_others_outputEN20251215.png")
+roc_image2   <- image_read("met_exprs_roc_HGSOC_Others_outputEN20260121.png")
+table_image2 <- image_read("met_exprs_table_HGSOC_others_outputEN20260121.png")
 
-combined_image2EN <- image_append(c(roc_image2EN, table_image2EN), stack = F)
+# Get height of ROC image
+roc_height <- image_info(roc_image2)$height
 
-# Save the combined image
-image_write(combined_image2EN, 
-            "met_exprs_ROCTABLE_HGSOC_others_outputEN20251215.png")
+# Resize table to same height (keeps aspect ratio)
+table_image2_resized <- image_resize(
+  table_image2,
+  geometry = paste0("x", roc_height)
+)
+
+combined_image2 <- image_append(
+  c(roc_image2, table_image2_resized),
+  stack = FALSE
+)
+
+image_write(
+  combined_image2,
+  "met_exprs_ROCTABLE_HGSOC_others_outputEN202602121.png"
+)

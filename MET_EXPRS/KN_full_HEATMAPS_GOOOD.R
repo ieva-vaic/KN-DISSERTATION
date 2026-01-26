@@ -158,7 +158,8 @@ png("C:/Users/Ieva/rprojects/outputs_all/DISS/heatmap_output_ALL20251204.png", w
 draw(htlist, row_km = 1, row_split = merged_df$Tumor)
 dev.off() # Close the PNG device
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/heatmap_output_METHILATION20251204.png", width =3000, height = 5500,
-    res = 510, units = "px", pointsize = 12) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/heatmap_output_METHILATION20260121.png",
+    width =20, height = 25,
+    res = 510, units = "cm", pointsize = 12) # width and height in pixels, resolution in dpi
 draw(heatmap_metilinimas)
 dev.off() # Close the PNG device

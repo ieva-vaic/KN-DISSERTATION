@@ -50,7 +50,7 @@ each.vs.ref_sig_tumor <- tibble::tribble(
   "Gerybiniai",   "KV", 0.000176, -4, "FBXW7",
   #"Gerybiniai",   "KV", 0.842, -4, "JAG2",
   "Gerybiniai",   "KV", 0.00044, -5, "DLL1",
-  "Gerybiniai",   "KV", 0.002, -2, "HES1",
+  "Gerybiniai",   "KV", 0.002, -1.5, "HES1",
 )
 # iki 3 skaiciu po kablelio numazinimas
 each.vs.ref_sig_tumor$p.adj_custom <- ifelse(each.vs.ref_sig_tumor$p.adj < 0.001, 
@@ -89,7 +89,13 @@ tumor_plot #
 #set directory for saving
 setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
 #save
-png("met_exprs_boxplot_OVca_output1020.png", width = 3000, height = 2700, res = 450) # width and height in pixels, resolution in dpi
+png("met_exprs_boxplot_OVca_output20260121.png",
+#width = 3000, height = 2700, res = 450
+width = 18,
+height = 16,
+units = "cm",
+res = 500
+)
 tumor_plot #
 dev.off() # Close the PNG device
 
@@ -218,8 +224,13 @@ HOB_x <- ggplot(HOB_table, aes(x=tumor , y=value, fill = variable)) +
 HOB_x
 
 #SAVE PNG
-png("met_exprs_boxplot_3groups_output1020.png",
-    width = 4200, height = 3000, res = 400) # width and height in pixels, resolution in dpi
+png("met_exprs_boxplot_3groups_output20260121.png",
+#    width = 4200, height = 3000, res = 400 # width and height in pixels, resolution in dpi
+width = 28,
+height = 16,
+units = "cm",
+res = 500
+    )
 HOB_x #
 dev.off() # Close the PNG device
 
@@ -290,7 +301,7 @@ each.vs.ref_sig_grade <- tibble::tribble(
   "G1",   "G3", 0.054, -4, "FBXW7", #not significant anymore
   #"G1",   "G3", 0.335, -3, "JAG2",
   "G1",   "G3", 0.054, -6, "DLL1",
-  "G1",   "G3", 0.000364, -2, "HES1",
+  "G1",   "G3", 0.000364, -1.5, "HES1",
   
 )
 # iki 3 skaiciu po kablelio numazinimas
@@ -325,8 +336,13 @@ grade_plot
 
 #SAVE PNG AT THE SAME SIZE
 
-png("metexprs_BOXPLOT_grade_output1020.png",
-    width = 3000, height = 2600, res = 400) # width and height in pixels, resolution in dpi
+png("metexprs_BOXPLOT_grade_output20260121.png",
+#    width = 3000, height = 2600, res = 400 # width and height in pixels, resolution in dpi
+width = 18,
+height = 16,
+units = "cm",
+res = 500
+)
 grade_plot #
 dev.off() # Close the PNG device
 
@@ -366,7 +382,7 @@ stat.test_stage4_w
 
 each.vs.ref_sig_stage4 <- tibble::tribble(
   ~group1, ~group2, ~p.adj,   ~y.position, ~variable,
-  "II",   "IV", 0.026   , -3, "NOTCH2",
+  "II",   "IV", 0.026   , -2, "NOTCH2",
   "II",   "IV", 0.046     , 0, "CTNNB1",
   "III",   "IV", 0.042    , -1, "CTNNB1",
   "II",   "IV", 0.046     , -3, "FBXW7",
@@ -374,8 +390,8 @@ each.vs.ref_sig_stage4 <- tibble::tribble(
   "II",   "III", 0.075     , -1, "ARID1A",
   "III",   "IV", 0.053     , -2, "ARID1A",
   "II",   "IV", 0.053     , -4, "NOTCH1",
-  "II",   "III", 0.083     , -3.5, "NOTCH2",
-  "III",   "IV", 0.086     , -2, "NOTCH2",
+  "II",   "III", 0.083     , -3, "NOTCH2",
+  "III",   "IV", 0.086     , -1, "NOTCH2",
 )
 # iki 3 skaiciu po kablelio numazinimas
 each.vs.ref_sig_stage4$p.adj_custom <- ifelse(each.vs.ref_sig_stage4$p.adj < 0.001, 
@@ -408,8 +424,13 @@ stage4_plot <- ggplot(stage4_table, aes(x=Stage4, y=value, fill = variable)) +
 stage4_plot #
 
 #SAVE PNG
-png("met_exprs_BOXPLOT_HGSOC_stage_output1020.png", 
-    width = 3000, height = 2700, res = 400) # width and height in pixels, resolution in dpi
+png("met_exprs_BOXPLOT_HGSOC_stage_output20260121.png", 
+    #width = 3000, height = 2700, res = 400 # width and height in pixels, resolution in dpi
+    width = 20,
+    height = 16,
+    units = "cm",
+    res = 500
+)    
 stage4_plot #
 dev.off() # Close the PNG device
 
@@ -491,7 +512,13 @@ ca_expr_plot <- ggplot(ca_table, aes(x=CA125_f, y=value)) +
 ca_expr_plot
 
 #SAVE PNG 
-png("met_exprs_BOXPLOT__ca125_output0530.png", width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+png("met_exprs_BOXPLOT__ca125_output20260121.png",
+    #width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+    width = 18,
+    height = 20,
+    units = "cm",
+    res = 500
+)
 ca_expr_plot #
 dev.off() # Close the PNG device
 
@@ -646,10 +673,7 @@ corr_plot <- ggplot(plot_df, aes(x = Amžius, y = value)) +
   theme_minimal() +
   labs(y = "Expression", x = "Amžius")
 
-#SAVE PNG 
-png("met_exprs_CORELATION_age_output0530.png", width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
 corr_plot #
-dev.off() # Close the PNG device
 
 # ENGLISH PLOTS #############
 ## EN OC boxplot ##############
@@ -668,7 +692,7 @@ each.vs.ref_sig_tumorEN <- tibble::tribble(
   "Benign",   "OC", 0.000176, -4, "FBXW7",
   # "Benign",   "OC", 0.842, -4, "JAG2",
   "Benign",   "OC", 0.00044, -5, "DLL1",
-  "Benign",   "OC", 0.002, -2, "HES1",
+  "Benign",   "OC", 0.002, -1.5, "HES1",
 )
 # iki 3 skaiciu po kablelio numazinimas
 each.vs.ref_sig_tumorEN$p.adj_custom <- ifelse(each.vs.ref_sig_tumorEN$p.adj < 0.001, 
@@ -702,13 +726,17 @@ tumor_plotEN <- ggplot(tumor_tableEN, aes(x=tumor, y=value, fill = variable)) +
 tumor_plotEN #
 
 #SAVE PNG
-png("met_exprs_boxplot_2groups_ENoutput20251212.png",
-    width = 4200, height = 3000, res = 400) # width and height in pixels, resolution in dpi
+png("met_exprs_boxplot_2groups_ENoutput20260121.png",
+    width = 18,
+    height = 16,
+    units = "cm",
+    res = 500
+)
 tumor_plotEN #
 dev.off() # Close the PNG device
 
 
-# EN 3 groups ################################
+## EN 3 groups ################################
 HOB_tableEN <- HOB_table %>%
   mutate(tumor = recode(Grupė_Ieva, "Other" = "Other OC")) 
 
@@ -758,12 +786,15 @@ HOB_x_EN
 
 
 #SAVE PNG
-png("met_exprs_boxplot_3groups_ENoutput20251212.png",
-    width = 4200, height = 3000, res = 400) # width and height in pixels, resolution in dpi
+png("met_exprs_boxplot_3groups_ENoutput20260121.png",
+    width = 28,
+    height = 16,
+    units = "cm",
+    res = 500)
 HOB_x_EN #
 dev.off() # Close the PNG device
 
-#EN grade #####################################
+##EN grade #####################################
 #plot
 custom_colors <- c("G3" = "#CF5784", "G1" = "#929cef", "NA" = "grey")
 grade_plotEN <- ggplot(grade_table, aes(x=Grade2, y=value, fill = variable)) +
@@ -790,12 +821,16 @@ grade_plotEN <- ggplot(grade_table, aes(x=Grade2, y=value, fill = variable)) +
 grade_plotEN
 
 #SAVE PNG
-png("met_exprs_boxplot_grade_ENoutput20251212.png",
-    width = 4200, height = 3000, res = 400) # width and height in pixels, resolution in dpi
+png("met_exprs_boxplot_grade_ENoutput20260121.png",
+    width = 18,
+    height = 16,
+    units = "cm",
+    res = 500
+)
 grade_plotEN #
 dev.off() # Close the PNG device
 
-# EN HGSOC STAGE #####################################
+## EN HGSOC STAGE #####################################
 #plot
 custom_colors <- c("IV" = "#cf5784","III" = "pink", "II" = "#929cef")
 stage4_plotEN <- ggplot(stage4_table, aes(x=Stage4, y=value, fill = variable)) +
@@ -822,12 +857,15 @@ stage4_plotEN <- ggplot(stage4_table, aes(x=Stage4, y=value, fill = variable)) +
 stage4_plotEN #
 
 #SAVE PNG
-png("met_exprs_boxplot_HSGOC_STAGE_ENoutput20251212.png",
-    width = 4200, height = 3000, res = 400) # width and height in pixels, resolution in dpi
+png("met_exprs_boxplot_HSGOC_STAGE_ENoutput20260121.png",
+    width = 20,
+    height = 16,
+    units = "cm",
+    res = 500) 
 stage4_plotEN #
 dev.off() # Close the PNG device
 
-#EN  CA125 ###########################
+##EN  CA125 ###########################
 ca_tableEN <- melt(KN_data, id.vars="CA125_f",  measure.vars=raiska)
 ca_tableEN <- ca_tableEN %>%
   drop_na()
@@ -871,7 +909,11 @@ ca_expr_plotEN <- ggplot(ca_tableEN, aes(x=CA125_f, y=value)) +
 ca_expr_plotEN
 
 #SAVE PNG 
-png("met_exprs_BOXPLOT__ca125_ENoutput20251212.png",
-    width = 3000, height = 2300, res = 300) 
+png("met_exprs_BOXPLOT__ca125_ENoutput20260121.png",
+    width = 18,
+    height = 20,
+    units = "cm",
+    res = 500
+)
 ca_expr_plotEN #
 dev.off() # Close the PNG device
