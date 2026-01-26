@@ -74,8 +74,8 @@ age_test_plot <-
   scale_fill_brewer(palette = "Pastel1") +
   scale_color_brewer(palette = "Pastel1") 
 #save plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontest20251001.png",
-    width = 3000, height = 3000, res = 250) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontest20260121.png",
+    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 age_test_plot #
 grid.text("B", x = unit(0.02, "npc"), y = unit(0.98, "npc"),
           gp = gpar(fontsize = 18, fontface = "bold"))
@@ -218,10 +218,23 @@ age_train_plot <- ggplot(age_long, aes(x = AGE2, y = expression)) +
   scale_fill_brewer(palette = "Pastel2") +
   scale_color_brewer(palette = "Pastel2") 
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontrain20251001.png",
-    width = 3000, height = 3000, res = 250) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontrain20260121.png",
+    width = 32, height = 29, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 age_train_plot #
 grid.text("A", x = unit(0.02, "npc"), y = unit(0.98, "npc"),
           gp = gpar(fontsize = 18, fontface = "bold"))
 dev.off() # Close the PNG device
 
+#do this after train plots are already generated 
+ img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontest20260121.png")
+ img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontrain20260121.png")
+
+combined_vertical <- image_append(
+  c(img_top, img_bottom),
+  stack = TRUE
+)
+
+image_write(
+  combined_vertical,
+  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_AGE20260121.png"
+)

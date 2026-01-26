@@ -364,7 +364,7 @@ col_colors <- sapply(colnames(gtex_filtered_counts_train), function(x) {
 heatmap_tcga4 <- Heatmap(as.matrix(gtex_filtered_counts_train), 
                          row_split = group,   
                          show_row_names = F,
-                         column_names_gp = gpar(fontsize = 6, col = col_colors, fontface = "italic"), 
+                         column_names_gp = gpar(fontsize = 8, col = col_colors, fontface = "italic"), 
                          row_names_gp = gpar(fontsize = 2), # 
                          heatmap_legend_param = list(title = "Genų raiška"),
                          right_annotation = row_ha2,
@@ -372,10 +372,16 @@ heatmap_tcga4 <- Heatmap(as.matrix(gtex_filtered_counts_train),
                          cluster_columns = F,
                          column_order = RANK)
 #save lithuanian heatmap
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/big_elastic_net_heatmap20251208.png",
-    width = 7000, height = 3000, res = 350) 
-heatmap_tcga4 
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/big_elastic_net_heatmap20260121.png",
+    width = 50, height = 20, res = 350, units = "cm") 
+draw(
+  heatmap_tcga4,
+  heatmap_legend_side = "bottom", #the legend at the bottom
+  annotation_legend_side = "bottom"
+)
+
 dev.off()
+
 
 #BONUS: count age groups###########################################
 pheno_best$id <-  substr(trimws(pheno_best$barcode), 1, 4)
@@ -388,3 +394,64 @@ full214 <- rownames(gtex_filtered_counts_train2)
 expression <- c("EXO1", "RAD50","PPT2", "LUC7L2","PKP3", "CDCA5","ZFPL1","VPS33B", "GRB7","TCEAL4", 
                 "NOTCH1", "NOTCH2", "NOTCH3", "NOTCH4", "ARID1A", "CTNNB1", "FBXW7", "JAG2", "DLL1", "HES1")
 expression[expression %in% full214] #not in the list
+
+#chek other genes form the list
+colnames(gtex_counts_train)
+
+WNT <- c("SFRP1", "SFRP2", "SFRP4", "SFRP5", "SOST", "TCF7L1", "TLE1", "TLE2" ,
+         "TLE3", "TLE4", "WIF1" ,"ZNRF3", "CTNNB1", "AMER1" ,"APC" ,"AXIN1","AXIN2", "DKK1", "DKK2",
+         "DKK3" ,"DKK4" ,"GSK3B" ,"RNF43" ,"TCF7" ,"TCF7L2")
+NOtch <- c( "ADAM10", "ADAM17", "APH1A" ,"APH1B" ,"ARRDC1" ,"CIR1" ,"CTBP1" ,"CTBP2" ,
+            "CUL1", "DLL1" ,"DLL3", "DLL4", "DTX1", "DTX2" ,"DTX3", "DTX3L" ,"DTX4",
+            "EP300", "FBXW7", "HDAC1" ,"HDAC2", "HES1", "HES5", "HEYL", "ITCH", "JAG1" ,
+            "JAG2", "KDM5A" ,"LFNG", "MAML1" ,"MAML2", "MAML3" ,"MFNG", "NCOR2",
+            "NCSTN", "NOTCH1", "NOTCH2" ,"NOTCH3", "NOTCH4" ,"NRARP", "NUMB" ,"NUMBL",
+            "PSEN1" ,"PSEN2", "PSENEN", "RBPJ", "RBPJL" ,"RFNG", "SNW1", "SPEN",
+            "HES2" ,"HES4", "HES7" ,"HEY1" ,"HEY2")
+chromatin <-  c(
+  # SWI/SNF (BAF / PBAF)
+  "SMARCA4", "SMARCA2", "SMARCB1", "SMARCC1", "SMARCC2",
+  "ARID1A", "ARID1B", "ARID2", "PBRM1",
+  "BRD7", "BRD9",
+  "DPF1", "DPF2", "DPF3",
+  
+  # ISWI
+  "SMARCA1", "SMARCA5",
+  "BAZ1A", "BAZ1B", "BAZ2A", "BAZ2B",
+  "RSF1",
+  
+  # CHD family
+  "CHD1", "CHD2", "CHD3", "CHD4", "CHD5",
+  "CHD6", "CHD7", "CHD8", "CHD9",
+  
+  # INO80 / SWR
+  "INO80", "SRCAP",
+  "RUVBL1", "RUVBL2",
+  "ACTL6A", "ACTL6B",
+  "YY1",
+  
+  # NuRD
+  "HDAC1", "HDAC2",
+  "MTA1", "MTA2", "MTA3",
+  "RBBP4", "RBBP7",
+  "GATAD2A", "GATAD2B",
+  
+  # ATRX/DAXX
+  "ATRX", "DAXX",
+  
+  # Histone variant / associated factors
+  "H2AFZ", "H3F3A", "H3F3B",
+  "ASF1A", "ASF1B",
+  "NAP1L1"
+)
+WNT %in% colnames(gtex_counts_train) #check if they are in the data
+sum(NOtch %in% colnames(gtex_counts_train)) #check if they are in the data
+chromatin %in% colnames(gtex_counts_train) #check if they are in the data
+
+chromatin_present <- chromatin[
+  chromatin %in% colnames(gtex_counts_train)
+]
+
+chromatin_present
+"PSEN2" %in%colnames(gtex_counts_train) #this gene is in the data
+

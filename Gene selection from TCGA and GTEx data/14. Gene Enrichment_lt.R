@@ -11,7 +11,7 @@ library(enrichplot)
 library(msigdbr)
 library(tidyverse)
 #set directory of the data
-setwd("../TCGA-OV-RISK-PROJECT/Public data RDSs/")
+setwd("C:/Users/Ieva/rprojects/TCGA-OV-RISK-PROJECT/Public data RDSs/")
 # Load train data ###################################
 gtex_counts_train <- readRDS("train_gtcga_normcounts_prot_2025.RDS")
 #filter for lasso genes
@@ -52,9 +52,9 @@ dotplot <- dotplot(ego, showCategory =15) +
   ggtitle("GO Enrichment for Elastic net selected genes") +
   theme_minimal() +
   theme(plot.title = element_text(hjust = 0.5))
-#save dotplot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/gene_enrichment_20250902.png",
-    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
+#save dotplot#################################################################
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/gene_enrichment_20260121.png",
+    width = 15, height = 21, res = 200, units = "cm") # width and height in pixels, resolution in dpi
 dotplot #
 dev.off() # Close the PNG device
 

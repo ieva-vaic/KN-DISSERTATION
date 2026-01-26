@@ -141,9 +141,9 @@ surv_test <- survdiff(Surv(overall_survival, deceased) ~ RiskGroup, data = clin_
 pval_num <- 1 - pchisq(surv_test$chisq, length(surv_test$n) - 1)
 # Format nicely
 if (pval_num < 0.001) {
-  pval_text <- "Long-rank p < 0.001"
+  pval_text <- "Log-rank p < 0.001"
 } else {
-  pval_text <- paste0("Long-rank p = ", signif(pval_num, 3))
+  pval_text <- paste0("Log-rank p = ", signif(pval_num, 3))
 }
 
 # Plot
@@ -158,15 +158,15 @@ train_surv <- ggsurvplot(
   ylab = "Išgyvenamumo tikimybė",
   palette = c("turquoise", "deeppink"),
   legend.title = "Rizikos grupė", 
-  legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas")
+  legend.labs = c("Mažos rizikos balas", "Didelės rizikos balas")
 )
 
 # Add subtitle
 train_surv$plot <- train_surv$plot + labs(subtitle = pval_text)
 print(train_surv)
 #save km plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_train20250925.png",
-    width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_train20260123.png",
+    width = 15, height = 13, res = 100, units = "cm") # width and height in pixels, resolution in dpi
 train_surv #
 dev.off() # Close the PNG device
 
@@ -408,7 +408,7 @@ target_time <- 1825   # choose year 5
 time_index <- which(rez_list2[[1]]$times == target_time)
 
 # plot with save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20251215.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20260123.png",
     width = 1000, height = 1000, res = 200)
 
 par(pty="s")
@@ -536,17 +536,17 @@ gt_table_roc_60
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_roc_60,
-       filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_timeroc_table_202501002.png")
+       filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_timeroc_table_20260121.png")
 
 #Combine the images
-roc_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20251124.png")
-table_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_timeroc_table_202501002.png")
+roc_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_train20260123.png")
+table_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_timeroc_table_20260121.png")
 
 combined_image <- image_append(c(roc_image, table_image), stack = F)
 
 # Save the combined image
 image_write(combined_image, 
-            "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_ROC_W_TABLE20251124.png")
+            "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_ROC_W_TABLE20260123.png")
 
 #Kaplan-meier plot, sepratae genes##################################
 colnames(clin_df_joined) 
@@ -812,8 +812,8 @@ gtex_plot <- ggplot(gtcga_table_full, aes(x=group , y=value, fill = variable)) +
 
 gtex_plot
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_20250618.png",
-    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_20260121.png",
+    width = 18, height = 17, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 gtex_plot #
 dev.off() # Close the PNG device
 
@@ -980,8 +980,8 @@ stage_plot2 <- ggdraw(stage_plot) +
 
 stage_plot2
 #save stage plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_stage_barplot_20251211.png",
-    width = 2200, height = 1300, res = 180) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_stage_barplot_20260126.png",
+    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 stage_plot2 #
 dev.off() # Close the PNG device
 
@@ -1054,8 +1054,8 @@ grade_plot2 <- ggdraw(grade_plot) +
   draw_plot_label(label = "A", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
 
 #save grade plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_grade_barplot_20251211.png",
-    width = 2200, height = 1300, res = 200) 
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_grade_barplot_20260121.png",
+    width = 32, height = 19, res = 500, units = "cm") 
 grade_plot2 
 dev.off() 
 
@@ -1160,8 +1160,8 @@ lymph_plot2 <- ggdraw(lymph_plot) +
 
 lymph_plot2
 #save lymphovascular invasion plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_lymph_barplot_20251211.png",
-    width = 2450, height = 1300, res = 200) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_lymph_barplot_20260121.png",
+    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 lymph_plot2 #
 dev.off() # Close the PNG device
 
@@ -1302,8 +1302,8 @@ res_plot2 <- ggdraw(res_plot) +
 
 res_plot2
 #save residual tumor plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_res_barplot_20251211.png",
-    width = 2450, height = 1300, res = 170) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_res_barplot_20260121.png",
+    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 res_plot2 #
 dev.off() # Close the PNG device
 
@@ -1476,8 +1476,8 @@ gtex_plotEN <- ggplot(gtcga_table_full, aes(x=group , y=value, fill = variable))
 gtex_plotEN
 
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_EN20251216.png",
-    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_EN20260121.png",
+    width = 18, height = 17, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 gtex_plotEN #
 dev.off() # Close the PNG device
 
@@ -1505,3 +1505,31 @@ png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_KM_risk_score_EN20251216.png
     width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
 train_survEN #
 dev.off() # Close the PNG device
+
+# EN coef plot ############################################## 
+plot_coef <- ggplot(coefs_df, aes(x = reorder(Feature, Coefficient), y = Coefficient, fill = Feature)) +
+  geom_bar(stat = "identity", alpha = 0.8, width = 0.8) +  # Colorful bars
+  scale_fill_manual(values = colors) +  # Apply colors to bars
+  coord_flip() +
+  theme_minimal(base_size = 10) +
+  labs( x = "Genes", y = "Log hazard ratios per 1 sd increase in the gene expression") +
+  theme(
+    axis.text.y = element_text(face = "italic"),  # Italic feature names
+    panel.grid.major.y = element_blank(),  # Remove gridlines for cleaner look
+    panel.grid.minor = element_blank(),
+    legend.position = "none"  # Hide legend for a clean visual
+  )
+plot_coef
+
+plot_coef +
+  theme(
+    plot.margin = margin(t = 5.5, r = 20, b = 5.5, l = 5.5)  # increase right margin
+  )
+#save value of coeficients plot
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/coeficient_plot_bar20260126.png",
+    width = 900, height = 800, res = 200) 
+plot_coef +
+  theme(
+    plot.margin = margin(t = 5.5, r = 20, b = 5.5, l = 5.5)  # increase right margin
+  )
+dev.off() 

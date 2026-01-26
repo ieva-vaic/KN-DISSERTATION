@@ -118,8 +118,8 @@ gtex_plot <- ggplot(gtcga_table_full, aes(x=group , y=value, fill = variable)) +
 #show plot
 gtex_plot
 #save gtex vs tca test plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_barplot_20250618.png",
-    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_barplot_20260121.png",
+    width = 18, height = 17, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 gtex_plot #
 dev.off() # Close the PNG device
 
@@ -505,9 +505,9 @@ surv_test <- survdiff(Surv(overall_survival, deceased) ~ RiskGroup, data = clin_
 pval_num <- 1 - pchisq(surv_test$chisq, length(surv_test$n) - 1)
 # Format nicely
 if (pval_num < 0.001) {
-  pval_text <- "Long-rank p < 0.001"
+  pval_text <- "Log-rank p < 0.001"
 } else {
-  pval_text <- paste0("Long-rank p = ", signif(pval_num, 3))
+  pval_text <- paste0("Log-rank p = ", signif(pval_num, 3))
 }
 
 # Plot
@@ -522,7 +522,7 @@ train_surv <- ggsurvplot(
   ylab = "Išgyvenamumo tikimybė",
   palette = c("turquoise", "deeppink"),
   legend.title = "Rizikos grupė", 
-  legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas")
+  legend.labs = c("Mažos rizikos balas", "Didelės rizikos balas")
 )
 
 # Add subtitle
@@ -530,87 +530,87 @@ train_surv$plot <- train_surv$plot + labs(subtitle = pval_text)
 # Add a big "B" to the top-left corner
 print(train_surv)
 #save km plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_test20250925.png",
-    width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_test20260123.png",
+    width = 15, height = 13, res = 100, units = "cm") # width and height in pixels, resolution in dpi
 train_surv #
 dev.off() # Close the PNG device
 
-#Forest plot################
-colnames(clin_df_joined_test)
-clin_df_joined_test$neoplasmhistologicgrade
-#first, fix stage
-clin_df_joined_test <- clin_df_joined_test %>%
-  mutate(stage_early_late = case_when(
-    clinicalstage2 %in% c("Stage I", "Stage II") ~ "early stage",
-    clinicalstage2 %in% c("Stage III", "Stage IV") ~ "late stage",
-    TRUE ~ NA_character_
-  ))
-#first, fix grade
-clin_df_joined_test$neoplasmhistologicgrade <- recode(clin_df_joined_test$neoplasmhistologicgrade,
-                                                 "GX" = NA_character_)
-vars <- c("RiskScore", "stage_early_late",
-          "neoplasmhistologicgrade", "ageatinitialpathologicdiagnosis" )
-
-#model
-models <- vars %>%       # begin with variables of interest
-  str_c("deceased ~ ", .) %>%   # combine each variable into formula ("outcome ~ variable of interest")
-  # iterate through each univariate formula
-  map(                               
-    .f = ~glm(                       # pass the formulas one-by-one to glm()
-      formula = as.formula(.x),      # within glm(), the string formula is .x
-      family = "binomial",           # specify type of glm (logistic)
-      data = clin_df_joined_test)) %>%          # dataset
-  
-  # tidy up each of the glm regression outputs from above
-  map(
-    .f = ~tidy(
-      .x, 
-      exponentiate = TRUE,           # exponentiate 
-      conf.int = TRUE)) %>%          # return confidence intervals
-  
-  # collapse the list of regression outputs in to one data frame
-  bind_rows() %>% 
-  
-  # round all numeric columns
-  mutate(across(where(is.numeric), round, digits = 2)) %>%
-  filter(term != "(Intercept)")
-
-models #simple table models
-
-# fix terms
-models$term <-  c("Risk Score", "FIGO Stage late vs early",
-                  "Neoplasm histologic grade G3 vs G2", "Age at initial pathologic diagnosis")
-term_order <-  c("Risk Score", "FIGO Stage late vs early",
-                 "Neoplasm histologic grade G3 vs G2", "Age at initial pathologic diagnosis")
-# Apply the order to the term variable in the models data frame
-models$term <- factor(models$term, levels = term_order)
-models
-
-#forest plot
-p <- 
-  models |>
-  ggplot(aes(y = fct_rev(term))) + 
-  theme_classic()+
-  geom_point(aes(x=estimate), shape=15, size=3) +
-  geom_linerange(aes(xmin=conf.low, xmax=conf.high)) +
-  geom_vline(xintercept = 1, linetype="dashed") +
-  labs(x="Odds Ratio, 95% CI", y="")+
-  theme(
-    axis.text.y = element_text(face = "italic")  # Make y-axis labels italic
-  )+
-  scale_x_continuous(
-    breaks = c(1, seq(-3,  10, by = 1))  # Increase the number of x-axis ticks
-  )
-
-
-odds1 <- p +geom_text(aes(y = term, x = 2, label = sprintf("%0.2f", round(estimate, digits = 2))), size = 4) + ## decimal places
-  annotate("text", x = 8, y= 4.5,  label = "OR", size = 4, fontface = "bold", hjust = 0)+
-  geom_text(aes(y = term, x =6, label = paste(conf.low, "-", conf.high)), size = 4) + 
-  annotate("text", x =5, y= 4.5,  label = "95 % CI", size =4, fontface = "bold", hjust = 0)+
-  geom_text(aes(y = term, x =4, label = sprintf("%0.2f", round(p.value, digits = 2))), size = 4) + 
-  annotate("text", x = 7, y= 4.5,  label = "p value", size = 4, fontface = "bold", hjust = 0)+
-  labs(title = "Hazard Ratios for Mortality")
-odds1
+# #Forest plot################
+# colnames(clin_df_joined_test)
+# clin_df_joined_test$neoplasmhistologicgrade
+# #first, fix stage
+# clin_df_joined_test <- clin_df_joined_test %>%
+#   mutate(stage_early_late = case_when(
+#     clinicalstage2 %in% c("Stage I", "Stage II") ~ "early stage",
+#     clinicalstage2 %in% c("Stage III", "Stage IV") ~ "late stage",
+#     TRUE ~ NA_character_
+#   ))
+# #first, fix grade
+# clin_df_joined_test$neoplasmhistologicgrade <- recode(clin_df_joined_test$neoplasmhistologicgrade,
+#                                                  "GX" = NA_character_)
+# vars <- c("RiskScore", "stage_early_late",
+#           "neoplasmhistologicgrade", "ageatinitialpathologicdiagnosis" )
+# 
+# #model
+# models <- vars %>%       # begin with variables of interest
+#   str_c("deceased ~ ", .) %>%   # combine each variable into formula ("outcome ~ variable of interest")
+#   # iterate through each univariate formula
+#   map(                               
+#     .f = ~glm(                       # pass the formulas one-by-one to glm()
+#       formula = as.formula(.x),      # within glm(), the string formula is .x
+#       family = "binomial",           # specify type of glm (logistic)
+#       data = clin_df_joined_test)) %>%          # dataset
+#   
+#   # tidy up each of the glm regression outputs from above
+#   map(
+#     .f = ~tidy(
+#       .x, 
+#       exponentiate = TRUE,           # exponentiate 
+#       conf.int = TRUE)) %>%          # return confidence intervals
+#   
+#   # collapse the list of regression outputs in to one data frame
+#   bind_rows() %>% 
+#   
+#   # round all numeric columns
+#   mutate(across(where(is.numeric), round, digits = 2)) %>%
+#   filter(term != "(Intercept)")
+# 
+# models #simple table models
+# 
+# # fix terms
+# models$term <-  c("Risk Score", "FIGO Stage late vs early",
+#                   "Neoplasm histologic grade G3 vs G2", "Age at initial pathologic diagnosis")
+# term_order <-  c("Risk Score", "FIGO Stage late vs early",
+#                  "Neoplasm histologic grade G3 vs G2", "Age at initial pathologic diagnosis")
+# # Apply the order to the term variable in the models data frame
+# models$term <- factor(models$term, levels = term_order)
+# models
+# 
+# #forest plot
+# p <- 
+#   models |>
+#   ggplot(aes(y = fct_rev(term))) + 
+#   theme_classic()+
+#   geom_point(aes(x=estimate), shape=15, size=3) +
+#   geom_linerange(aes(xmin=conf.low, xmax=conf.high)) +
+#   geom_vline(xintercept = 1, linetype="dashed") +
+#   labs(x="Odds Ratio, 95% CI", y="")+
+#   theme(
+#     axis.text.y = element_text(face = "italic")  # Make y-axis labels italic
+#   )+
+#   scale_x_continuous(
+#     breaks = c(1, seq(-3,  10, by = 1))  # Increase the number of x-axis ticks
+#   )
+# 
+# 
+# odds1 <- p +geom_text(aes(y = term, x = 2, label = sprintf("%0.2f", round(estimate, digits = 2))), size = 4) + ## decimal places
+#   annotate("text", x = 8, y= 4.5,  label = "OR", size = 4, fontface = "bold", hjust = 0)+
+#   geom_text(aes(y = term, x =6, label = paste(conf.low, "-", conf.high)), size = 4) + 
+#   annotate("text", x =5, y= 4.5,  label = "95 % CI", size =4, fontface = "bold", hjust = 0)+
+#   geom_text(aes(y = term, x =4, label = sprintf("%0.2f", round(p.value, digits = 2))), size = 4) + 
+#   annotate("text", x = 7, y= 4.5,  label = "p value", size = 4, fontface = "bold", hjust = 0)+
+#   labs(title = "Hazard Ratios for Mortality")
+# odds1
 
 #TCGA - stage, boxplot ###########################
 #CREATE GROUPINGS ACCORDING TO DATA#
@@ -720,8 +720,8 @@ stage_plot2 <- ggdraw(stgae_plot) +
   draw_plot_label(label = "B", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
 
 #save stage boxplot 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_stage_barplot_20251211.png",
-    width = 2200, height = 1300, res = 200) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_stage_barplot_20260121.png",
+    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 stage_plot2 #
 dev.off() # Close the PNG device
 
@@ -794,8 +794,8 @@ grade_plot2 <- ggdraw(grade_plot) +
 
 grade_plot2
 #save grade boxplot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_grade_barplot_20251211.png",
-    width = 2200, height = 1300, res = 200) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_grade_barplot_20260121.png",
+    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 grade_plot2 #
 dev.off() # Close the PNG device
 
@@ -898,8 +898,8 @@ lymph_plot2 <- ggdraw(lymph_plot) +
 
 lymph_plot2
 #save lymphatic invasion plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_lymph_barplot_20251211.png",
-    width = 2450, height = 1300, res = 200) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_lymph_barplot_20260121.png",
+    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 lymph_plot2 #
 dev.off() # Close the PNG device
 
@@ -1030,8 +1030,8 @@ res_plot2 <- ggdraw(res_plot) +
 
 res_plot2
 #save residual disease plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_res_barplot_20251211.png",
-    width = 2450, height = 1300, res = 170) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_res_barplot_20260121.png",
+    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 res_plot2 #
 dev.off() # Close the PNG device
 #survival, separate genes ###########################################
@@ -1318,8 +1318,8 @@ gtex_plotEN <- ggplot(gtcga_table_full, aes(x=group , y=value, fill = variable))
 #show plot
 gtex_plotEN
 #save gtex vs tca test plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_barplot_EN20251216.png",
-    width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_barplot_EN20260121.png",
+    width = 18, height = 17, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 gtex_plotEN #
 dev.off() # Close the PNG device
 
@@ -1345,3 +1345,93 @@ png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_test20251215EN.png",
     width = 800, height = 600, res = 120) # width and height in pixels, resolution in dpi
 train_survEN #
 dev.off() # Close the PNG device
+
+
+#save boxplots together with the other cohort##############################
+#do this after train plots are already generated 
+img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_20260121.png")
+img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_barplot_20260121.png")
+
+combined_vertical <- image_append(
+  c(img_top, img_bottom),
+  stack = TRUE
+)
+
+image_write(
+  combined_vertical,
+  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_LT20260121.png"
+)
+
+
+#EN version 
+#do this after train plots are already generated 
+img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_EN20260121.png")
+img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_barplot_EN20260121.png")
+
+combined_vertical <- image_append(
+  c(img_top, img_bottom),
+  stack = TRUE
+)
+
+image_write(
+  combined_vertical,
+  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_EN20260121.png"
+)
+
+#SAVE FIGURES TOGETHER WITH TRAIN COHORTS#####################
+#stage
+#do this after train plots are already generated 
+img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_stage_barplot_20260126.png")
+img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_stage_barplot_20260121.png")
+
+combined_vertical <- image_append(
+  c(img_top, img_bottom),
+  stack = TRUE
+)
+
+image_write(
+  combined_vertical,
+  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_STAGE20260121.png"
+)
+#grade
+#do this after train plots are already generated 
+img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_grade_barplot_20260121.png")
+img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_grade_barplot_20260121.png")
+
+combined_vertical <- image_append(
+  c(img_top, img_bottom),
+  stack = TRUE
+)
+
+image_write(
+  combined_vertical,
+  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_GRADE20260121.png"
+)
+#lymph nodes
+#do this after train plots are already generated 
+img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_lymph_barplot_20260121.png")
+img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_lymph_barplot_20260121.png")
+
+combined_vertical <- image_append(
+  c(img_top, img_bottom),
+  stack = TRUE
+)
+
+image_write(
+  combined_vertical,
+  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_LYMPH20260121.png"
+)
+#residual tumor
+#do this after train plots are already generated 
+img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_res_barplot_20260121.png")
+img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_res_barplot_20260121.png")
+
+combined_vertical <- image_append(
+  c(img_top, img_bottom),
+  stack = TRUE
+)
+
+image_write(
+  combined_vertical,
+  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_RESIDUAL_TUMOR20260121.png"
+)
