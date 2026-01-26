@@ -75,10 +75,10 @@ roc_plot_4 <- function() {
          ,
          col = c("#911eb4","#dcbeff", "#fabed4", "darkred",
                  "deeppink","darkgreen", "darkblue","lightblue", "grey" ), lty = 1, 
-         cex = 0.8, lwd =3)
+         cex = 0.7, lwd =3)
 }
 # Save the plot as a PNG file
-png("metexprs_roc_HGSOC_output20251020.png", width = 1000, height = 1000, res = 150)
+png("metexprs_roc_HGSOC_output20260126.png",width = 15, height = 15, res = 510, units = "cm")
 roc_plot_4()
 dev.off()
 
@@ -89,7 +89,9 @@ dev.off()
 auc_values_tumor_bh <- sapply(roc_results_tumor_bh, function(roc_obj) {auc(roc_obj)})
 auc_values_tumor_bh #extracted aucs
 coords_results_tumor_bh <- lapply(roc_results_tumor_bh, function(roc_obj) {
-  coords(roc_obj, "best", ret = c("threshold", "accuracy", "sensitivity", "specificity", "precision", "npv", "tpr", "fpr"), transpose = FALSE)
+  coords(roc_obj, "best", ret = c("threshold", "accuracy", "sensitivity", "specificity"
+                                 # ,"precision", "npv", "tpr", "fpr"
+                                  ), transpose = FALSE)
 })
 coords_results_tumor_bh
 coords_results_tumor_bh$ARID1A_met #arid1a methylation have infinate thresholds 
@@ -105,30 +107,36 @@ results_tumor_bh
 #make combination coords
 #ca125
 coords_ca2 <- coords(roc_curve_CA2, "best", 
-                     ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                           "precision", "npv", "tpr", "fpr"), transpose = FALSE)
+                     ret=c("threshold", "accuracy", "sensitivity", "specificity"
+                         # , "precision", "npv", "tpr", "fpr"
+                           ), transpose = FALSE)
 
 #coords2
 coords2 <- coords(roc_curve2, "best", 
-                    ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                          "precision", "npv", "tpr", "fpr"), transpose = FALSE)
+                    ret=c("threshold", "accuracy", "sensitivity", "specificity"
+                          #, "precision", "npv", "tpr", "fpr"
+                          ), transpose = FALSE)
 #coords2.2
 coords2.2  <- coords(roc_curve2.2, "best", 
-                    ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                          "precision", "npv", "tpr", "fpr"), transpose = FALSE)
+                    ret=c("threshold", "accuracy", "sensitivity", "specificity"
+                         # ,"precision", "npv", "tpr", "fpr"
+                          ), transpose = FALSE)
 #coords2.3
 coords2.3 <- coords(roc_curve2.3, "best", 
-                      ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                            "precision", "npv", "tpr", "fpr"), transpose = FALSE)
+                      ret=c("threshold", "accuracy", "sensitivity", "specificity"
+                            #, "precision", "npv", "tpr", "fpr"
+                            ), transpose = FALSE)
 #coords2.4
 coords2.4 <- coords(roc_curve2.4, "best", 
-                      ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                            "precision", "npv", "tpr", "fpr"), transpose = FALSE)
+                      ret=c("threshold", "accuracy", "sensitivity", "specificity"
+                            #, "precision", "npv", "tpr", "fpr"
+                            ), transpose = FALSE)
 
 #coords2.5
 coords2.5 <- coords(roc_curve2.5, "best", 
-                      ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                            "precision", "npv", "tpr", "fpr"), transpose = FALSE)
+                      ret=c("threshold", "accuracy", "sensitivity", "specificity"
+                            #,"precision", "npv", "tpr", "fpr"
+                            ), transpose = FALSE)
 #MAKE ONE DF
 results_roc2<- data.frame(
   Biožymenys = c("Genų raiškos žymenų kombinacija", 
@@ -167,30 +175,30 @@ results_roc2<- data.frame(
                     coords_results_tumor_bh[["FBXW7"]]$specificity,
                     coords_results_tumor_bh[["HES1"]]$specificity,
                     coords_ca2$specificity),
-  ppv  = c(coords2$precision, coords2.2$precision, coords2.3$precision,
-           coords2.4$precision,coords2.5$precision,
-           coords_results_tumor_bh[["CTNNB1"]]$precision,
-           coords_results_tumor_bh[["FBXW7"]]$precision,
-           coords_results_tumor_bh[["HES1"]]$precision,
-           coords_ca2$precision ),
-  npv  = c(coords2$npv, coords2.2$npv, coords2.3$npv,
-           coords2.4$npv, coords2.5$npv, 
-           coords_results_tumor_bh[["CTNNB1"]]$npv,
-           coords_results_tumor_bh[["FBXW7"]]$npv,
-           coords_results_tumor_bh[["HES1"]]$npv,
-           coords_ca2$npv),
-  tpr  = c(coords2$tpr, coords2.2$tpr, coords2.3$tpr,
-           coords2.4$tpr,coords2.5$tpr,
-           coords_results_tumor_bh[["CTNNB1"]]$tpr,
-           coords_results_tumor_bh[["FBXW7"]]$tpr,
-           coords_results_tumor_bh[["HES1"]]$tpr,
-           coords_ca2$tpr),
-  fpr  = c(coords2$fpr, coords2.2$fpr, coords2.3$fpr,
-           coords2.4$fpr, coords2.5$fpr,
-           coords_results_tumor_bh[["CTNNB1"]]$fpr,
-           coords_results_tumor_bh[["FBXW7"]]$fpr,
-           coords_results_tumor_bh[["HES1"]]$fpr,
-           coords_ca2$fpr),
+  # ppv  = c(coords2$precision, coords2.2$precision, coords2.3$precision,
+  #          coords2.4$precision,coords2.5$precision,
+  #          coords_results_tumor_bh[["CTNNB1"]]$precision,
+  #          coords_results_tumor_bh[["FBXW7"]]$precision,
+  #          coords_results_tumor_bh[["HES1"]]$precision,
+  #          coords_ca2$precision ),
+  # npv  = c(coords2$npv, coords2.2$npv, coords2.3$npv,
+  #          coords2.4$npv, coords2.5$npv, 
+  #          coords_results_tumor_bh[["CTNNB1"]]$npv,
+  #          coords_results_tumor_bh[["FBXW7"]]$npv,
+  #          coords_results_tumor_bh[["HES1"]]$npv,
+  #          coords_ca2$npv),
+  # tpr  = c(coords2$tpr, coords2.2$tpr, coords2.3$tpr,
+  #          coords2.4$tpr,coords2.5$tpr,
+  #          coords_results_tumor_bh[["CTNNB1"]]$tpr,
+  #          coords_results_tumor_bh[["FBXW7"]]$tpr,
+  #          coords_results_tumor_bh[["HES1"]]$tpr,
+  #          coords_ca2$tpr),
+  # fpr  = c(coords2$fpr, coords2.2$fpr, coords2.3$fpr,
+  #          coords2.4$fpr, coords2.5$fpr,
+  #          coords_results_tumor_bh[["CTNNB1"]]$fpr,
+  #          coords_results_tumor_bh[["FBXW7"]]$fpr,
+  #          coords_results_tumor_bh[["HES1"]]$fpr,
+  #          coords_ca2$fpr),
   check.names = FALSE
 )
 rownames(results_roc2) <- NULL
@@ -214,20 +222,29 @@ gt_table2 <- results_roc2 %>%
 gt_table2
 
 #there is no other convenient way to save gt outputs
-gtsave(gt_table2,vwidth = 800,
-       filename = "metexprs_table_HGSOC_output20251020.png")
+gtsave(gt_table2,vwidth = 700,
+       filename = "metexprs_table_HGSOC_output20260126.png")
 
 #Combine the images
-roc_image2<- image_read("metexprs_roc_HGSOC_output20251020.png")
-table_image2 <- image_read("metexprs_table_HGSOC_output20251020.png")
+img1 <- image_read("metexprs_roc_HGSOC_output20260126.png")
+img2 <- image_read("metexprs_table_HGSOC_output20260126.png")
 
-# Now append vertically
-combined_image2 <- image_append(c(roc_image2, table_image2), stack = FALSE)
+# Match heights (use the larger height to preserve resolution)
+max_height <- max(image_info(img1)$height,
+                  image_info(img2)$height)
 
-# Save the combined image
-image_write(combined_image2, 
-            "metexprs_Roctable_HGSOC_output20251020.png")
+img1 <- image_resize(img1, paste0("x", max_height))
+img2 <- image_resize(img2, paste0("x", max_height))
 
+# Append horizontally
+combined_horizontal <- image_append(c(img1, img2), stack = FALSE)
+
+# Save at high quality
+image_write(
+  combined_horizontal,
+  path = "PRESENTATIONmetexprs_Roctable_HGSOC_output20260126.png",
+  format = "png"
+)
 
 #PLOT ROC COMBINATIONS HGSOC vs OTHERS##########################
 roc_plot_5 <- function() {
@@ -254,37 +271,44 @@ roc_plot_5 <- function() {
          ,
          col = c("#911eb4","#dcbeff", "#fabed4", "darkred",
                  "deeppink", "#808000", "grey" ), lty = 1, 
-         cex = 0.73, lwd =3)
+         cex = 0.6, lwd =3)
 }
 
 # Save the plot as a PNG file
-png("metexprs_roc_HGSOC_OTHERS_MODELS_output20251013.png", 
-    width = 1000, height = 1000, res = 150)
+png("metexprs_roc_HGSOC_OTHERS_MODELS_output20260126.png", 
+    ,width = 15, height = 15, res = 510, units = "cm")
 roc_plot_5()
 dev.off()
 
 ##make cooords hgsoc vs others #########################
 coordsx <- coords(roc_curvex, "best", 
-                  ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                        "precision", "npv", "tpr", "fpr"), transpose = FALSE)
+                  ret=c("threshold", "accuracy", "sensitivity", "specificity"
+                       # , "precision", "npv", "tpr", "fpr"
+                        ), transpose = FALSE)
 coordsx.1 <- coords(roc_curvex.1, "best", 
-                   ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                         "precision", "npv", "tpr", "fpr"), transpose = FALSE)
+                   ret=c("threshold", "accuracy", "sensitivity", "specificity"
+                         #,"precision", "npv", "tpr", "fpr"
+                         ), transpose = FALSE)
 coordsx.3 <- coords(roc_curvex.3, "best", 
-                   ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                         "precision", "npv", "tpr", "fpr"), transpose = FALSE)
+                   ret=c("threshold", "accuracy", "sensitivity", "specificity"
+                         #, "precision", "npv", "tpr", "fpr"
+                         ), transpose = FALSE)
 coordsx.4 <- coords(roc_curvex.4, "best", 
-                   ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                         "precision", "npv", "tpr", "fpr"), transpose = FALSE)
+                   ret=c("threshold", "accuracy", "sensitivity", "specificity"
+                         #, "precision", "npv", "tpr", "fpr"
+                         ), transpose = FALSE)
 coordsX.5 <- coords(roc_curveX.5, "best", 
-                    ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                          "precision", "npv", "tpr", "fpr"), transpose = FALSE)
+                    ret=c("threshold", "accuracy", "sensitivity", "specificity"
+                         # , "precision", "npv", "tpr", "fpr"
+                          ), transpose = FALSE)
 coords_ca2X <- coords(roc_curve_CA2X, "best", 
-                      ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                            "precision", "npv", "tpr", "fpr"), transpose = FALSE)
+                      ret=c("threshold", "accuracy", "sensitivity", "specificity"
+                            #,"precision", "npv", "tpr", "fpr"
+                            ), transpose = FALSE)
 coords_HES <- coords(roc_results_tumor_oh[["HES1"]], "best", 
-                      ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                            "precision", "npv", "tpr", "fpr"), transpose = FALSE)
+                      ret=c("threshold", "accuracy", "sensitivity", "specificity"
+                            #,  "precision", "npv", "tpr", "fpr"
+                            ), transpose = FALSE)
 
 ##TABLE ROC COMBINATIONS HGSOC vs OTHERS#####################
 results_rocx<- data.frame(
@@ -310,14 +334,14 @@ results_rocx<- data.frame(
                 coordsx.4$sensitivity, coordsX.5$sensitivity,coords_HES$sensitivity, coords_ca2X$sensitivity),
   specifiškumas = c(coordsx$specificity, coordsx.1$specificity, coordsx.3$specificity,
                     coordsx.4$specificity, coordsX.5$specificity,coords_HES$specificity, coords_ca2X$specificity),
-  ppv  = c(coordsx$precision, coordsx.1$precision, coordsx.3$precision,
-           coordsx.4$precision,coordsX.5$precision,coords_HES$precision, coords_ca2X$precision ),
-  npv  = c(coordsx$npv, coordsx.1$npv, coordsx.3$npv,
-           coordsx.4$npv, coordsX.5$npv, coords_HES$npv, coords_ca2X$npv),
-  tpr  = c(coordsx$tpr, coordsx.1$tpr, coordsx.3$tpr,
-           coordsx.4$tpr,coordsX.5$tpr,coords_HES$tpr, coords_ca2X$tpr),
-  fpr  = c(coordsx$fpr, coordsx.1$fpr,  coordsx.3$fpr,
-           coordsx.4$fpr, coordsX.5$fpr, coords_HES$fpr, coords_ca2X$fpr),
+  # ppv  = c(coordsx$precision, coordsx.1$precision, coordsx.3$precision,
+  #          coordsx.4$precision,coordsX.5$precision,coords_HES$precision, coords_ca2X$precision ),
+  # npv  = c(coordsx$npv, coordsx.1$npv, coordsx.3$npv,
+  #          coordsx.4$npv, coordsX.5$npv, coords_HES$npv, coords_ca2X$npv),
+  # tpr  = c(coordsx$tpr, coordsx.1$tpr, coordsx.3$tpr,
+  #          coordsx.4$tpr,coordsX.5$tpr,coords_HES$tpr, coords_ca2X$tpr),
+  # fpr  = c(coordsx$fpr, coordsx.1$fpr,  coordsx.3$fpr,
+  #          coordsx.4$fpr, coordsX.5$fpr, coords_HES$fpr, coords_ca2X$fpr),
   check.names = FALSE
 )
 rownames(results_rocx) <- NULL
@@ -341,19 +365,29 @@ gt_tablex <- results_rocx %>%
 gt_tablex
 
 #there is no other convieneat way to save gt outputs
-gtsave(gt_tablex,vwidth = 800,
-       filename = "metexprs_table_HGSOC_OTHERS_MODELS_output20251013.png")
+gtsave(gt_tablex,vwidth = 700,
+       filename = "metexprs_table_HGSOC_OTHERS_MODELS_output20260126.png")
 
 #Combine the images
-roc_image2<- image_read("metexprs_roc_HGSOC_OTHERS_MODELS_output20251013.png")
-table_image2 <- image_read("metexprs_table_HGSOC_OTHERS_MODELS_output20251013.png")
+img1 <- image_read("metexprs_roc_HGSOC_OTHERS_MODELS_output20260126.png")
+img2 <- image_read("metexprs_table_HGSOC_OTHERS_MODELS_output20260126.png")
 
-# Now append horizontaly
-combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
+# Match heights (use the larger height to preserve resolution)
+max_height <- max(image_info(img1)$height,
+                  image_info(img2)$height)
 
-# Save the combined image
-image_write(combined_image2, 
-            "metexprs_tableroc_HGSOC_OTHERS_MODELS_output202501013.png")
+img1 <- image_resize(img1, paste0("x", max_height))
+img2 <- image_resize(img2, paste0("x", max_height))
+
+# Append horizontally
+combined_horizontal <- image_append(c(img1, img2), stack = FALSE)
+
+# Save at high quality
+image_write(
+  combined_horizontal,
+  path = "metexprs_tableroc_HGSOC_OTHERS_MODELS_output20260126.png",
+  format = "png"
+)
 #STATISTICAL MODEL GENES #################################
 OC_full <- readRDS("C:/Users/Ieva/rprojects/OTHER DATA/KN-DISSERTATION FILES//OC_10_genes_clean_2025_02_14.RDS")
 OC_full <- OC_full[c(OC_full$KN != "KN-100"), ]
@@ -422,7 +456,7 @@ roc_plot_custom <- function() {
 #show plot
 roc_plot_custom()
 # Save the plot as a PNG file
-png("FIG_best3_HSGOC_BENIGN20251020.png", width = 1000, height = 1000, res = 150)
+png("FIG_best3_HSGOC_BENIGN20260126.png", width = 15, height = 15, res = 510, units = "cm")
 roc_plot_custom()
 #mtext("B", side = 3, adj = 0, line = 2.5, cex = 1.5, font = 2)
 dev.off()
@@ -450,18 +484,18 @@ results_roc_custom <- data.frame(
                     coords_results_tumor[["GRB7"]]$specificity,
                     coords_results_tumor[["TCEAL4"]]$specificity,
                     coords_ca2X$specificity),
-  ppv  = c(coords2$precision, coords10$precision, 
-           coords_results_tumor[["GRB7"]]$precision,
-           coords_results_tumor[["TCEAL4"]]$precision, coords_ca2X$precision),
-  npv  = c(coords2$npv, coords10$npv,
-           coords_results_tumor[["GRB7"]]$npv,
-           coords_results_tumor[["TCEAL4"]]$npv, coords_ca2X$npv),
-  tpr  = c(coords2$tpr, coords10$tpr, 
-           coords_results_tumor[["GRB7"]]$tpr,
-           coords_results_tumor[["TCEAL4"]]$tpr, coords_ca2X$tpr),
-  fpr  = c(coords2$fpr, coords10$fpr,
-           coords_results_tumor[["GRB7"]]$fpr,
-           coords_results_tumor[["TCEAL4"]]$fpr, coords_ca2X$fpr),
+  # ppv  = c(coords2$precision, coords10$precision, 
+  #          coords_results_tumor[["GRB7"]]$precision,
+  #          coords_results_tumor[["TCEAL4"]]$precision, coords_ca2X$precision),
+  # npv  = c(coords2$npv, coords10$npv,
+  #          coords_results_tumor[["GRB7"]]$npv,
+  #          coords_results_tumor[["TCEAL4"]]$npv, coords_ca2X$npv),
+  # tpr  = c(coords2$tpr, coords10$tpr, 
+  #          coords_results_tumor[["GRB7"]]$tpr,
+  #          coords_results_tumor[["TCEAL4"]]$tpr, coords_ca2X$tpr),
+  # fpr  = c(coords2$fpr, coords10$fpr,
+  #          coords_results_tumor[["GRB7"]]$fpr,
+  #          coords_results_tumor[["TCEAL4"]]$fpr, coords_ca2X$fpr),
   check.names = FALSE
 )
 rownames(results_roc_custom) <- NULL
@@ -485,17 +519,27 @@ gt_table_cut <- results_roc_custom %>%
 gt_table_cut
 
 #there is no other convieneat way to save gt outputs
-gtsave(gt_table_cut,vwidth = 800,
-       filename = "FIG_tabbest3_HGSOC_BENIGN20251020.png")
+gtsave(gt_table_cut,vwidth = 500,
+       filename = "FIG_tabbest3_HGSOC_BENIGN20260126.png")
 
 #Combine the images
-roc_image2<- image_read("FIG_best3_HSGOC_BENIGN20251020.png")
-table_image2 <- image_read("FIG_tabbest3_HGSOC_BENIGN20251020.png")
 
+img1 <- image_read("FIG_best3_HSGOC_BENIGN20260126.png")
+img2 <- image_read("FIG_tabbest3_HGSOC_BENIGN20260126.png")
 
-# Now append horizontaly
-combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
+# Match heights (use the larger height to preserve resolution)
+max_height <- max(image_info(img1)$height,
+                  image_info(img2)$height)
 
-# Save the combined image
-image_write(combined_image2, 
-            "FIG_COMBINED_best3_HGSOC_BENIGN20251020.png")
+img1 <- image_resize(img1, paste0("x", max_height))
+img2 <- image_resize(img2, paste0("x", max_height))
+
+# Append horizontally
+combined_horizontal <- image_append(c(img1, img2), stack = FALSE)
+
+# Save at high quality
+image_write(
+  combined_horizontal,
+  path = "PRESENTATION_FIG_COMBINED_best3_HGSOC_BENIGN20260126.png",
+  format = "png"
+)
