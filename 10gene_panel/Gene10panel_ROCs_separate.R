@@ -76,7 +76,7 @@ roc_plot <- function() {
 roc_plot()
 ## Save the plot as a PNG file
 png("10_genes_roc_hgsoc_benign_20251121.png",
-    width = 1000, height = 1000, res = 200)
+    width = 15, height = 15, res = 510, units = "cm")
 roc_plot()
 dev.off()
 
@@ -125,32 +125,31 @@ gt_table_tumor
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_tumor,
-       filename = "10_genes_roc_table_hgsoc_benign_20251209.png")
+       filename = "10_genes_roc_table_hgsoc_benign_20250122.png")
 
 #Combine the images
-roc_image1<- image_read("10_genes_roc_hgsoc_benign_20251121.png")
-table_image1 <- image_read("10_genes_roc_table_hgsoc_benign_20251209.png")
+#Combine the images
+roc_image2   <- image_read("10_genes_roc_hgsoc_benign_20251121.png")
+table_image2 <- image_read("10_genes_roc_table_hgsoc_benign_20250122.png")
 
-combined_image1 <- image_append(c(roc_image1, table_image1), stack = F)
-# Save the combined image
-image_write(combined_image1, 
-            "10_genes_roc_combined_hgsoc_benign_20251209.png")
+# Get height of ROC image
+roc_height <- image_info(roc_image2)$height
 
+# Resize table to same height (keeps aspect ratio)
+table_image2_resized <- image_resize(
+  table_image2,
+  geometry = paste0("x", roc_height)
+)
 
-# Find the max width to align both
-roc_info <- image_info(roc_image1)
-table_info <- image_info(table_image1)
-max_width <- max(roc_info$width, table_info$width)
+combined_image2 <- image_append(
+  c(roc_image2, table_image2_resized),
+  stack = FALSE
+)
 
-# Pad each image to the max width
-roc_image1_padded <- image_extent(roc_image1, geometry = geometry_area(max_width, roc_info$height), gravity = "center", color = "white")
-table_image1_padded <- image_extent(table_image1, geometry = geometry_area(max_width, table_info$height), gravity = "center", color = "white")
-#combine
-combined_image1.2 <- image_append(c(roc_image1_padded, table_image1_padded), stack = T)
-# Save the combined image
-image_write(combined_image1.2, 
-            "10_genes_roc_combined_hgsoc_benign_20251121.png")
-
+image_write(
+  combined_image2,
+  "10_genes_roc_combined_hgsoc_benign_20260121.png"
+)
 
 ##CA125 ROC HGSOC vs benign for comparison###################################
 KN_CA2X <- OC_HGSOC_BENIGN[!is.na(OC_HGSOC_BENIGN$CA125_f), ] #remove empty
@@ -163,16 +162,16 @@ coords_ca2X <- coords(roc_curve_CA2X, "best", ret=c("threshold", "accuracy", "se
                                                     "tpr", "fpr"), transpose = FALSE)
 coords_ca2X
 #roc tests
-roc.test(roc_curve_CA2X, roc_results_tumor[["EXO1"]]) # 0.9377
-roc.test(roc_curve_CA2X, roc_results_tumor[["RAD50"]])#0.6012
-roc.test(roc_curve_CA2X, roc_results_tumor[["PPT2"]])#0.222
-roc.test(roc_curve_CA2X, roc_results_tumor[["LUC7L2"]])#0.4331
-roc.test(roc_curve_CA2X, roc_results_tumor[["CDCA5"]]) #0.3579
-roc.test(roc_curve_CA2X, roc_results_tumor[["ZFPL1"]]) #0.6487
-roc.test(roc_curve_CA2X, roc_results_tumor[["VPS33B"]]) #0.5084
-roc.test(roc_curve_CA2X, roc_results_tumor[["GRB7"]],  method= "b"
-         ) #0.02912
-roc.test(roc_curve_CA2X, roc_results_tumor[["TCEAL4"]], method= "b") # 0.05818
+# roc.test(roc_curve_CA2X, roc_results_tumor[["EXO1"]]) # 0.9377
+# roc.test(roc_curve_CA2X, roc_results_tumor[["RAD50"]])#0.6012
+# roc.test(roc_curve_CA2X, roc_results_tumor[["PPT2"]])#0.222
+# roc.test(roc_curve_CA2X, roc_results_tumor[["LUC7L2"]])#0.4331
+# roc.test(roc_curve_CA2X, roc_results_tumor[["CDCA5"]]) #0.3579
+# roc.test(roc_curve_CA2X, roc_results_tumor[["ZFPL1"]]) #0.6487
+# roc.test(roc_curve_CA2X, roc_results_tumor[["VPS33B"]]) #0.5084
+# roc.test(roc_curve_CA2X, roc_results_tumor[["GRB7"]],  method= "b"
+#          ) #0.02912
+# roc.test(roc_curve_CA2X, roc_results_tumor[["TCEAL4"]], method= "b") # 0.05818
 
 #ROC HGSOC vs OTHERS#########################################################
 #make sure the levels are correct 
@@ -226,8 +225,8 @@ roc_plot2 <- function() {
 
 roc_plot2()
 ## Save the plot as a PNG file
-png("10_genes_roc_hgsoc_others_20251121.png",
-    width = 1000, height = 1000, res = 200)
+png("10_genes_roc_hgsoc_others_20260121.png",
+    width = 15, height = 15, res = 510, units = "cm")
 roc_plot2()
 dev.off()
 
@@ -237,41 +236,41 @@ random_pred <- runif(length(OC_HGSOC_OTHERS$tumor))  # Random scores between 0 a
 
 roc_random <- roc(OC_HGSOC_OTHERS$tumor, random_pred)
 
-# DeLong test
-roc.test(roc_results_tumor_others[["EXO1"]], roc_random)#0.0588
-roc.test(roc_results_tumor_others[["RAD50"]], roc_random)
-roc.test(roc_results_tumor_others[["PPT2"]], roc_random)
-roc.test(roc_results_tumor_others[["LUC7L2"]], roc_random)
-roc.test(roc_results_tumor_others[["PKP3"]], roc_random)
-roc.test(roc_results_tumor_others[["CDCA5"]], roc_random)
-roc.test(roc_results_tumor_others[["ZFPL1"]], roc_random)
-roc.test(roc_results_tumor_others[["VPS33B"]], roc_random)
-roc.test(roc_results_tumor_others[["GRB7"]], roc_random)
-roc.test(roc_results_tumor_others[["TCEAL4"]], roc_random)
+# # DeLong test
+# roc.test(roc_results_tumor_others[["EXO1"]], roc_random)#0.0588
+# roc.test(roc_results_tumor_others[["RAD50"]], roc_random)
+# roc.test(roc_results_tumor_others[["PPT2"]], roc_random)
+# roc.test(roc_results_tumor_others[["LUC7L2"]], roc_random)
+# roc.test(roc_results_tumor_others[["PKP3"]], roc_random)
+# roc.test(roc_results_tumor_others[["CDCA5"]], roc_random)
+# roc.test(roc_results_tumor_others[["ZFPL1"]], roc_random)
+# roc.test(roc_results_tumor_others[["VPS33B"]], roc_random)
+# roc.test(roc_results_tumor_others[["GRB7"]], roc_random)
+# roc.test(roc_results_tumor_others[["TCEAL4"]], roc_random)
 
-##compare to CA125#########################################
-#ca125 roc hgsoc vs other
-KN_CA2X <- OC_HGSOC_OTHERS[!is.na(OC_HGSOC_OTHERS$CA125_f), ] #remove empty
-table(KN_CA2X$tumor)
-KN_CA2X$CA125_fN <- as.numeric(factor(KN_CA2X$CA125_f))- 1
-roc_curve_CA2X <- roc(KN_CA2X$tumor, KN_CA2X$CA125_fN , direction = ">")
-plot(roc_curve_CA2X) #auc = 0.765
-auc(roc_curve_CA2X)
-coords_ca2X <- coords(roc_curve_CA2X, "best", 
-        ret=c("threshold", "accuracy", "sensitivity", "specificity",
-              "precision", "npv","tpr", "fpr"), transpose = FALSE)
-coords_ca2X
-#roc tests
-roc.test(roc_curve_CA2X, roc_results_tumor_others[["EXO1"]]) # 0.04754
-roc.test(roc_curve_CA2X, roc_results_tumor_others[["RAD50"]])#0.5565
-roc.test(roc_curve_CA2X, roc_results_tumor_others[["PPT2"]])#0.2999
-roc.test(roc_curve_CA2X, roc_results_tumor_others[["PKP3"]])#0.624
-roc.test(roc_curve_CA2X, roc_results_tumor_others[["LUC7L2"]])#0.6134
-roc.test(roc_curve_CA2X, roc_results_tumor_others[["CDCA5"]]) #0.1022
-roc.test(roc_curve_CA2X, roc_results_tumor_others[["ZFPL1"]]) #0.5239
-roc.test(roc_curve_CA2X, roc_results_tumor_others[["VPS33B"]]) #0.4877
-roc.test(roc_curve_CA2X, roc_results_tumor_others[["GRB7"]]) #0.3351
-roc.test(roc_curve_CA2X, roc_results_tumor_others[["TCEAL4"]]) # 0.004414
+# ##compare to CA125#########################################
+# #ca125 roc hgsoc vs other
+# KN_CA2X <- OC_HGSOC_OTHERS[!is.na(OC_HGSOC_OTHERS$CA125_f), ] #remove empty
+# table(KN_CA2X$tumor)
+# KN_CA2X$CA125_fN <- as.numeric(factor(KN_CA2X$CA125_f))- 1
+# roc_curve_CA2X <- roc(KN_CA2X$tumor, KN_CA2X$CA125_fN , direction = ">")
+# plot(roc_curve_CA2X) #auc = 0.765
+# auc(roc_curve_CA2X)
+# coords_ca2X <- coords(roc_curve_CA2X, "best", 
+#         ret=c("threshold", "accuracy", "sensitivity", "specificity",
+#               "precision", "npv","tpr", "fpr"), transpose = FALSE)
+# coords_ca2X
+# #roc tests
+# roc.test(roc_curve_CA2X, roc_results_tumor_others[["EXO1"]]) # 0.04754
+# roc.test(roc_curve_CA2X, roc_results_tumor_others[["RAD50"]])#0.5565
+# roc.test(roc_curve_CA2X, roc_results_tumor_others[["PPT2"]])#0.2999
+# roc.test(roc_curve_CA2X, roc_results_tumor_others[["PKP3"]])#0.624
+# roc.test(roc_curve_CA2X, roc_results_tumor_others[["LUC7L2"]])#0.6134
+# roc.test(roc_curve_CA2X, roc_results_tumor_others[["CDCA5"]]) #0.1022
+# roc.test(roc_curve_CA2X, roc_results_tumor_others[["ZFPL1"]]) #0.5239
+# roc.test(roc_curve_CA2X, roc_results_tumor_others[["VPS33B"]]) #0.4877
+# roc.test(roc_curve_CA2X, roc_results_tumor_others[["GRB7"]]) #0.3351
+# roc.test(roc_curve_CA2X, roc_results_tumor_others[["TCEAL4"]]) # 0.004414
 ##ROC table HGSOC vs others ################################
 #get roc features
 coords_results_tumor_others <- lapply(roc_results_tumor_others, function(roc_obj) {
@@ -316,17 +315,30 @@ gt_table_tumor_others
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_tumor_others,
-       filename = "10_genes_roc_table_hgsoc_other_20251209.png")
+       filename = "10_genes_roc_table_hgsoc_other_20260121.png")
 
 #Combine the images
-roc_image2<- image_read("10_genes_roc_hgsoc_others_20251121.png")
-table_image2 <- image_read("10_genes_roc_table_hgsoc_other_20251209.png")
+roc_image2   <- image_read("10_genes_roc_hgsoc_others_20260121.png")
+table_image2 <- image_read("10_genes_roc_table_hgsoc_other_20260121.png")
 
-combined_image2 <- image_append(c(roc_image2, table_image2), stack = F)
+# Get height of ROC image
+roc_height <- image_info(roc_image2)$height
 
-# Save the combined image
-image_write(combined_image2, 
-            "10_genes_roc_combined_hgsoc_others_20251209.png")
+# Resize table to same height (keeps aspect ratio)
+table_image2_resized <- image_resize(
+  table_image2,
+  geometry = paste0("x", roc_height)
+)
+
+combined_image2 <- image_append(
+  c(roc_image2, table_image2_resized),
+  stack = FALSE
+)
+
+image_write(
+  combined_image2,
+  "10_genes_roc_combined_hgsoc_others_20260121.png"
+)
 
 #ROC OVCa vs benign############################################
 #ROC w OVCa vs benign
@@ -377,8 +389,8 @@ roc_plot3 <- function() {
 
 roc_plot3()
 ## Save the plot as a PNG file
-png("10_genes_roc_oc_20251121.png",
-    width = 1000, height = 1000, res = 200)
+png("10_genes_roc_oc_20260121.png",
+    width = 15, height = 15, res = 510, units = "cm")
 roc_plot3()
 dev.off()
 
@@ -394,19 +406,19 @@ coords_ca2X <- coords(roc_curve_CA2X, "best",
     ret=c("threshold", "accuracy", "sensitivity", "specificity",
           "precision", "npv","tpr", "fpr"), transpose = FALSE)
 coords_ca2X
-#roc tests
-roc.test(roc_curve_CA2X, roc_results_tumor_OC[["EXO1"]]) # 0.8994
-roc.test(roc_curve_CA2X, roc_results_tumor_OC[["RAD50"]])#0.521
-roc.test(roc_curve_CA2X, roc_results_tumor_OC[["PPT2"]])#0.3368
-roc.test(roc_curve_CA2X, roc_results_tumor_OC[["LUC7L2"]])#0.5118
-roc.test(roc_curve_CA2X, roc_results_tumor_OC[["CDCA5"]]) #0.547
-roc.test(roc_curve_CA2X, roc_results_tumor_OC[["ZFPL1"]]) #0.4945
-roc.test(roc_curve_CA2X, roc_results_tumor_OC[["VPS33B"]]) #0.6404
-roc.test(roc_curve_CA2X, roc_results_tumor_OC[["GRB7"]]) #0.03597
-roc.test(roc_curve_CA2X, roc_results_tumor_OC[["TCEAL4"]]) # 0.07026
-
-#comapare together
-roc.test(roc_results_tumor_OC[["EXO1"]], roc_results_tumor_OC[["TCEAL4"]],  method=c("delong"))# 0.07 10 genes
+# #roc tests
+# roc.test(roc_curve_CA2X, roc_results_tumor_OC[["EXO1"]]) # 0.8994
+# roc.test(roc_curve_CA2X, roc_results_tumor_OC[["RAD50"]])#0.521
+# roc.test(roc_curve_CA2X, roc_results_tumor_OC[["PPT2"]])#0.3368
+# roc.test(roc_curve_CA2X, roc_results_tumor_OC[["LUC7L2"]])#0.5118
+# roc.test(roc_curve_CA2X, roc_results_tumor_OC[["CDCA5"]]) #0.547
+# roc.test(roc_curve_CA2X, roc_results_tumor_OC[["ZFPL1"]]) #0.4945
+# roc.test(roc_curve_CA2X, roc_results_tumor_OC[["VPS33B"]]) #0.6404
+# roc.test(roc_curve_CA2X, roc_results_tumor_OC[["GRB7"]]) #0.03597
+# roc.test(roc_curve_CA2X, roc_results_tumor_OC[["TCEAL4"]]) # 0.07026
+# 
+# #comapare together
+# roc.test(roc_results_tumor_OC[["EXO1"]], roc_results_tumor_OC[["TCEAL4"]],  method=c("delong"))# 0.07 10 genes
 ##ROC table OVCa vs benign ################################
 #get roc features
 coords_results_tumor_OC <- lapply(roc_results_tumor_OC, function(roc_obj) {
@@ -450,212 +462,226 @@ gt_table_tumor_OC
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_tumor_OC,
-       filename = "10_genes_roc_table_oc_20251209.png")
+       filename = "10_genes_roc_table_oc_20260121.png")
 
 #Combine the images
-roc_image3 <- image_read("10_genes_roc_oc_20251121.png")
-table_image3 <- image_read("10_genes_roc_table_oc_20251209.png")
+#Combine the images
+roc_image2   <- image_read("10_genes_roc_oc_20260121.png")
+table_image2 <- image_read("10_genes_roc_table_oc_20260121.png")
 
-combined_image3 <- image_append(c(roc_image3, table_image3), stack = F)
+# Get height of ROC image
+roc_height <- image_info(roc_image2)$height
 
-# Save the combined image
-image_write(combined_image3, 
-"10_genes_roc_combined_OC_2025061209.png")
-
-#combine HGSOC vs benign ####################################################
-#2 best genes is GRB7 and TCEAL4
-#logistic reg . with 2 genes:
-genes2 <- c( "GRB7", "TCEAL4")
-expr_tumor2 <- OC_HGSOC_BENIGN[colnames(OC_HGSOC_BENIGN) %in% genes2]
-logistic.model_2<- glm(OC_HGSOC_BENIGN$tumor ~ ., data = expr_tumor2, family = "binomial") #will not converge
-#to make it converge
-brglm.model_2 <- glm(OC_HGSOC_BENIGN$tumor ~ ., data = expr_tumor2, family = binomial("logit"), method = "brglm_fit") #no problems
-predicted_probs_2 <- predict.glm(brglm.model_2, type='response') #43 cases
-pred_data2 <- OC_HGSOC_BENIGN[(rownames(OC_HGSOC_BENIGN)
-                         %in% names(predicted_probs_2)), ]
-dim(pred_data2)#45 cases
-#roc 
-roc_curve2 <- roc(pred_data2$tumor, predicted_probs_2)
-AUC2 <- auc(roc_curve2)
-AUC2
-roc_plot_2 <- function() {
-  par(pty = "s") #sets square
-  plot(roc_curve2, main = "GRB7, TCEAL4, HGSOC vs benign") #auc =  1
-}
-roc_plot_2() 
-#table
-coords2 <- coords(roc_curve2,
-"best", ret=c("threshold", "accuracy", "sensitivity", "specificity",
-              "precision", "npv","tpr", "fpr"), transpose = FALSE)
-coords2
-#df of table
-coords2 <- as.data.frame(coords2)
-# Format coordinates as text
-coord_text <- paste0( 
-  "AUC: ", paste(AUC2, collapse = ", "),"\n",
-  "Sensitivity: ", paste(round(coords2$sensitivity, 2), collapse = ", "),"\n",
-  "Specificity: ", paste(round(coords2$specificity, 2), collapse = ", ")
-)
-# Add text below the plot
-roc_plot_2 <- function() {
-  par(pty = "s") #sets square
-  plot(roc_curve2, main = "GRB7, TCEAL4 HGSOC vs BENIGN") #auc =  1
-  
-  mtext(coord_text, side = 1, line = 4,adj = 0.9, cex = 0.7)
-}
-roc_plot_2()
-
-# Save the plot as a PNG file
-png("10_genes_roc_model2_hgsoc_benign_2025_02_18.png",
-    width = 500, height = 500, res = 100)
-roc_plot_2()
-dev.off()
-
-#combine HGSOC others ###############################
-#3best genes is "EXO1", "CDCA5", "TCEAL4"
-#get only the expresion df
-genes3 <- c( "EXO1", "CDCA5", "TCEAL4")
-expr_tumor3 <- OC_HGSOC_OTHERS[colnames(OC_HGSOC_OTHERS) %in% genes3]
-logistic.model_3<- glm(OC_HGSOC_OTHERS$tumor ~ ., data = expr_tumor3, family = "binomial") #will not converge
-#to make it converge
-#brglm.model_3 <- glm(OC_HGSOC_OTHERS$tumor ~ ., data = expr_tumor3, family = binomial("logit"), method = "brglm_fit") #no problems
-predicted_probs_3 <- predict.glm(logistic.model_3, type='response') #43 cases
-pred_data3 <- OC_HGSOC_OTHERS[(rownames(OC_HGSOC_OTHERS)
-                               %in% names(predicted_probs_3)), ]
-dim(pred_data3)#43 cases
-#roc 
-roc_curve3 <- roc(pred_data3$tumor, predicted_probs_3)
-AUC3 <- auc(roc_curve3)
-AUC3
-roc_plot_3 <- function() {
-  par(pty = "s") #sets square
-  plot(roc_curve3, main = "EXO1, CDCA5, TCEAL4, HGSOC vs others") #auc =  1
-}
-#table
-coords3 <- coords(roc_curve3,
-                  "best", ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                                "precision", "npv","tpr", "fpr"), transpose = FALSE)
-coords3
-# Convert to data frame
-coords3 <- as.data.frame(coords3)
-
-# Format coordinates as text
-coord_text <- paste0( 
-  "AUC: ", paste(AUC3, collapse = ", "),"\n",
-  "Sensitivity: ", paste(round(coords3$sensitivity, 2), collapse = ", "),"\n",
-  "Specificity: ", paste(round(coords3$specificity, 2), collapse = ", ")
+# Resize table to same height (keeps aspect ratio)
+table_image2_resized <- image_resize(
+  table_image2,
+  geometry = paste0("x", roc_height)
 )
 
-# Add text below the plot
-roc_plot_3 <- function() {
-  par(pty = "s") #sets square
-  plot(roc_curve3, main = "EXO1, CDCA5, TCEAL4 together, HGSOC vs others") 
-  
-  mtext(coord_text, side = 1, line = 4,adj = 0.9, cex = 0.7)
-}
-roc_plot_3()
-# Save the plot as a PNG file
-png("10_genes_roc_model3_hgsoc_others_2025_02_18.png",
-    width = 500, height = 500, res = 100)
-roc_plot_3()
-dev.off()
-
-#combine all 10 HGSOC vs others################################################
-#get only the expresion df, all 10 genes
-expr_tumor10 <- OC_HGSOC_OTHERS[colnames(OC_HGSOC_OTHERS) %in% expression]
-logistic.model_10<- glm(OC_HGSOC_OTHERS$tumor ~ ., data = expr_tumor10, family = "binomial") 
-predicted_probs_10 <- predict.glm(logistic.model_10, type='response')
-pred_data10 <- OC_HGSOC_OTHERS[(rownames(OC_HGSOC_OTHERS)
-                               %in% names(predicted_probs_10)), ]
-dim(pred_data10)#43 cases
-#roc 
-roc_curve10 <- roc(pred_data10$tumor, predicted_probs_10)
-AUC10 <- auc(roc_curve10)
-AUC10
-roc_plot_10 <- function() {
-  par(pty = "s") #sets square
-  plot(roc_curve10, main = "All 10 genes together HGSOC vs others") 
-}
-#table
-coords10 <- coords(roc_curve10,
-"best", ret=c("threshold", "accuracy", "sensitivity", "specificity",
-"precision", "npv","tpr", "fpr"), transpose = FALSE)
-coords10
-# Convert to data frame
-coords10 <- as.data.frame(coords10)
-
-# Format coordinates as text
-coord_text <- paste0( 
-  "AUC: ", paste(AUC10, collapse = ", "),"\n",
-  "Sensitivity: ", paste(round(coords10$sensitivity, 2), collapse = ", "),"\n",
-  "Specificity: ", paste(round(coords10$specificity, 2), collapse = ", ")
+combined_image2 <- image_append(
+  c(roc_image2, table_image2_resized),
+  stack = FALSE
 )
 
-# Add text below the plot
-roc_plot_10 <- function() {
-  par(pty = "s") #sets square
-  plot(roc_curve10, main = "All 10 genes together, HGSOC vs others") 
-  
-  mtext(coord_text, side = 1, line = 4,adj = 0.9, cex = 0.7)
-}
-roc_plot_10()
-# Save the plot as a PNG file
-png("10_genes_roc_model10_hgsoc_others_2025_02_18.png",
-    width = 500, height = 500, res = 100)
-roc_plot_10()
-dev.off()
-
-#combine all 10 OC vs benign###################################
-#get only the expresion df, all 10 genes
-expr_tumor10_oc <- OC_full[colnames(OC_full) %in% expression]
-logistic.model_10_OC <- glm(OC_full$tumor ~ ., data = expr_tumor10_oc, family = "binomial") 
-#maxed out need converging
-#to make it converge
-brglm.model_10oc <- glm(OC_full$tumor ~ ., data = expr_tumor10_oc,
-                        family = binomial("logit"), method = "brglm_fit") #no problems
-predicted_probs_2_oc <- predict.glm(brglm.model_10oc, type='response') 
-pred_data2oc <- OC_full[(rownames(OC_full)
-                               %in% names(predicted_probs_2_oc)), ]
-dim(pred_data2oc)#41
-table(pred_data2oc$tumor)
-
-#roc 
-roc_curve10oc <- roc(pred_data2oc$tumor, predicted_probs_2_oc)
-AUC10oc <- auc(roc_curve10oc)
-AUC10oc
-roc_plot_10oc <- function() {
-  par(pty = "s") #sets square
-  plot(roc_curve10oc, main = "All 10 genes together OC vs benign") 
-}
-#table
-coords10oc <- coords(roc_curve10oc,
-                   "best", ret=c("threshold", "accuracy", "sensitivity", "specificity",
-                                 "precision", "npv","tpr", "fpr"), transpose = FALSE)
-coords10oc
-# Convert to data frame
-coords10oc <- as.data.frame(coords10oc)
-
-# Format coordinates as text
-coord_text_oc <- paste0( 
-  "AUC: ", paste(AUC10oc, collapse = ", "),"\n",
-  "Sensitivity: ", paste(round(coords10oc$sensitivity, 2), collapse = ", "),"\n",
-  "Specificity: ", paste(round(coords10oc$specificity, 2), collapse = ", ")
+image_write(
+  combined_image2,
+  "10_genes_roc_combined_OC_20260121.png"
 )
 
-# Add text below the plot
-roc_plot_10oc <- function() {
-  par(pty = "s") #sets square
-  plot(roc_curve10oc, main = "All 10 genes together, OC vs benign") 
-  
-  mtext(coord_text_oc, side = 1, line = 4,adj = 0.9, cex = 0.7)
-}
-roc_plot_10oc()
+# #combine HGSOC vs benign ####################################################
+# #2 best genes is GRB7 and TCEAL4
+# #logistic reg . with 2 genes:
+# genes2 <- c( "GRB7", "TCEAL4")
+# expr_tumor2 <- OC_HGSOC_BENIGN[colnames(OC_HGSOC_BENIGN) %in% genes2]
+# logistic.model_2<- glm(OC_HGSOC_BENIGN$tumor ~ ., data = expr_tumor2, family = "binomial") #will not converge
+# #to make it converge
+# brglm.model_2 <- glm(OC_HGSOC_BENIGN$tumor ~ ., data = expr_tumor2, family = binomial("logit"), method = "brglm_fit") #no problems
+# predicted_probs_2 <- predict.glm(brglm.model_2, type='response') #43 cases
+# pred_data2 <- OC_HGSOC_BENIGN[(rownames(OC_HGSOC_BENIGN)
+#                          %in% names(predicted_probs_2)), ]
+# dim(pred_data2)#45 cases
+# #roc 
+# roc_curve2 <- roc(pred_data2$tumor, predicted_probs_2)
+# AUC2 <- auc(roc_curve2)
+# AUC2
+# roc_plot_2 <- function() {
+#   par(pty = "s") #sets square
+#   plot(roc_curve2, main = "GRB7, TCEAL4, HGSOC vs benign") #auc =  1
+# }
+# roc_plot_2() 
+# #table
+# coords2 <- coords(roc_curve2,
+# "best", ret=c("threshold", "accuracy", "sensitivity", "specificity",
+#               "precision", "npv","tpr", "fpr"), transpose = FALSE)
+# coords2
+# #df of table
+# coords2 <- as.data.frame(coords2)
+# # Format coordinates as text
+# coord_text <- paste0( 
+#   "AUC: ", paste(AUC2, collapse = ", "),"\n",
+#   "Sensitivity: ", paste(round(coords2$sensitivity, 2), collapse = ", "),"\n",
+#   "Specificity: ", paste(round(coords2$specificity, 2), collapse = ", ")
+# )
+# # Add text below the plot
+# roc_plot_2 <- function() {
+#   par(pty = "s") #sets square
+#   plot(roc_curve2, main = "GRB7, TCEAL4 HGSOC vs BENIGN") #auc =  1
+#   
+#   mtext(coord_text, side = 1, line = 4,adj = 0.9, cex = 0.7)
+# }
+# roc_plot_2()
+# 
+# # Save the plot as a PNG file
+# png("10_genes_roc_model2_hgsoc_benign_2025_02_18.png",
+#     width = 500, height = 500, res = 100)
+# roc_plot_2()
+# dev.off()
 
-# Save the plot as a PNG file
-png("10_genes_roc_model10_oc_2025_0305.png",
-    width = 500, height = 500, res = 100)
-roc_plot_10oc()
-dev.off()
+# #combine HGSOC others ###############################
+# #3best genes is "EXO1", "CDCA5", "TCEAL4"
+# #get only the expresion df
+# genes3 <- c( "EXO1", "CDCA5", "TCEAL4")
+# expr_tumor3 <- OC_HGSOC_OTHERS[colnames(OC_HGSOC_OTHERS) %in% genes3]
+# logistic.model_3<- glm(OC_HGSOC_OTHERS$tumor ~ ., data = expr_tumor3, family = "binomial") #will not converge
+# #to make it converge
+# #brglm.model_3 <- glm(OC_HGSOC_OTHERS$tumor ~ ., data = expr_tumor3, family = binomial("logit"), method = "brglm_fit") #no problems
+# predicted_probs_3 <- predict.glm(logistic.model_3, type='response') #43 cases
+# pred_data3 <- OC_HGSOC_OTHERS[(rownames(OC_HGSOC_OTHERS)
+#                                %in% names(predicted_probs_3)), ]
+# dim(pred_data3)#43 cases
+# #roc 
+# roc_curve3 <- roc(pred_data3$tumor, predicted_probs_3)
+# AUC3 <- auc(roc_curve3)
+# AUC3
+# roc_plot_3 <- function() {
+#   par(pty = "s") #sets square
+#   plot(roc_curve3, main = "EXO1, CDCA5, TCEAL4, HGSOC vs others") #auc =  1
+# }
+# #table
+# coords3 <- coords(roc_curve3,
+#                   "best", ret=c("threshold", "accuracy", "sensitivity", "specificity",
+#                                 "precision", "npv","tpr", "fpr"), transpose = FALSE)
+# coords3
+# # Convert to data frame
+# coords3 <- as.data.frame(coords3)
+# 
+# # Format coordinates as text
+# coord_text <- paste0( 
+#   "AUC: ", paste(AUC3, collapse = ", "),"\n",
+#   "Sensitivity: ", paste(round(coords3$sensitivity, 2), collapse = ", "),"\n",
+#   "Specificity: ", paste(round(coords3$specificity, 2), collapse = ", ")
+# )
+# 
+# # Add text below the plot
+# roc_plot_3 <- function() {
+#   par(pty = "s") #sets square
+#   plot(roc_curve3, main = "EXO1, CDCA5, TCEAL4 together, HGSOC vs others") 
+#   
+#   mtext(coord_text, side = 1, line = 4,adj = 0.9, cex = 0.7)
+# }
+# roc_plot_3()
+# # Save the plot as a PNG file
+# png("10_genes_roc_model3_hgsoc_others_2025_02_18.png",
+#     width = 500, height = 500, res = 100)
+# roc_plot_3()
+# dev.off()
+
+# #combine all 10 HGSOC vs others################################################
+# #get only the expresion df, all 10 genes
+# expr_tumor10 <- OC_HGSOC_OTHERS[colnames(OC_HGSOC_OTHERS) %in% expression]
+# logistic.model_10<- glm(OC_HGSOC_OTHERS$tumor ~ ., data = expr_tumor10, family = "binomial") 
+# predicted_probs_10 <- predict.glm(logistic.model_10, type='response')
+# pred_data10 <- OC_HGSOC_OTHERS[(rownames(OC_HGSOC_OTHERS)
+#                                %in% names(predicted_probs_10)), ]
+# dim(pred_data10)#43 cases
+# #roc 
+# roc_curve10 <- roc(pred_data10$tumor, predicted_probs_10)
+# AUC10 <- auc(roc_curve10)
+# AUC10
+# roc_plot_10 <- function() {
+#   par(pty = "s") #sets square
+#   plot(roc_curve10, main = "All 10 genes together HGSOC vs others") 
+# }
+# #table
+# coords10 <- coords(roc_curve10,
+# "best", ret=c("threshold", "accuracy", "sensitivity", "specificity",
+# "precision", "npv","tpr", "fpr"), transpose = FALSE)
+# coords10
+# # Convert to data frame
+# coords10 <- as.data.frame(coords10)
+# 
+# # Format coordinates as text
+# coord_text <- paste0( 
+#   "AUC: ", paste(AUC10, collapse = ", "),"\n",
+#   "Sensitivity: ", paste(round(coords10$sensitivity, 2), collapse = ", "),"\n",
+#   "Specificity: ", paste(round(coords10$specificity, 2), collapse = ", ")
+# )
+# 
+# # Add text below the plot
+# roc_plot_10 <- function() {
+#   par(pty = "s") #sets square
+#   plot(roc_curve10, main = "All 10 genes together, HGSOC vs others") 
+#   
+#   mtext(coord_text, side = 1, line = 4,adj = 0.9, cex = 0.7)
+# }
+# roc_plot_10()
+# # Save the plot as a PNG file
+# png("10_genes_roc_model10_hgsoc_others_2025_02_18.png",
+#     width = 500, height = 500, res = 100)
+# roc_plot_10()
+# dev.off()
+
+# #combine all 10 OC vs benign###################################
+# #get only the expresion df, all 10 genes
+# expr_tumor10_oc <- OC_full[colnames(OC_full) %in% expression]
+# logistic.model_10_OC <- glm(OC_full$tumor ~ ., data = expr_tumor10_oc, family = "binomial") 
+# #maxed out need converging
+# #to make it converge
+# brglm.model_10oc <- glm(OC_full$tumor ~ ., data = expr_tumor10_oc,
+#                         family = binomial("logit"), method = "brglm_fit") #no problems
+# predicted_probs_2_oc <- predict.glm(brglm.model_10oc, type='response') 
+# pred_data2oc <- OC_full[(rownames(OC_full)
+#                                %in% names(predicted_probs_2_oc)), ]
+# dim(pred_data2oc)#41
+# table(pred_data2oc$tumor)
+# 
+# #roc 
+# roc_curve10oc <- roc(pred_data2oc$tumor, predicted_probs_2_oc)
+# AUC10oc <- auc(roc_curve10oc)
+# AUC10oc
+# roc_plot_10oc <- function() {
+#   par(pty = "s") #sets square
+#   plot(roc_curve10oc, main = "All 10 genes together OC vs benign") 
+# }
+# #table
+# coords10oc <- coords(roc_curve10oc,
+#                    "best", ret=c("threshold", "accuracy", "sensitivity", "specificity",
+#                                  "precision", "npv","tpr", "fpr"), transpose = FALSE)
+# coords10oc
+# # Convert to data frame
+# coords10oc <- as.data.frame(coords10oc)
+# 
+# # Format coordinates as text
+# coord_text_oc <- paste0( 
+#   "AUC: ", paste(AUC10oc, collapse = ", "),"\n",
+#   "Sensitivity: ", paste(round(coords10oc$sensitivity, 2), collapse = ", "),"\n",
+#   "Specificity: ", paste(round(coords10oc$specificity, 2), collapse = ", ")
+# )
+# 
+# # Add text below the plot
+# roc_plot_10oc <- function() {
+#   par(pty = "s") #sets square
+#   plot(roc_curve10oc, main = "All 10 genes together, OC vs benign") 
+#   
+#   mtext(coord_text_oc, side = 1, line = 4,adj = 0.9, cex = 0.7)
+# }
+# roc_plot_10oc()
+
+# # Save the plot as a PNG file
+# png("10_genes_roc_model10_oc_2025_0305.png",
+#     width = 500, height = 500, res = 100)
+# roc_plot_10oc()
+# dev.off()
 
 #EN plot HGSOC benign roc###########################
 #ROC HGSOC vs BENIGN
@@ -715,8 +741,8 @@ roc_plot_en <- function() {
 
 roc_plot_en()
 ## Save the plot as a PNG file
-png("10_genes_roc_hgsoc_benign_20251110_en.png",
-    width = 1000, height = 1000, res = 200)
+png("10_genes_roc_hgsoc_benign_20260121_en.png",
+    width = 15, height = 15, res = 510, units = "cm")
 roc_plot_en()
 dev.off()
 
@@ -763,16 +789,31 @@ gt_table_tumor_en
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_tumor_en,
-       filename = "10_genes_roc_table_hgsoc_benign_20250922en.png")
+       filename = "10_genes_roc_table_hgsoc_benign_20260121en.png")
 
 #Combine the images
-roc_image1en <- image_read("10_genes_roc_hgsoc_benign_20251110_en.png")
-table_image1en <- image_read("10_genes_roc_table_hgsoc_benign_20250922en.png")
+#Combine the images
+roc_image2   <- image_read("10_genes_roc_hgsoc_benign_20260121_en.png")
+table_image2 <- image_read("10_genes_roc_table_hgsoc_benign_20260121en.png")
 
-combined_image1en <- image_append(c(roc_image1en, table_image1en), stack = F)
-# Save the combined image
-image_write(combined_image1en, 
-            "10_genes_roc_combined_hgsoc_benign_20251218en.png")
+# Get height of ROC image
+roc_height <- image_info(roc_image2)$height
+
+# Resize table to same height (keeps aspect ratio)
+table_image2_resized <- image_resize(
+  table_image2,
+  geometry = paste0("x", roc_height)
+)
+
+combined_image2 <- image_append(
+  c(roc_image2, table_image2_resized),
+  stack = FALSE
+)
+
+image_write(
+  combined_image2,
+  "10_genes_roc_combined_hgsoc_benign_20260121en.png"
+)
 #EN PLOT roc HGSOC vs others #############################################
 roc_plot2EN <- function() {
   par(pty = "s") #sets square
@@ -812,8 +853,8 @@ roc_plot2EN <- function() {
 
 roc_plot2EN()
 ## Save the plot as a PNG file
-png("10_genes_roc_hgsoc_others_20251218EN.png",
-    width = 1000, height = 1000, res = 200)
+png("10_genes_roc_hgsoc_others_20260121EN.png",
+    width = 15, height = 15, res = 510, units = "cm")
 roc_plot2EN()
 dev.off()
 
@@ -857,17 +898,30 @@ gt_table_tumor_othersEN
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_tumor_othersEN,
-       filename = "10_genes_roc_table_hgsoc_other_20251218EN.png")
+       filename = "10_genes_roc_table_hgsoc_other_20260121EN.png")
 
 #Combine the images
-roc_image2EN<- image_read("10_genes_roc_hgsoc_others_20251218EN.png")
-table_image2EN <- image_read("10_genes_roc_table_hgsoc_other_20251218EN.png")
+roc_image2   <- image_read("10_genes_roc_hgsoc_others_20260121EN.png")
+table_image2 <- image_read("10_genes_roc_table_hgsoc_other_20260121EN.png")
 
-combined_image2EN <- image_append(c(roc_image2EN, table_image2EN), stack = F)
+# Get height of ROC image
+roc_height <- image_info(roc_image2)$height
 
-# Save the combined image
-image_write(combined_image2EN, 
-            "10_genes_roc_combined_hgsoc_others_20251218EN.png")
+# Resize table to same height (keeps aspect ratio)
+table_image2_resized <- image_resize(
+  table_image2,
+  geometry = paste0("x", roc_height)
+)
+
+combined_image2 <- image_append(
+  c(roc_image2, table_image2_resized),
+  stack = FALSE
+)
+
+image_write(
+  combined_image2,
+  "10_genes_roc_combined_hgsoc_others_20260121EN.png"
+)
 
 #EN PLOT roc OVCa vs benign#############################################
 roc_plot3EN <- function() {
@@ -909,8 +963,9 @@ roc_plot3EN <- function() {
 roc_plot3EN()
 
 ## Save the plot as a PNG file
-png("10_genes_roc_oc_20251218EN.png",
-    width = 1000, height = 1000, res = 200)
+png("10_genes_roc_oc_20260121EN.png",
+    width = 15, height = 15, res = 510, units = "cm"
+)
 roc_plot3EN()
 dev.off()
 
@@ -953,15 +1008,27 @@ gt_table_results_tumor_OCEN
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_results_tumor_OCEN,
-       filename = "10_genes_roc_table_oc_20251218EN.png")
+       filename = "10_genes_roc_table_oc_20260121EN.png")
 
 #Combine the images
-roc_image3EN <- image_read("10_genes_roc_oc_20251218EN.png")
-table_image3EN <- image_read("10_genes_roc_table_oc_20251218EN.png")
+roc_image2   <- image_read("10_genes_roc_oc_20260121EN.png")
+table_image2 <- image_read("10_genes_roc_table_oc_20260121EN.png")
 
-combined_image3EN <- image_append(c(roc_image3EN, table_image3EN), stack = F)
+# Get height of ROC image
+roc_height <- image_info(roc_image2)$height
 
-# Save the combined image
-image_write(combined_image3EN, 
-            "10_genes_roc_combined_OC_2025061218EN.png")
+# Resize table to same height (keeps aspect ratio)
+table_image2_resized <- image_resize(
+  table_image2,
+  geometry = paste0("x", roc_height)
+)
 
+combined_image2 <- image_append(
+  c(roc_image2, table_image2_resized),
+  stack = FALSE
+)
+
+image_write(
+  combined_image2,
+  "10_genes_roc_combined_OC_20260121EN.png"
+)

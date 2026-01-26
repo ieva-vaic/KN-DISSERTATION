@@ -215,8 +215,8 @@ OC_plot <- ggplot(Group3_table_full, aes(x=type , y=value, fill = variable)) +
 
 OC_plot
 ##save png 3 groups####################################
-png("10genes_boxplot3groups_2025-09-22.png",
-    width = 3200, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+png("10genes_boxplot3groups_20260121.png",
+    width = 27, height = 18, res = 500, units = "cm") 
 OC_plot #
 dev.off() # Close the PNG device
 
@@ -280,8 +280,8 @@ OC_plot_en <- ggplot(Group3_table_full_en, aes(x=type , y=value, fill = variable
 
 OC_plot_en
 
-png("10genes_boxplot3groups_EN_2025-12-17.png",
-    width = 3200, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+png("10genes_boxplot3groups_EN_20260121.png",
+    width = 27, height = 19, res = 500, units = "cm") 
 OC_plot_en #
 dev.off() # Close the PNG device
 #3 groups STAGE, HGSOC ##################################
@@ -409,15 +409,11 @@ Stage_plot <- ggplot(Stage_table_hgsoc, aes(x=Stage4 , y=value, fill = variable)
 
 Stage_plot
 ##save png hgsoc stage####################################
-png("10_gene_stage20251001.png",
-    width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+png("10_gene_stage20260121.png",
+    width = 20, height = 17, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 Stage_plot #
 dev.off() # Close the PNG device
-#EN version
-png("10_gene_stage20250911EN.png",
-    width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
-Stage_plot_EN #
-dev.off() # Close the PNG device
+
 
 ##FC STAGE ###########################################
 expression_df_stage <- HGSOC_only[, c("Stage4", expression, "KN")]
@@ -464,8 +460,8 @@ stage2plot <- ggplot(Stage_table_hgsoc, aes(x=Stage4 , y=value, fill = variable)
     gsub("-", "\u2212", as.character(x))) #add long "-" signs
 stage2plot
 
-png("10_gene_stage20250922EN.png",
-    width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+png("10_gene_stage20260121EN.png",
+    width = 20, height = 17, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 stage2plot #
 dev.off() # Close the PNG device
 

@@ -197,8 +197,8 @@ Grade_plot <- ggplot(Grade_table_OC, aes(x=Grade2 , y=value, fill = variable)) +
 Grade_plot
 
 ##save plot####################################################
-png("10gene_grade_20250623.png"
-    , width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+png("10gene_grade_20260121.png"
+    , width = 20, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 Grade_plot 
 dev.off() # Close the PNG device
 
@@ -345,8 +345,8 @@ Ca125_plot <- ggplot(CA125_table_OC, aes(x=CA125_f , y=value, fill = variable)) 
 Ca125_plot
 
 ##save plot ca125 pre op######################################
-png("10_gene_boxplot_ca125_2025_06_23.png"
-    , width = 3500, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+png("10_gene_boxplot_ca125_20260121.png"
+    , width = 29, height = 19, res = 500, units = "cm")
 Ca125_plot #
 dev.off() # Close the PNG device
 
@@ -516,16 +516,16 @@ plot_list <- lapply(df_all$variable, function(gene) {
 for (p in plot_list) print(p)
 
 # Combine into one figure
-combined_plot <- wrap_plots(plot_list, ncol = 2) +
-  plot_annotation(title = "Ryšys tarp amžiaus ir genų raiškos")
+combined_plot <- wrap_plots(plot_list, ncol = 2) 
 combined_plot
 ##save age plot to PNG####################
 ggsave(
-  filename = "10_gene_age10genes20250623.png",
+  filename = "10_gene_age10genes20260121LT.png",
   plot = combined_plot,
-  width = 8,       # adjust width as needed
-  height = 11,       # adjust height as needed
-  dpi = 300         # high resolution
+  width = 25,       # adjust width as needed
+  height = 30,       # adjust height as needed
+  dpi = 500,         # high resolution
+  units = "cm"
 )
 #ENGLISH PLOTS #####################################
 #EN CA125 plot################################################
@@ -565,8 +565,8 @@ Ca125_plot <- ggplot(CA125_table_OCEN, aes(x=CA125_f , y=value, fill = variable)
 Ca125_plot
 
 ##save plot ca125 pre op######################################
-png("10_gene_boxplot_ca125_2025_0927EN.png"
-    , width = 3500, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+png("10_gene_boxplot_ca125_20260121EN.png"
+    , width = 29, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 Ca125_plot #
 dev.off() # Close the PNG device
 
@@ -663,7 +663,7 @@ Grade_plotEN <- ggplot(Grade_table_OC, aes(x=Grade2 , y=value, fill = variable))
 
 Grade_plotEN
 
-png("10gene_gradeEN_20251217.png"
-    , width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+png("10gene_gradeEN_20260121.png"
+    , width = 20, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 Grade_plotEN
 dev.off() # Cl

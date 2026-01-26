@@ -128,21 +128,27 @@ summary(multicox_model)
 test_survplot<- ggsurvplot(km_fit, data = surv_df_test, 
                            #pval = TRUE,  # Show p-value of the log-rank test
                            risk.table = TRUE,  # Add risk table below the plot
-                           risk.table.title = "Pacientų skaičius rizikos grupėje",
-                           title = "Didelės vs. mažos rizikos atvejai KV imtyje, 10 genų raiškos kombinacija",
+                           risk.table.title = "Pacienčių skaičius rizikos grupėje",
+                           title = paste0("Didelės vs. mažos rizikos atvejai KV imtyje,\n",
+                           "10 genų raiškos kombinacija"),
                            xlab = "Bendras išgyvenamumo laikas",
                            ylab = "Išgyvenamumo tikimybė",
                            palette = c("turquoise", "deeppink"),  # Color palette for groups
                            legend.title = "Rizikos grupė", 
-                           legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
+                           legend.labs = c("Mažos rizikos balas", "Didelės rizikos balas"))#2026.01.20 changed from "mažas rizikos balas" and "didelis rizikos balas"
 # Add subtitle form cox result
 test_survplot$plot <- test_survplot$plot +
-  labs(subtitle = "Uni PR =  0,26  (95 % PI: 0,08–0,85); Multi PR = 0,24 (95 % PI: 0,06–1,03), Long-rank p = 0,017, n= 47")
-
+  labs(
+    subtitle = paste0(
+      "Uni PR = 0,26 (95% PI: 0,08–0.85)\n",
+      "Multi PR = 0,24 (95% PI: 0,06–1.03)\n",
+      "Log-rank p = 0,017, n = 47"
+    )
+  )
 print(test_survplot)
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_sig_20151208LT.png",
-    width = 1100, height = 600, res = 120) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_sig_20260120LT.png",
+    width = 1100, height = 600, res = 100) # width and height in pixels, resolution in dpi
 test_survplot #
 dev.off() # Close the PNG device
 
@@ -184,7 +190,7 @@ km_fitH <- survfit(surv_object ~ RiskGroup, data = surv_df_test_h)
 test_survplotH <- ggsurvplot(km_fitH, data = surv_df_test_h, 
                              pval = TRUE,  # Show p-value of the log-rank test
                              risk.table = TRUE,  # Add risk table below the plot
-                             title = "Kaplan-Meier kreivė: Didelės vs. mažos rizikos atvejai KV audinių imtyje",
+                             title = "Kaplan-Meier kreivė: Didelės vs. mažos rizikos atvejai HGSOC audinių imtyje",
                              xlab = "Bendras išgyvenamumo laikas",
                              ylab = "Išgyvenamumo tikimybė",
                              palette = c("turquoise", "deeppink"),  # Color palette for groups
@@ -192,7 +198,7 @@ test_survplotH <- ggsurvplot(km_fitH, data = surv_df_test_h,
                              legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
 test_survplotH
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_hgsocsig_20150915.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_hgsocsig_20260121.png",
     width = 800, height = 600, res = 100) # width and height in pixels, resolution in dpi
 test_survplotH #
 dev.off() # Close the PNG device
@@ -245,13 +251,14 @@ summary(multicox_model2)
 test_survplot2 <- ggsurvplot(km_fit2, data = surv_df_test2, 
                              #pval = TRUE,  # Show p-value of the log-rank test
                              risk.table = TRUE,  # Add risk table below the plot
-                             risk.table.title = "Pacientų skaičius rizikos grupėje",
-                             title = "Didelės vs. mažos rizikos atvejai KV imtyje, 10 genų raiškos kombinacija",
+                             risk.table.title = "Pacienčių skaičius rizikos grupėje",
+                             title = paste0("Didelės vs. mažos rizikos atvejai KV imtyje,\n",
+                                            "10 genų raiškos kombinacija"),
                              xlab = "Bendras išgyvenamumo laikas, mėnesiais",
                              ylab = "Išgyvenamumo tikimybė",
-                             palette = c( "deeppink", "turquoise"),  # Color palette for groups
+                             palette = c(  "deeppink", "turquoise"),  # Color palette for groups
                              legend.title = "Rizikos grupė", 
-                             legend.labs = c("Mažas rizikos balas", "Didelis rizikos balas"))
+                             legend.labs = c( "Didelės rizikos balas", "Mažos rizikos balas")) #2026.01.20 changed from "didelis / mažas rizikos balas"
 # Add subtitle form cox result
 test_survplot2$plot <- test_survplot2$plot +
   labs(subtitle = paste0("Uni PR =  0,24  (95 % PI: 0,07–0,81);\n",
@@ -260,8 +267,8 @@ test_survplot2$plot <- test_survplot2$plot +
 
 test_survplot2
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_OCa_20251208.png",
-    width = 1000, height = 700, res = 120) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_OCa_20260120short.png",
+    width = 800, height = 620, res = 120) # width and height in pixels, resolution in dpi
 test_survplot2 #
 dev.off() # Close the PNG device
 
@@ -318,7 +325,7 @@ auc_table
 target_time <- 60        
 time_index <- which(rez_list[[1]]$times == target_time)
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test20251124LT.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test20260121LT.png",
     width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
 # Set up base plot with gene 1
 par(pty="s")
@@ -396,7 +403,7 @@ dev.off() # Close the PNG device
 target_time <- 60        
 time_index <- which(rez_list[[1]]$times == target_time)
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test2025925LT.png",
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test20260122LT.png",
     width = 1100, height = 1100, res = 200) # width and height in pixels, resolution in dpi
 # Set up base plot with gene 1
 # Base ROC curve plot
@@ -543,17 +550,17 @@ gt_table_roc_60
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_roc_60,
-       filename = "10genetimeroc_table_20251002.png")
+       filename = "10genetimeroc_table_20260121.png")
 
 #Combine the images
-roc_image <- image_read("tissues_OCtimeROC_test20251124LT.png")
-table_image <- image_read("10genetimeroc_table_20251002.png")
+roc_image <- image_read("tissues_OCtimeROC_test20260122LT.png")
+table_image <- image_read("10genetimeroc_table_20260121.png")
 
 combined_image <- image_append(c(roc_image, table_image), stack = F)
 
 # Save the combined image
 image_write(combined_image, 
-            "tissues_OCtimeROCw_table_test202511124.png")
+            "tissues_OCtimeROCw_table_test20260121.png")
 
 
 
@@ -687,35 +694,38 @@ test_survplotctga3 #
 dev.off() # Close the PNG device
 
 #ENGLISH KM PLOT ###############################
-
 test_survplot2EN <- ggsurvplot(km_fit2, data = surv_df_test2, 
                                #pval = TRUE,  # Show p-value of the log-rank test
                                risk.table = TRUE,  # Add risk table below the plot
                                title = "Risk score association with overall survival, OC group",
                                palette = c("turquoise", "deeppink"),  # Color palette for groups
+                               xlab = "Overall survival, months",
                                legend.title = "Risk score", 
-                               legend.labs = c("Low risk score", "High risk score"))
+                               legend.labs = c( "High risk score", "Low risk score"))
 # Add subtitle form cox result
 test_survplot2EN$plot <- test_survplot2EN$plot +
-  labs(subtitle = "Uni HR =  0.24  (95% CI: 0.07–0.81); Multi HR = 0.21 (95% CI: 0.05–0.91), Long-rank p = 0.013, n = 47")
+  labs(subtitle = paste0("Uni HR =  0.24  (95% CI: 0.07–0.81);\n",
+                         "Multi HR = 0.21 (95% CI: 0.05–0.91),\n",
+                         "Long-rank p = 0.013, n = 47") )
 
 test_survplot2EN
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_OCa_20150927EN.png",
-    width = 1100, height = 600, res = 100) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_OCa_20260120ENshort.png",
+    width = 800, height = 600, res = 120) # width and height in pixels, resolution in dpi
 test_survplot2EN #
 dev.off() # Close the PNG device
 
 #ENGLISH plot at year 5  with plotting, no AUCS in the plot###############
-# Choose target time
-target_time <- 60        
+# Choose target time (5 years)
+target_time <- 60
 time_index <- which(rez_list[[1]]$times == target_time)
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test2025927EN.png",
-    width = 1200, height = 1200, res = 200) # width and height in pixels, resolution in dpi
-# Set up base plot with gene 1
-par(pty="s")
-# Set up base plot with gene 1
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test20260121EN.png",
+    width = 1200, height = 1200, res = 200)
+
+par(pty = "s")
+
+# Base plot (gene 1)
 plot(
   rez_list[[1]]$FP[, time_index],
   rez_list[[1]]$TP[, time_index],
@@ -724,13 +734,13 @@ plot(
   lwd = 2,
   xlab = "1 - Specificity",
   ylab = "Sensitivity",
-  main = paste("ROC curves, 5 years form diagnosis, OC group"),
+  main = "ROC curves, 5 years from diagnosis, OC group",
   xlim = c(0, 1),
   ylim = c(0, 1),
   asp = 1
 )
 
-# Add ROC lines for all genes
+# Add ROC curves for remaining genes
 for (i in 2:length(rez_list)) {
   lines(
     rez_list[[i]]$FP[, time_index],
@@ -740,49 +750,33 @@ for (i in 2:length(rez_list)) {
   )
 }
 
-# Add risk score ROC line in bold black
+# Add risk score ROC (bold maroon)
 lines(
   roc_result$FP[, time_index],
   roc_result$TP[, time_index],
   col = "maroon",
-  lwd = 3,
-  lty = 1
+  lwd = 3
 )
 
-# Add diagonal reference line
+# Diagonal reference line
 abline(0, 1, lty = 2, col = "gray")
 
-# Build legend names: italic gene names + "risk score"
+# Legend labels: italic gene names + Risk score (NO AUC)
 legend_labels <- c(
   parse(text = paste0("italic('", names(rez_list), "')")),
-  "Risk Score"
+  "Risk score"
 )
 
-# Get AUCs for each gene at time_index
-auc_list <- sapply(rez_list, function(x) x$AUC[time_index])
-auc_risk <- roc_result$AUC[time_index]
-
-# Build gene labels with italic names and AUCs
-legend_labels <- mapply(function(name, auc) {
-  paste0("italic('", name, "')~'(AUC = ", sprintf("%.3f", auc), ")'")
-}, names(rez_list), auc_list)
-
-# Add risk score with AUC
-legend_labels <- c(legend_labels,
-                   paste0("'Risk score (AUC = ", sprintf("%.3f", auc_risk), ")'"))
-
-# Add legend
 legend(
   "bottomright",
-  legend = parse(text = legend_labels),
+  legend = legend_labels,
   col = c(1:length(rez_list), "maroon"),
   lwd = c(rep(2, length(rez_list)), 3),
   cex = 0.6,
   bty = "n"
 )
 
-#run plot
-dev.off() # Close the PNG device
+dev.off()
 
 #TABLE of aucs, sensitivity, specificity##########################
 # Extract best sensitivity, specificity, cutoff for Notch risk score at 60 months
@@ -864,15 +858,15 @@ gt_table_roc_60
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_roc_60,
-       filename = "10genetimeroc_table_20250927EN.png")
+       filename = "10genetimeroc_table_20260121EN.png")
 
 #Combine the images
-roc_image <- image_read("tissues_OCtimeROC_test2025927EN.png")
-table_image <- image_read("10genetimeroc_table_20250927EN.png")
+roc_image <- image_read("tissues_OCtimeROC_test20260121EN.png")
+table_image <- image_read("10genetimeroc_table_20260121EN.png")
 
 combined_image <- image_append(c(roc_image, table_image), stack = F)
 
 # Save the combined image
 image_write(combined_image, 
-            "tissues_OCtimeROCw_table_test2025927EN.png")
+            "tissues_OCtimeROCw_table_test20260121EN.png")
 

@@ -124,8 +124,8 @@ tumor_plot <- ggplot(OC_table, aes(x=tumor, y=value, fill = variable)) +
 tumor_plot #
 
 ##save plot 2 groups ###########################
-png("10genes_boxplot2groups_2025-06-20.png"
-    , width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
+png("10genes_boxplot2groups_20260121.png"
+    , width = 18, height = 18, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 tumor_plot #
 dev.off() # Close the PNG device
 
@@ -199,7 +199,7 @@ tumor_plotEN <- ggplot(OC_tableEN, aes(x=tumor, y=value, fill = variable)) +
 tumor_plotEN #
 
 ##save plot 2 groups ###########################
-png("10genes_boxplot2groupsEN_20251217.png"
-    , width = 3000, height = 2300, res = 350) # width and height in pixels, resolution in dpi
+png("10genes_boxplot2groupsEN_20260121.png"
+    , width = 18, height = 18, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 tumor_plotEN #
 dev.off() # Close the PNG device

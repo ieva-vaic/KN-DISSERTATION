@@ -101,7 +101,7 @@ roc_plot_custom <- function() {
 #show plot
 roc_plot_custom()
 # Save the plot as a PNG file
-png("FIG_best3_HSGOC_BENIGN20251124.png", width = 1000, height = 1000, res = 150)
+png("FIG_best3_HSGOC_BENIGN20260121.png",width = 15, height = 15, res = 510, units = "cm")
 roc_plot_custom()
 mtext("B", side = 3, adj = 0, line = 2.5, cex = 1.5, font = 2)
 dev.off()
@@ -143,28 +143,30 @@ gt_table_cut <- results_roc_custom %>%
 gt_table_cut
 
 #there is no other convieneat way to save gt outputs
-gtsave(gt_table_cut,vwidth = 800,
-  filename = "FIG_tabbest3_HGSOC_BENIGN20251218.png")
+gtsave(gt_table_cut,vwidth = 1000,
+  filename = "FIG_tabbest3_HGSOC_BENIGN20260121.png")
 
 #Combine the images
-roc_image2<- image_read("FIG_best3_HSGOC_BENIGN20251124.png")
-table_image2 <- image_read("FIG_tabbest3_HGSOC_BENIGN20251218.png")
+roc_image2<- image_read("FIG_best3_HSGOC_BENIGN20260121.png")
+table_image2 <- image_read("FIG_tabbest3_HGSOC_BENIGN20260121.png")
 
-# Find the max width to align both
-roc_info <- image_info(roc_image2)
-table_info <- image_info(table_image2)
-max_width <- max(roc_info$width, table_info$width)
+# Match widths (use the larger width to avoid downscaling)
+max_width <- max(image_info(roc_image2)$width,
+                 image_info(table_image2)$width)
 
-# Pad each image to the max width
-roc_image2_padded <- image_extent(roc_image2, geometry = geometry_area(max_width, roc_info$height), gravity = "center", color = "white")
-table_image2_padded <- image_extent(table_image2, geometry = geometry_area(max_width, table_info$height), gravity = "center", color = "white")
+roc_image2   <- image_resize(roc_image2,   paste0(max_width, "x"))
+table_image2 <- image_resize(table_image2, paste0(max_width, "x"))
 
-# Now append vertically
-combined_image2 <- image_append(c(roc_image2_padded, table_image2_padded), stack = TRUE)
+# Append vertically
+combined_image <- image_append(c(roc_image2, table_image2), stack = TRUE)
 
-# Save the combined image
-image_write(combined_image2, 
-            "FIG_COMBINED_best3_HGSOC_BENIGN20251218.png")
+# Save with high quality
+image_write(
+  combined_image,
+  path = "FIG_best3_HGSOC_BENIGN_combined20260121.png",
+  format = "png"
+)
+
 
 #OVCa vs BENIGN MODELS################################################################
 ##manually make combination of the best two OVCa vs benign#####
@@ -230,7 +232,7 @@ roc_plot_customx <- function() {
 roc_plot_customx()
 
 # Save the plot as a PNG file
-png("FIG_best3ocfull_for_genes20251124.png", width = 1000, height = 1000, res = 150)
+png("FIG_best3ocfull_for_genes20260121.png", width = 15, height = 15, res = 510, units = "cm")
 roc_plot_customx()
 mtext("A", side = 3, adj = 0, line = 2.5, cex = 1.5, font = 2)
 dev.off()
@@ -273,28 +275,51 @@ gt_table_cutx
 
 #there is no other convieneat way to save gt outputs
 gtsave(gt_table_cutx,vwidth = 800, 
- filename = "FIG_tabbest3ocfull_for_genes20251218.png")
+ filename = "FIG_tabbest3ocfull_for_genes20260121.png")
 
-#Combine the images
-roc_image2x<- image_read("FIG_best3ocfull_for_genes20251124.png")
-table_image2x <- image_read("FIG_tabbest3ocfull_for_genes20251218.png")
-
-# Find the max width to align both
-roc_infox <- image_info(roc_image2x)
-table_infox <- image_info(table_image2x)
-max_widthx <- max(roc_infox$width, table_infox$width)
-
-# Pad each image to the max width
-roc_image2_paddedx <- image_extent(roc_image2x, geometry = geometry_area(max_width, roc_infox$height), gravity = "center", color = "white")
-table_image2_paddedx <- image_extent(table_image2x, geometry = geometry_area(max_width, table_infox$height), gravity = "center", color = "white")
-
-# Now append vertically
-combined_image2x <- image_append(c(roc_image2_paddedx, table_image2_paddedx), stack = TRUE)
 
 # Save the combined image
-image_write(combined_image2x, 
-            "FIG_COMBINED_forOC_full_genes20251218.png")
+roc_image2<- image_read("FIG_best3ocfull_for_genes20260121.png")
+table_image2 <- image_read("FIG_tabbest3ocfull_for_genes20260121.png")
 
+# Match widths (use the larger width to avoid downscaling)
+max_width <- max(image_info(roc_image2)$width,
+                 image_info(table_image2)$width)
+
+roc_image2   <- image_resize(roc_image2,   paste0(max_width, "x"))
+table_image2 <- image_resize(table_image2, paste0(max_width, "x"))
+
+# Append vertically
+combined_image <- image_append(c(roc_image2, table_image2), stack = TRUE)
+
+# Save with high quality
+image_write(
+  combined_image,
+  path = "FIG_COMBINED_forOC_full_genes20260121.png",
+  format = "png"
+)
+
+
+##COMBINE fig A and B#############################################
+img2 <- image_read("FIG_best3_HGSOC_BENIGN_combined20260121.png")
+img1 <- image_read("FIG_COMBINED_forOC_full_genes20260121.png")
+
+# Match heights (use the larger height to preserve resolution)
+max_height <- max(image_info(img1)$height,
+                  image_info(img2)$height)
+
+img1 <- image_resize(img1, paste0("x", max_height))
+img2 <- image_resize(img2, paste0("x", max_height))
+
+# Append horizontally
+combined_horizontal <- image_append(c(img1, img2), stack = FALSE)
+
+# Save at high quality
+image_write(
+  combined_horizontal,
+  path = "FIG_MODELS_horizontal_combined_20260121.png",
+  format = "png"
+)
 #HGSOC vs OTHERS MODELS###############################
 ##combination of the best 6 HGSOC vs others#####
 genes6 <- c( "RAD50",	"PKP3",	"CDCA5"	,"ZFPL1",	"VPS33B",	"TCEAL4")
@@ -376,7 +401,7 @@ roc_plot_customo <- function() {
 roc_plot_customo()
 
 # Save the plot as a PNG file
-png("FIG_bestHGSOC_VS_others20251124.png", width = 1000, height = 1000, res = 150)
+png("FIG_bestHGSOC_VS_others20260121.png", width = 1000, height = 1000, res = 150)
 roc_plot_customo()
 dev.off()
 
@@ -419,35 +444,27 @@ gt_table_cuto
 
 #there is no other convieneat way to save gt outputs
 gtsave(gt_table_cuto,vwidth = 800, 
-    filename = "FIG_besttableHGSOC_VS_others20251218.png")
+    filename = "FIG_besttableHGSOC_VS_others20260121.png")
 
-#Combine the images
-roc_image2o<- image_read("FIG_bestHGSOC_VS_others20251124.png")
-table_image2o <- image_read("FIG_besttableHGSOC_VS_others20251218.png")
+roc_image2<- image_read("FIG_bestHGSOC_VS_others20260121.png")
+table_image2 <- image_read("FIG_besttableHGSOC_VS_others20260121.png")
 
-# Find the max width to align both
-roc_infoo <- image_info(roc_image2o)
-table_infoo <- image_info(table_image2o)
-max_widtho <- max(roc_infoo$width, table_infoo$width)
+# Match widths (use the larger width to avoid downscaling)
+max_width <- max(image_info(roc_image2)$width,
+                 image_info(table_image2)$width)
 
-# Pad each image to the max width
-roc_image2_paddedo <- image_extent(roc_image2o, geometry = geometry_area(max_width, roc_infoo$height), gravity = "center", color = "white")
-table_image2_paddedo <- image_extent(table_image2o, geometry = geometry_area(max_width, table_infoo$height), gravity = "center", color = "white")
+roc_image2   <- image_resize(roc_image2,   paste0(max_width, "x"))
+table_image2 <- image_resize(table_image2, paste0(max_width, "x"))
 
-# Now append vertically
-combined_image2o <- image_append(c(roc_image2_paddedo, table_image2_paddedo), stack = TRUE)
+# Append vertically
+combined_image <- image_append(c(roc_image2, table_image2), stack = TRUE)
 
-# Save the combined image
-image_write(combined_image2o, 
-            "FIG_COMBINED_forHGSOC_others_genes20251218.png")
-
-#horizontal version
-# Now append vertically
-combined_image2o2 <- image_append(c(roc_image2o, table_image2o), stack = F)
-
-# Save the combined image
-image_write(combined_image2o2, 
-            "FIG_COMBINED_forHGSOC_others_genes20251124h.png")
+# Save with high quality
+image_write(
+  combined_image,
+  path = "FIG_COMBINED_forHGSOC_OTHERS_20260121.png",
+  format = "png"
+)
 
 ##compare HGSOC vs OTHERs ###################################
 roc.test(roc_curve10, roc_curve22, method = "delong")
@@ -734,4 +751,4 @@ combined_image2oEN <- image_append(c(roc_image2_paddedoEN, table_image2_paddedoE
 
 # Save the combined image
 image_write(combined_image2oEN, 
-            "FIG_COMBINED_forHGSOC_others_genes20251218EN.png")
+            "FIG_COMBINED_forHGSOC_others_genes2026122EN.png")
