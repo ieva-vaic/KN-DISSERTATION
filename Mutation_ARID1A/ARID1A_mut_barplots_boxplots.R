@@ -9,7 +9,8 @@ library(tidyverse)
 library(ggpubr)
 library(scales)  
 library(reshape2)
-#set wd for plots###########################################
+library(magick)
+#set wd for plots
 setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
 #upload data##############################################################
 KN_data <- read_xlsx("C:/Users/Ieva/rprojects/OTHER DATA/KN-DISSERTATION FILES/audiniu_mut_exprs_met20250709.xlsx")
@@ -110,8 +111,8 @@ geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = ARID1A_met )) +
     gsub("-", "\u2212", as.character(x))) #add long "-" signs
 ARID1A_met
 #save plot
-png("ARID1A_MET_RAISKA_BOXPLOT_20251009.png", width = 400, height = 400,
-    res =  100, units = "px", pointsize = 14) # width and height in pixels, resolution in dpi
+png("ARID1A_MET_RAISKA_BOXPLOT_20260121.png", width = 12, height = 10,
+    res =  510, units = "cm", pointsize = 14) # width and height in pixels, resolution in dpi
 ARID1A_met
 dev.off()
 
@@ -155,8 +156,8 @@ ARID1A_metEN <- ggplot(ARID1A_dfEN, aes(x = ARID1A_met, y = ARID1A, fill = ARID1
 ARID1A_metEN
 
 #save plot
-png("ARID1A_MET_RAISKA_BOXPLOT_20251212.png", width = 400, height = 400,
-    res =  100, units = "px", pointsize = 14) # width and height in pixels, resolution in dpi
+png("ARID1A_MET_RAISKA_BOXPLOT_20260121EN.png",  width = 12, height = 10,
+    res =  510, units = "cm", pointsize = 14) 
 ARID1A_metEN
 dev.off()
 
@@ -218,12 +219,12 @@ ARID1A_mut <- ggplot(ARID1A_df_mut, aes(x = ARID1A_tumor_mut, y = ARID1A, fill =
     gsub("-", "\u2212", as.character(x))) #add long "-" signs
 ARID1A_mut
 #save png
-png("ARID1A_MUT_RAISKA_BOXPLOT_20251009.png", width = 400, height = 400,
-    res =  100, units = "px", pointsize = 14) # width and height in pixels, resolution in dpi
+png("ARID1A_MUT_RAISKA_BOXPLOT_20260121.png", width = 12, height = 10,
+    res =  510, units = "cm", pointsize = 14) 
 ARID1A_mut# Render the heatmap
 dev.off() # Close the PNG device
 
-### EN mut  vs raiska arid1a##################################
+## EN mut  vs raiska arid1a##################################
 ARID1A_df_mutEN <- ARID1A_df_mut %>%
   mutate(ARID1A_tumor_mut = recode(ARID1A_tumor_mut,
                                    "Be mutacijų" = "No mutations",
@@ -262,8 +263,8 @@ ARID1A_mutEN <- ggplot(ARID1A_df_mutEN, aes(x = ARID1A_tumor_mut, y = ARID1A, fi
 ARID1A_mutEN
 
 #save png
-png("ARID1A_MUT__RAISKA_BOXPLOT_EN20251212.png", width = 400, height = 400,
-    res =  100, units = "px", pointsize = 14) 
+png("ARID1A_MUT__RAISKA_BOXPLOT_EN20260121.png",width = 12, height = 10,
+    res =  510, units = "cm", pointsize = 14) 
 ARID1A_mutEN# 
 dev.off() 
 
@@ -285,8 +286,36 @@ mean_expression_tumor2 <- exp_df %>%
   mutate(fold_change_HB = log2(2^`Mutacija` / 2^`Be mutacijų`))
 mean_expression_tumor2#biger values
 
+#COMBINE 2 EN PLOTS TOGETHER#######################################
+# Read images
+img1en <- image_read("ARID1A_MET_RAISKA_BOXPLOT_20260121EN.png")
+img2en <- image_read("ARID1A_MUT__RAISKA_BOXPLOT_EN20260121.png")
+
+
+# Stack horizontally
+combineden <- image_append(c(img1en, img2en), stack = FALSE)
+
+# Display
+combineden
+
+# Save
+image_write(combineden, "ARID1A_combined_horizontal_20260121EN.png")
+
 
 #simplify mut + mutacija #########################################
+table(ARID1A_df_mut$ARID1A_tumor_mut)
+table(ARID1A_df_mut$ARID1A_met)
+ARID1A_df_mut <- ARID1A_df_mut %>%
+  mutate(
+    met_mut_arid1a = case_when(
+      ARID1A_met == "Metilintas"   & ARID1A_tumor_mut == "Mutacija"       ~ "Metilintas_Mutacija",
+      ARID1A_met == "Metilintas"   & ARID1A_tumor_mut == "Be mutacijų"    ~ "Metilintas_Be mutacijų",
+      ARID1A_met == "Nemetilintas" & ARID1A_tumor_mut == "Mutacija"       ~ "Nemetilintas_Mutacija",
+      ARID1A_met == "Nemetilintas" & ARID1A_tumor_mut == "Be mutacijų"    ~ "Nemetilintas_Be mutacijų",
+      TRUE ~ NA_character_
+    )
+  )
+
 table(ARID1A_df_mut$met_mut_arid1a)
 ARID1A_df_mut <- ARID1A_df_mut %>%
   mutate(arid1a_met_mut2 = case_when(
@@ -319,13 +348,14 @@ ARID1A_met4 <- ggplot(ARID1A_df_mut, aes(x = arid1a_met_mut2, y = ARID1A, fill =
       size = 12, face = "bold.italic"
     ),
     legend.position = "none",
-    plot.title = element_text(hjust = 0.5))+
+    plot.title = element_text(hjust = 0.5, size = 8))+
   labs(x=NULL)+
   stat_boxplot(geom ='errorbar')+
   annotate("text", x = -Inf, y = Inf, label = "C", hjust = -0.5, vjust = 1.5)+
   scale_fill_manual(values = custom_gray_colors3) +
   scale_color_manual(values = custom_gray_colors3)+
-  ggtitle(expression(italic("ARID1A") *" raiškos sąsaja su mutacijų ir promotoriaus metilinimo kombinacija" ))+
+  ggtitle(expression(italic("ARID1A") *" raiškos sąsaja su mutacijų ir promotoriaus metilinimo kombinacija"
+                     ))+
   stat_pvalue_manual(p_df3, label = "p.value",tip.length = 0.01,
                      inherit.aes = FALSE) +
   ylab(label =
@@ -334,8 +364,8 @@ ARID1A_met4 <- ggplot(ARID1A_df_mut, aes(x = arid1a_met_mut2, y = ARID1A, fill =
     gsub("-", "\u2212", as.character(x))) #add long "-" signs
 ARID1A_met4
 #save png
-png("ARID1A_MUT_MET_RAISKA_BOXPLOT_20251009.png", width = 650, height = 400,
-    res =  100, units = "px", pointsize = 14) 
+png("ARID1A_MUT_MET_RAISKA_BOXPLOT_20260121.png", width = 12, height = 10,
+    res =  510, units = "cm", pointsize = 14) 
 ARID1A_met4# 
 dev.off() 
 
@@ -356,7 +386,21 @@ mean_expression_tumor2 <- exp_df %>%
   mutate(fold_change_HB = log2(2^`Metilinimas arba mutacija` / 2^`Nemetilintas, Be mutacijų`))
 mean_expression_tumor2
 
-#BOXPLOT mutation vs methyaltion################
+#COMBINE 3 plots#####################
+# Read images
+img1 <- image_read("ARID1A_MET_RAISKA_BOXPLOT_20260121.png")
+img2 <- image_read("ARID1A_MUT_RAISKA_BOXPLOT_20260121.png")
+img3 <- image_read("ARID1A_MUT_MET_RAISKA_BOXPLOT_20260121.png")
+
+# Stack horizontally
+combined <- image_append(c(img1, img2, img3), stack = FALSE)
+
+# Display
+combined
+
+# Save
+image_write(combined, "ARID1A_combined_horizontal_20260121.png")
+#BARPLOT mutation vs methyaltion################
 #median arid1a expression
 ARID1A_df_mut <- ARID1A_df_mut %>%
   mutate(ARID1A_expression_group = ifelse(ARID1A > median(ARID1A, na.rm = TRUE), "big", "small"))
@@ -387,12 +431,12 @@ barplot_arid <- ggplot(df, aes(x = Methylation, y = Percent, fill = Mutation)) +
        title = expression(italic("ARID1A") * " sekos pokyčiai " *
                             italic("vs") * " promotoriaus metilinimas"),
        subtitle = paste("Fisherio testo p =", signif(fisher_test$p.value, 3))) +
-  theme_minimal(base_size = 14)
+  theme_minimal(base_size = 10)
 #show
 barplot_arid
 #save
-png("ARID1A_MUT_met_fishers_20250930.png", width = 700, height = 500,
-    res =  100, units = "px", pointsize = 12) # width and height in pixels, resolution in dpi
+png("ARID1A_MUT_met_fishers_20260121.png", width = 16, height = 10,
+    res =  510, units = "cm") # width and height in pixels, resolution in dpi
 barplot_arid# Render the heatmap
 dev.off() # Close the PNG device
 
@@ -428,12 +472,12 @@ barplot_aridEN <- ggplot(dfEN, aes(x = Methylation, y = Percent, fill = Mutation
        title = expression(italic("ARID1A") * " mutation " *
                             italic("vs") * " promoter methylation"),
        subtitle = paste("Fisher test p =", signif(fisher_test$p.value, 3))) +
-  theme_minimal(base_size = 14)
+  theme_minimal(base_size = 10)
 #show
 barplot_aridEN
 
 #save
-png("ARID1A_MUT_met_fishers_EN20251212.png", width = 700, height = 500,
-    res =  100, units = "px", pointsize = 12) # width and height in pixels, resolution in dpi
+png("ARID1A_MUT_met_fishers_EN20260121.png", width = 16, height = 10,
+    res =  510, units = "cm") # width and height in pixels, resolution in dpi
 barplot_aridEN# Render the heatmap
 dev.off() # Close the PNG device

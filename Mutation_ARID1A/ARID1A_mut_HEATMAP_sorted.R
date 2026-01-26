@@ -126,27 +126,25 @@ row_ha = rowAnnotation(`ARID1A mutacija` = ARID1A_df$ARID1A_tumor_type2,
                        annotation_name_gp = gpar(fontface = "italic")
 )
 #expression colors
-col_fun = colorRamp2(c(2, -5, -10, -15), c("#8564fb",  "#64b3fb","#e088bd", "#af2745"))
+col_fun = colorRamp2(c(0, -5, -9), c( "blue",   "white","red" ))
+
 #col_fun = colorRamp2(c(2, 0, -2, -4, -6, -8, -10, -12, -14, -16),
 #                     c("#e7e0fe", "#cec1fd", "#8564fb", "#64b3fb","#93cafc","#325a7e", "#e088bd", "#af2745", "#9e233e", "#4f121f"))
-labels <- c("\u221215", "\u221210", "\u22125", "2" ) #THIS IS NEEDED FOR MDPI AT LEAST - LONG MINUS SIGNS
+labels <- c("\u22129", "\u22125",  "0" ) #THIS IS NEEDED FOR MDPI AT LEAST - LONG MINUS SIGNS
 
 heatmap_raiska <- Heatmap(as.matrix(Heat_data), 
                           cluster_columns = FALSE,
                           cluster_rows = FALSE,
+                          col = col_fun, 
                           right_annotation = row_ha,
                           name = "Santykinė genų raiška", 
                           column_names_gp = gpar(fontface = "italic"),
                           row_names_gp = gpar(fontsize = 8), 
                           heatmap_legend_param = list( #THIS IS FOR THE LONG MINUS SIGNS
-                            at = c(2, -5, -10, -15),   # Legend positions
+                            at = c(0, -5, -9),   # Legend positions
                             labels = labels, title_gp = gpar(fontface = "italic")
                           )  )  
 heatmap_raiska
-
-
-
-
 
 # CTNNB1 vector (already sorted with Heat_data_sorted)
 # compute median
@@ -163,6 +161,7 @@ row_group <- factor(row_group, levels = c("CTNNB1 didelė raiška", "CTNNB1 maž
 heatmap_raiska <- Heatmap(as.matrix(Heat_data), 
                           cluster_columns = FALSE,
                           cluster_rows = FALSE,
+                          col = col_fun,
                           right_annotation = row_ha,
                           row_split = row_group,             # <- SPLITTING HERE
                           row_title_gp = gpar(fontface = "italic", fontsize = 12),
@@ -170,14 +169,14 @@ heatmap_raiska <- Heatmap(as.matrix(Heat_data),
                           column_names_gp = gpar(fontface = "italic"),
                           row_names_gp = gpar(fontsize = 8), 
                           heatmap_legend_param = list( #THIS IS FOR THE LONG MINUS SIGNS
-                            at = c(2, -5, -10, -15),   # Legend positions
+                            at = c(0, -5, -9),   # Legend positions
                             labels = labels, title_gp = gpar(fontface = "italic")
                           )  )  
 heatmap_raiska
 
 #save png
-png("heatmap_mut20251205_longwise.png", width = 3000, height = 2500,
-    res = 300, units = "px", pointsize = 12) # width and height in pixels, resolution in dpi
+png("heatmap_mut20260123.png", width = 15, height = 18,
+    res = 510, units = "cm", pointsize = 12) # width and height in pixels, resolution in dpi
 draw(heatmap_raiska )# Render the heatmap
 dev.off() # Close the PNG device
 
@@ -239,7 +238,7 @@ ARID1A_dfEN$Histology <- ifelse(ARID1A_dfEN$Histology == "Granuloza", "Granulosa
                                 ARID1A_dfEN$Histology )
 ARID1A_dfEN$Histology <- ifelse(ARID1A_dfEN$Histology == "Endometriois", "Endometriosis",
                                 ARID1A_dfEN$Histology )
-#heatmap clinical data#########################################
+#EN heatmap clinical data#########################################
 # clinical data annotation
 row_ha = rowAnnotation(`ARID1A mutation` = ARID1A_dfEN$ARID1A_tumor_type2,
                        `CTNNB1 mutation` = ARID1A_dfEN$CTNNB1_tumor_mut2,
@@ -279,21 +278,21 @@ row_ha = rowAnnotation(`ARID1A mutation` = ARID1A_dfEN$ARID1A_tumor_type2,
                        ),
                        annotation_name_gp = gpar(fontface = "italic")
 )
-#expression colors
-col_fun = colorRamp2(c(2, -5, -10, -15), c("#8564fb",  "#64b3fb","#e088bd", "#af2745"))
+
 #col_fun = colorRamp2(c(2, 0, -2, -4, -6, -8, -10, -12, -14, -16),
 #                     c("#e7e0fe", "#cec1fd", "#8564fb", "#64b3fb","#93cafc","#325a7e", "#e088bd", "#af2745", "#9e233e", "#4f121f"))
-labels <- c("\u221215", "\u221210", "\u22125", "2" ) #THIS IS NEEDED FOR MDPI AT LEAST - LONG MINUS SIGNS
+#labels <- c("\u221215", "\u221210", "\u22125", "2" ) #THIS IS NEEDED FOR MDPI AT LEAST - LONG MINUS SIGNS
 
 heatmap_raiskaEN <- Heatmap(as.matrix(Heat_data), 
                             cluster_columns = FALSE,
                             cluster_rows = FALSE,
+                            col = col_fun, 
                             right_annotation = row_ha,
                             name = "Santykinė genų raiška", 
                             column_names_gp = gpar(fontface = "italic"),
                             row_names_gp = gpar(fontsize = 8), 
                             heatmap_legend_param = list( #THIS IS FOR THE LONG MINUS SIGNS
-                              at = c(2, -5, -10, -15),   # Legend positions
+                              at = c(0, -5, -9),   # Legend positions
                               labels = labels, title_gp = gpar(fontface = "italic")
                             )  )  
 heatmap_raiska
@@ -313,6 +312,7 @@ row_group <- factor(row_group, levels = c("CTNNB1 expression high", "CTNNB1 expr
 heatmap_raiskaEN <- Heatmap(as.matrix(Heat_data), 
                             cluster_columns = FALSE,
                             cluster_rows = FALSE,
+                            col = col_fun, 
                             right_annotation = row_ha,
                             row_split = row_group,             # <- SPLITTING HERE
                             row_title_gp = gpar(fontface = "italic", fontsize = 12),
@@ -320,14 +320,14 @@ heatmap_raiskaEN <- Heatmap(as.matrix(Heat_data),
                             column_names_gp = gpar(fontface = "italic"),
                             row_names_gp = gpar(fontsize = 8), 
                             heatmap_legend_param = list( #THIS IS FOR THE LONG MINUS SIGNS
-                              at = c(2, -5, -10, -15),   # Legend positions
+                              at = c(0, -5, -9),   # Legend positions
                               labels = labels, title_gp = gpar(fontface = "italic")
                             )  )  
 heatmap_raiskaEN
 
 #save png
-png("heatmap_mut20251212_longwise_EN.png", width = 3000, height = 2500,
-    res = 300, units = "px", pointsize = 12) # width and height in pixels, resolution in dpi
+png("heatmap_mut20260123EN.png", width = 15, height = 18,
+    res = 510, units = "cm", pointsize = 12) # width and height in pixels, resolution in dpi
 draw(heatmap_raiskaEN )# Render the heatmap
 dev.off() # Close the PNG device
 

@@ -125,40 +125,40 @@ test_survplot_Arid <- ggsurvplot(
 test_survplot_Arid
 
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/ARID1A_mut_KM_ALL_20250925.png",
-    width = 1000, height = 600, res = 100) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/ARID1A_mut_KM_ALL_20260121.png",
+    width = 26, height = 15, res = 510, units = "cm") # width and height in pixels, resolution in dpi
 test_survplot_Arid #
 dev.off() # Close the PNG device
 
-#time roc 
-MAIN_DF$ARID1A_mut_num <- ifelse(MAIN_DF$ARID1A_tumor_mut == "Mutacija", 1, 0) #make mutation a factor
-roc_obj <- timeROC(
-  T = MAIN_DF$OS,
-  delta = MAIN_DF$STATUS,
-  marker = MAIN_DF$ARID1A_mut_num,
-  cause = 1,
-  weighting = "marginal",
-  times = c(12, 36, 60),   # 1yr, 3yr, 5yr
-  iid = TRUE
-)
-plot(roc_obj, time = 60)   # ROC curve at 60 months
-roc_obj
-
-#coords
-# Extract index for 60 months
-idx <- which(roc_obj$times == 60)
-
-# Sensitivity (TPR) and Specificity (1 - FPR) at each cutoff
-sens_60 <- roc_obj$TP[, idx]
-spec_60 <- 1 - roc_obj$FP[, idx]
-
-results <- data.frame(
-  threshold = roc_obj$cutoffs,
-  sensitivity = sens_60,
-  specificity = spec_60
-)
-head(results)
-
+# #time roc 
+# MAIN_DF$ARID1A_mut_num <- ifelse(MAIN_DF$ARID1A_tumor_mut == "Mutacija", 1, 0) #make mutation a factor
+# roc_obj <- timeROC(
+#   T = MAIN_DF$OS,
+#   delta = MAIN_DF$STATUS,
+#   marker = MAIN_DF$ARID1A_mut_num,
+#   cause = 1,
+#   weighting = "marginal",
+#   times = c(12, 36, 60),   # 1yr, 3yr, 5yr
+#   iid = TRUE
+# )
+# plot(roc_obj, time = 60)   # ROC curve at 60 months
+# roc_obj
+# 
+# #coords
+# # Extract index for 60 months
+# idx <- which(roc_obj$times == 60)
+# 
+# # Sensitivity (TPR) and Specificity (1 - FPR) at each cutoff
+# sens_60 <- roc_obj$TP[, idx]
+# spec_60 <- 1 - roc_obj$FP[, idx]
+# 
+# results <- data.frame(
+#   threshold = roc_obj$cutoffs,
+#   sensitivity = sens_60,
+#   specificity = spec_60
+# )
+# head(results)
+# 
 
 #english ARID1A KM################
 
@@ -189,7 +189,7 @@ test_survplot_AridEN <- ggsurvplot(
 test_survplot_AridEN
 
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/ARID1A_mut_KM_ALL_EN20251215.png",
-    width = 1000, height = 600, res = 100) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/ARID1A_mut_KM_ALL_EN20260121.png",
+    width = 26, height = 15, res = 510, units = "cm") # width and height in pixels, resolution in dpi
 test_survplot_AridEN #
 dev.off() # Close the PNG device
