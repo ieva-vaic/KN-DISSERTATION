@@ -100,10 +100,10 @@ p_val <- 1 - pchisq(logrank_test$chisq, length(logrank_test$n) - 1)
 
 # make subtitle
 rms_subtitle <- paste0(
-  "Vidutinis išgyvenamumo laikas, mėnesiais: ",
-  "Be mutacijų = ", round(rms_values["ARID1A_tumor_mut=Be mutacijų"], 1), ", ",
-  "Mutacija = ", round(rms_values["ARID1A_tumor_mut=Mutacija"], 1),
-  "; Log-rank p = ", signif(p_val, 2)
+  "Vidutinis išgyvenamumo laikas, mėnesiais:\n",
+  "Be mutacijų = ", round(rms_values["ARID1A_tumor_mut=Be mutacijų"], 1),
+  ", Mutacija = ", round(rms_values["ARID1A_tumor_mut=Mutacija"], 1), "\n",
+  "Log-rank p = ", signif(p_val, 2)
 )
 
 # plot km
@@ -112,21 +112,21 @@ test_survplot_Arid <- ggsurvplot(
   data = MAIN_DF,
   pval = FALSE,              
   risk.table = TRUE,
-  title = expression( italic("ARID1A") * " mutacijų sąsaja su bendru išgyvenamumu KV audinių imtyje"),
-  risk.table.title = "Pacientų skaičius rizikos grupėje",
+  title = expression( italic("ARID1A") * " mutacijų sąsaja su bendru išgyvenamumu KV"),
+  risk.table.title = "Pacienčių skaičius rizikos grupėje",
   subtitle = rms_subtitle,
-  xlab = "Bendras išgyvenamumo laikas",
+  xlab = "Bendras išgyvenamumo laikas, mėnesiais",
   ylab = "Išgyvenamumo tikimybė",
   palette = c("darkblue", "maroon"),
   legend.title = "Mutacija",
-  legend.labs = c("Be mutacijų", "Mutacija")
+  legend.labs = c("Be mutacijų", "Mutacija"),
+  ggtheme = theme_survminer(base_size = 15) 
 )
 
 test_survplot_Arid
-
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/ARID1A_mut_KM_ALL_20260121.png",
-    width = 26, height = 15, res = 510, units = "cm") # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/ARID1A_mut_KM_ALL_20260130.png",
+    width = 16, height = 15, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 test_survplot_Arid #
 dev.off() # Close the PNG device
 
@@ -162,14 +162,12 @@ dev.off() # Close the PNG device
 
 #english ARID1A KM################
 
-# make subtitle
 rms_subtitleEN <- paste0(
-  "Median survival, months: ",
-  "No mutations = ", round(rms_values["ARID1A_tumor_mut=Be mutacijų"], 1), ", ",
-  "Mutations = ", round(rms_values["ARID1A_tumor_mut=Mutacija"], 1),
-  "; Log-rank p = ", signif(p_val, 2)
+  "Median survival (months):\n",
+  "No mutations: ", round(rms_values["ARID1A_tumor_mut=Be mutacijų"], 1),
+  ",  Mutations: ", round(rms_values["ARID1A_tumor_mut=Mutacija"], 1),"\n",
+  "Log-rank p = ", signif(p_val, 2)
 )
-
 # plot km
 test_survplot_AridEN <- ggsurvplot(
   km_fit_ARID1A_mut,
@@ -183,13 +181,14 @@ test_survplot_AridEN <- ggsurvplot(
   #ylab = "Išgyvenamumo tikimybė",
   palette = c("darkblue", "maroon"),
   legend.title = "Mutation",
-  legend.labs = c("No mutations", "Mutation")
+  legend.labs = c("No mutations", "Mutation"),
+  ggtheme = theme_survminer(base_size = 15) 
 )
 
 test_survplot_AridEN
 
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/ARID1A_mut_KM_ALL_EN20260121.png",
-    width = 26, height = 15, res = 510, units = "cm") # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/ARID1A_mut_KM_ALL_EN20260130.png",
+    width = 17, height = 15, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 test_survplot_AridEN #
 dev.off() # Close the PNG device

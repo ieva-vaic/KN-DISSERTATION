@@ -157,7 +157,7 @@ row_group <- ifelse(Heat_data$CTNNB1 < ctnnb1_med,
 
 row_group <- factor(row_group, levels = c("CTNNB1 didelė raiška", "CTNNB1 maža raiška"))
 
-#heatmap with a split
+#heatmap with a split#################################
 heatmap_raiska <- Heatmap(as.matrix(Heat_data), 
                           cluster_columns = FALSE,
                           cluster_rows = FALSE,
@@ -175,8 +175,8 @@ heatmap_raiska <- Heatmap(as.matrix(Heat_data),
 heatmap_raiska
 
 #save png
-png("heatmap_mut20260123.png", width = 15, height = 18,
-    res = 510, units = "cm", pointsize = 12) # width and height in pixels, resolution in dpi
+png("heatmap_mut20260130.png", width = 15, height = 17,
+    res = 400, units = "cm", pointsize = 11) # width and height in pixels, resolution in dpi
 draw(heatmap_raiska )# Render the heatmap
 dev.off() # Close the PNG device
 
@@ -326,8 +326,8 @@ heatmap_raiskaEN <- Heatmap(as.matrix(Heat_data),
 heatmap_raiskaEN
 
 #save png
-png("heatmap_mut20260123EN.png", width = 15, height = 18,
-    res = 510, units = "cm", pointsize = 12) # width and height in pixels, resolution in dpi
+png("heatmap_mut20260130EN.png", width = 15, height = 17,
+    res = 400, units = "cm", pointsize = 11) # width and height in pixels, resolution in dpi
 draw(heatmap_raiskaEN )# Render the heatmap
 dev.off() # Close the PNG device
 
