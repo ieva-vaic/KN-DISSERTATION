@@ -307,45 +307,73 @@ pheno_best2$`lymphatic invasion` <- recode(pheno_best2$`lymphatic invasion`,
                             "Lymphatic invasion" = "Invazija į limfmazgius",
                             "No invasion" = "Nėra invazijos į limfmazgius")
 #FIX ANOTATION OF CLINICAL DATA - pirmiausia klinikinių anotaciją susitvarkyt reikia
-row_ha2 = rowAnnotation(Rasė  = pheno_best2$race, 
-                        Amžius = pheno_best2$AGE2, 
-                        `Išgyvenamumo statusas` = pheno_best2$`vital status`,
-                        `Gydymo tipas` = pheno_best2$`treatment type`,
-                        `Diferenciacijos laipsnis` = pheno_best2$grade,
-                        Stadija =pheno_best2$stage,
-                        `Invazija į limfmazgius` = pheno_best2$`lymphatic invasion`,
-                        #choose colors
-                        col = list(Rasė = c("Indėnai arba Aliaskos vietiniai" = "pink",
-                                            "Azijiečiai" = "#9cd4c4",
-                                            "Juodaodžiai" = "darkgreen",
-                                            "Vietiniai Havajiečiai arba kiti Ramiojo vandenyno salų gyventojai" = "turquoise",
-                                            "Baltieji" = "lightgrey",
-                                            "neatsakė" = "darkgrey", 
-                                            "NA" = "grey"), 
-                                   Amžius = c("30-39" = "#E6D6F5",  
-                                           "40-49" = "#C49DDE", 
-                                           "50-59" = "#9C6CD3",  
-                                           "60-69" = "#713AB6", 
-                                           "70-79" = "#4B1C74", 
-                                           "NA" = "grey"),
-                                   `Išgyvenamumo statusas` = c("Gyvas" = "#9cd4c4",  
-                                                      "Miręs" = "#a89cd4", 
-                                                      "NA" = "grey"),
-                                   `Gydymo tipas` = c("Terapija vaistais" = "#9cd4c4",  
-                                                        "Radioterapija" = "#a89cd4", 
-                                                        "NA" = "grey"),
-                                   `Diferenciacijos laipsnis` = c("G2" = "#9cd4c4",  
-                                             "G3" = "#a89cd4", 
-                                             "NA" = "grey"),
-                                   Stadija = c("I Stadija" = "#9cd4c4",  
-                                             "II Stadija" = "#a89cd4",
-                                             "III Stadija" = "pink",  
-                                             "IV Stadija" = "turquoise", 
-                                             "NA" = "grey"),
-                                   `Invazija į limfmazgius` = c("Nėra invazijos į limfmazgius" = "#9cd4c4",  
-                                                            "Invazija į limfmazgius" = "#a89cd4", 
-                                                            "NA" = "grey")
-                        ))
+
+row_ha2 <- rowAnnotation(
+  `Rasė`  = pheno_best2$race, 
+  `Amžius` = pheno_best2$AGE2, 
+  `Išgyvenamumo statusas` = pheno_best2$`vital status`,
+  `Gydymo tipas` = pheno_best2$`treatment type`,
+  `Diferenciacijos laipsnis` = pheno_best2$grade,
+  `Stadija` = pheno_best2$stage,
+  `Invazija į limfmazgius` = pheno_best2$`lymphatic invasion`,
+  
+  col = list(
+    `Rasė` = c(
+      "Indėnai arba Aliaskos vietiniai" = "pink",
+      "Azijiečiai" = "#9cd4c4",
+      "Juodaodžiai" = "darkgreen",
+      "Vietiniai Havajiečiai arba kiti Ramiojo vandenyno salų gyventojai" = "turquoise",
+      "Baltieji" = "lightgrey",
+      "neatsakė" = "darkgrey", 
+      "NA" = "grey"
+    ), 
+    `Amžius` = c("30-39" = "#E6D6F5", "40-49" = "#C49DDE", 
+                 "50-59" = "#9C6CD3", "60-69" = "#713AB6", 
+                 "70-79" = "#4B1C74", "NA" = "grey"),
+    `Išgyvenamumo statusas` = c("Gyvas" = "#9cd4c4", "Miręs" = "#a89cd4", "NA" = "grey"),
+    `Gydymo tipas` = c("Terapija vaistais" = "#9cd4c4", "Radioterapija" = "#a89cd4", "NA" = "grey"),
+    `Diferenciacijos laipsnis` = c("G2" = "#9cd4c4", "G3" = "#a89cd4", "NA" = "grey"),
+    `Stadija` = c("I Stadija" = "#9cd4c4", "II Stadija" = "#a89cd4",
+                  "III Stadija" = "pink", "IV Stadija" = "turquoise", "NA" = "grey"),
+    `Invazija į limfmazgius` = c("Nėra invazijos į limfmazgius" = "#9cd4c4",
+                                 "Invazija į limfmazgius" = "#a89cd4", "NA" = "grey")
+  ),
+  
+  # ===== Bigger legends =====
+  show_annotation_name = TRUE,
+  annotation_name_gp = gpar(fontsize = 14, fontface = "bold"),
+  annotation_legend_param = list(
+    `Rasė` = list(title_gp = gpar(fontsize = 14, fontface = "bold"),
+                  labels_gp = gpar(fontsize = 14),
+                  legend_height = unit(5, "cm"),
+                  legend_width = unit(2, "cm")),
+    `Amžius` = list(title_gp = gpar(fontsize = 14, fontface = "bold"),
+                    labels_gp = gpar(fontsize = 14),
+                    legend_height = unit(5, "cm"),
+                    legend_width = unit(2, "cm")),
+    `Išgyvenamumo statusas` = list(title_gp = gpar(fontsize = 14, fontface = "bold"),
+                                   labels_gp = gpar(fontsize = 14),
+                                   legend_height = unit(5, "cm"),
+                                   legend_width = unit(2, "cm")),
+    `Gydymo tipas` = list(title_gp = gpar(fontsize = 14, fontface = "bold"),
+                          labels_gp = gpar(fontsize = 14),
+                          legend_height = unit(5, "cm"),
+                          legend_width = unit(2, "cm")),
+    `Diferenciacijos laipsnis` = list(title_gp = gpar(fontsize = 14, fontface = "bold"),
+                                      labels_gp = gpar(fontsize = 14),
+                                      legend_height = unit(5, "cm"),
+                                      legend_width = unit(2, "cm")),
+    `Stadija` = list(title_gp = gpar(fontsize = 14, fontface = "bold"),
+                     labels_gp = gpar(fontsize = 14),
+                     legend_height = unit(5, "cm"),
+                     legend_width = unit(2, "cm")),
+    `Invazija į limfmazgius` = list(title_gp = gpar(fontsize = 14, fontface = "bold"),
+                                    labels_gp = gpar(fontsize = 14),
+                                    legend_height = unit(5, "cm"),
+                                    legend_width = unit(2, "cm"))
+  )
+)
+
 
 #LT: MAKE BIG HEATMAP WITH GETX AGE################
 #gene names:
@@ -364,22 +392,22 @@ col_colors <- sapply(colnames(gtex_filtered_counts_train), function(x) {
 heatmap_tcga4 <- Heatmap(as.matrix(gtex_filtered_counts_train), 
                          row_split = group,   
                          show_row_names = F,
-                         column_names_gp = gpar(fontsize = 8, col = col_colors, fontface = "italic"), 
+                         column_names_gp = gpar(fontsize = 10, col = col_colors, fontface = "italic", column_names_rot = 45),  # rotates names 45 degrees), 
                          row_names_gp = gpar(fontsize = 2), # 
-                         heatmap_legend_param = list(title = "Genų raiška"),
+                         heatmap_legend_param = list(title = "Genų raiška",
+                                  title_gp = gpar(fontsize = 14, fontface = "bold"),  # main legend title
+                                  labels_gp = gpar(fontsize = 14)  ),
                          right_annotation = row_ha2,
                          cluster_rows = F,
                          cluster_columns = F,
                          column_order = RANK)
-#save lithuanian heatmap
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/big_elastic_net_heatmap20260121.png",
-    width = 50, height = 20, res = 350, units = "cm") 
-draw(
-  heatmap_tcga4,
-  heatmap_legend_side = "bottom", #the legend at the bottom
-  annotation_legend_side = "bottom"
-)
 
+# Save as PNG
+png(
+  "C:/Users/Ieva/rprojects/outputs_all/DISS/big_elastic_net_heatmap20260129.png",
+  width = 55, height = 25, units = "cm", res = 400
+)
+draw(heatmap_tcga4, heatmap_legend_side = "bottom", annotation_legend_side = "bottom")  # draw heatmap
 dev.off()
 
 

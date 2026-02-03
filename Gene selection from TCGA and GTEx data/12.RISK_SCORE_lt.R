@@ -813,10 +813,24 @@ gtex_plot <- ggplot(gtcga_table_full, aes(x=group , y=value, fill = variable)) +
 gtex_plot
 #save
 png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_20260121.png",
-    width = 18, height = 17, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+    width = 18, height = 16, res = 500, units = "cm") # width and height in pixels, resolution in dpi
 gtex_plot #
 dev.off() # Close the PNG device
 
+#save short 
+
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_20260127.png",
+    width = 15, height = 10, res = 300, units = "cm") # width and height in pixels, resolution in dpi
+gtex_plot +
+  theme(
+    strip.text.x = element_text(size = 8, face = "bold.italic"),
+    axis.text = element_text(size = 7),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_text(size = 9, hjust = 0.5),
+    plot.margin = margin(5, 5, 5, 5)
+  )+
+  coord_cartesian(clip = "off")
+dev.off() # Close the PNG device
 #GET FC
 gtex_counts_train_my <- gtex_counts_train2[, colnames(gtex_counts_train2) %in%
                                              c("group", expression )]
@@ -964,26 +978,33 @@ stage_plot <- ggplot(stage_table_train_full, aes(x=clinicalstage2 , y=value, fil
   add_pvalue(t.train_stage_tibble, label = "p") + #pvalue
   theme_minimal()+
   theme(
-    strip.text.x = element_text(
-      size = 12, face = "bold.italic"
-    ),
+    strip.text.x = element_text(size = 12, face = "bold.italic"),
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_stage) +
   scale_color_manual(values = custom_colors_stage) +
-  ggtitle("Genų raiška pagal stadiją mokymosi imtyje")
+  ggtitle("Genų raiška pagal stadiją mokymosi imtyje")+
+  coord_cartesian(clip = "off")
 
 stage_plot2 <- ggdraw(stage_plot) +
-  draw_plot_label(label = "A", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
+  draw_plot_label(label = "A", x = 0, y = 1, hjust = 0,
+                  vjust = 1, size = 10, fontface = "bold")
 
 stage_plot2
-#save stage plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_stage_barplot_20260126.png",
-    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
-stage_plot2 #
+#save short
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_stage_barplot_20260129.png",
+    width = 15, height = 10, res = 300, units = "cm") # width and height in pixels, resolution in dpi
+stage_plot2 
 dev.off() # Close the PNG device
+ 
+#save stage plot old
+# png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_stage_barplot_20260126.png",
+#     width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+# stage_plot2 #
+# dev.off() # Close the PNG device
 
 #TCGA - grade, boxplot ###########################
 #CREATE GROUPINGS ACCORDING TO DATA#
@@ -1046,18 +1067,25 @@ grade_plot <- ggplot(grade_table_full, aes(x=grade , y=value, fill = variable)) 
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_stage) +
   scale_color_manual(values = custom_colors_stage) +
-  ggtitle("Genų raiškoa pagal naviko diferenciacijos laipsnį mokymosi imtyje")
+  ggtitle("Genų raiška pagal naviko diferenciacijos laipsnį mokymosi imtyje")+
+  coord_cartesian(clip = "off") 
 
 grade_plot
 
 grade_plot2 <- ggdraw(grade_plot) +
   draw_plot_label(label = "A", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
+#save short
+
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_grade_barplot_20260129.png",
+    width = 15, height = 10, res = 300, units = "cm") # width and height in pixels, resolution in dpi
+grade_plot2
+dev.off() # Close the PNG device
 
 #save grade plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_grade_barplot_20260121.png",
-    width = 32, height = 19, res = 500, units = "cm") 
-grade_plot2 
-dev.off() 
+# png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_grade_barplot_20260121.png",
+#     width = 32, height = 19, res = 500, units = "cm") 
+# grade_plot2 
+# dev.off() 
 
 #Coreliation with age#################
 table(clin_df_joined$age_at_diagnosis, useNA ="a")
@@ -1142,16 +1170,16 @@ lymph_plot <- ggplot(lymph_table_full, aes(x=lymphaticinvasion , y=value, fill =
   add_pvalue(t.train_lymph_tibble, label = "p") + #pvalue
   theme_minimal()+
   theme(
-    strip.text.x = element_text(
-      size = 12, face = "bold.italic"
-    ),
+    strip.text.x = element_text(size = 8, face = "bold.italic"),
+    axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 8),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_lymph) +
   scale_color_manual(values = custom_colors_lymph) +
-  ggtitle("Genų raiška pagal invaziją į limfmazgius mokymosi imtyje")
+  ggtitle("Genų raiška pagal invaziją į limfmazgius mokymosi imtyje")+
+  coord_cartesian(clip = "off")   
 
 lymph_plot
 
@@ -1159,11 +1187,18 @@ lymph_plot2 <- ggdraw(lymph_plot) +
   draw_plot_label(label = "A", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
 
 lymph_plot2
+#save short
+
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_lymph_barplot_20260129.png",
+    width = 15, height = 11, res = 300, units = "cm") 
+lymph_plot2 
+dev.off() 
+
 #save lymphovascular invasion plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_lymph_barplot_20260121.png",
-    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
-lymph_plot2 #
-dev.off() # Close the PNG device
+# png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_lymph_barplot_20260121.png",
+#     width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+# lymph_plot2 #
+# dev.off() # Close the PNG device
 
 #TCGA - resudual tumor, boxplot ##############
 table(clin_df_joined$tumorresidualdisease, useNA ="a")
@@ -1293,7 +1328,8 @@ res_plot <- ggplot(residual_table_full, aes(x=tumorresidualdisease , y=value, fi
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_res) +
   scale_color_manual(values = custom_colors_res) +
-  ggtitle("Genų raiška pagal likutinį naviką mokymosi imtyje")
+  ggtitle("Genų raiška pagal likutinį naviką mokymosi imtyje")+
+  coord_cartesian(clip = "off")  
 
 res_plot
 
@@ -1301,11 +1337,17 @@ res_plot2 <- ggdraw(res_plot) +
   draw_plot_label(label = "A", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
 
 res_plot2
+#save short
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_res_barplot_20260129.png",
+    width = 15, height = 11, res = 300, units = "cm") 
+res_plot2 
+dev.off() 
+
 #save residual tumor plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_res_barplot_20260121.png",
-    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
-res_plot2 #
-dev.off() # Close the PNG device
+# png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_res_barplot_20260121.png",
+#     width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+# res_plot2 #
+# dev.off() # Close the PNG device
 
 
 #ENGLISH plot at year 5 with saving###########################
@@ -1462,24 +1504,35 @@ gtex_plotEN <- ggplot(gtcga_table_full, aes(x=group , y=value, fill = variable))
   add_pvalue(t.test_gtex_tibble, label = "p_custom") + #pvalue
   theme_minimal()+
   theme(
-    strip.text.x = element_text(
-      size = 12, face = "bold.italic"
-    ),
+    strip.text.x = element_text(size = 10, face = "bold.italic"),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors) +
   scale_color_manual(values = custom_colors) +
-  ggtitle("Gene expression in train cohort")
+  ggtitle("Gene expression in train cohort")+
+  coord_cartesian(clip = "off")  
 
 gtex_plotEN
+#save short
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_EN20260129.png",
+    width = 15, height = 10, res = 300, units = "cm") 
+gtex_plotEN +
+  theme(
+    strip.text.x = element_text(size = 8, face = "bold.italic"),
+    axis.text = element_text(size = 7),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_text(size = 9, hjust = 0.5),
+    plot.margin = margin(5, 5, 5, 5)
+  )
+dev.off() 
 
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_EN20260121.png",
-    width = 18, height = 17, res = 500, units = "cm") # width and height in pixels, resolution in dpi
-gtex_plotEN #
-dev.off() # Close the PNG device
+# png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_EN20260121.png",
+#     width = 18, height = 17, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+# gtex_plotEN #
+# dev.off() # Close the PNG device
 
 #EN KM train plot ##########################
 # Plot
@@ -1503,7 +1556,7 @@ print(train_survEN)
 #save
 png("C:/Users/Ieva/rprojects/outputs_all/DISS/train_KM_risk_score_EN20251216.png",
     width = 1500, height = 1200, res = 200) # width and height in pixels, resolution in dpi
-train_survEN #
+train_survEN
 dev.off() # Close the PNG device
 
 # EN coef plot ############################################## 

@@ -12,6 +12,7 @@ library(gt)
 library(multcomp)
 library(FSA)
 library(cowplot)
+library(patchwork)
 #set directory of the data
 setwd("../TCGA-OV-RISK-PROJECT/Public data RDSs/")
 #set genes of interest
@@ -27,7 +28,26 @@ age_long <- full_test %>%
   pivot_longer(cols = all_of(expression), names_to = "gene", values_to = "expression") %>%
   filter(!is.na(AGE2))
 #BOXPLOT: Age TEST ########################################
-# Step 1: Compute Kruskal-Wallis test for each gene
+# Step 1: Compute Kruskal-Wallis test for each gene (number version)
+# kw_df <- lapply(expression, function(gene) {
+#   test <- kruskal.test(full_test[[gene]] ~ full_test$AGE2)
+#   data.frame(
+#     gene = gene,
+#     statistic = test$statistic,
+#     p_value = test$p.value
+#   )
+# }) %>%
+#   do.call(rbind, .) %>%
+#   mutate(
+#     label = ifelse(
+#       p_value < 0.001,
+#       "italic(p) < 0.001",
+#       paste0("italic(p) == ", signif(p_value, 3))
+#     ),
+#     gene_label = paste0("italic(", gene, ")")
+#   )
+
+# Step 1: Compute Kruskal-Wallis test for each gene and convert to stars
 kw_df <- lapply(expression, function(gene) {
   test <- kruskal.test(full_test[[gene]] ~ full_test$AGE2)
   data.frame(
@@ -38,13 +58,17 @@ kw_df <- lapply(expression, function(gene) {
 }) %>%
   do.call(rbind, .) %>%
   mutate(
-    label = ifelse(
-      p_value < 0.001,
-      "italic(p) < 0.001",
-      paste0("italic(p) == ", signif(p_value, 3))
+    # Convert p-values to significance stars
+    label = case_when(
+      p_value < 0.001 ~ "***",
+      p_value < 0.01  ~ "**",
+      p_value < 0.05  ~ "*",
+      TRUE            ~ ""
     ),
+    # Keep gene label for facet
     gene_label = paste0("italic(", gene, ")")
   )
+
 
 # Step 2: Add labels to long-format data
 age_long <- age_long %>%
@@ -54,7 +78,7 @@ age_long <- age_long %>%
 age_test_plot <- 
   ggplot(age_long, aes(x = AGE2, y = expression)) +
   geom_boxplot(aes(fill = AGE2), outlier.shape = NA, alpha = 0.6) +
-  geom_jitter(aes(color = AGE2), width = 0.2, alpha = 0.8, size = 1.5) +
+  geom_jitter(aes(color = AGE2), width = 0.2, alpha = 0.8, size = 1) +
   geom_text(
     data = kw_df,
     aes(x = 1, y = Inf, label = label),
@@ -70,12 +94,13 @@ age_test_plot <-
     fill = "Amžius", color = "Amžius"
   ) +
   theme(legend.position = "bottom", 
-        plot.title = element_text(hjust = 0.5, size = 14, face = "bold"))+
-  scale_fill_brewer(palette = "Pastel1") +
-  scale_color_brewer(palette = "Pastel1") 
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5, size = 12, face = "bold"))+
+  scale_fill_brewer(palette = "Pastel2") +
+  scale_color_brewer(palette = "Pastel2") 
 #save plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontest20260121.png",
-    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontest20260127.png",
+    width = 15, height = 10, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 age_test_plot #
 grid.text("B", x = unit(0.02, "npc"), y = unit(0.98, "npc"),
           gp = gpar(fontsize = 18, fontface = "bold"))
@@ -107,13 +132,13 @@ rownames(full_age_df) <- full_age_df$Row.names
 full_age_df$Row.names <- NULL
 
 #pivot long
-age_long <- full_age_df %>%
+age_long1 <- full_age_df %>%
   dplyr::select(all_of(expression), AGE2) %>%
   pivot_longer(cols = all_of(expression), names_to = "gene", values_to = "expression") %>%
   filter(!is.na(AGE2))
 #BOXPLOT: Age TRAIN ########################################
 # Step 1: Compute Kruskal-Wallis test for each gene
-kw_df <- lapply(expression, function(gene) {
+kw_df1 <- lapply(expression, function(gene) {
   test <- kruskal.test(full_age_df[[gene]] ~ full_age_df$AGE2)
   data.frame(
     gene = gene,
@@ -123,24 +148,25 @@ kw_df <- lapply(expression, function(gene) {
 }) %>%
   do.call(rbind, .) %>%
   mutate(
+    # round to 3 decimals
     label = ifelse(
       p_value < 0.001,
       "italic(p) < 0.001",
-      paste0("italic(p) == ", signif(p_value, 3))
+      paste0("italic(p) == ", format(round(p_value, 3), nsmall = 3))
     ),
     gene_label = paste0("italic(", gene, ")")
   )
 
 # Step 2: Add labels to long-format data
-age_long <- age_long %>%
+age_long1 <- age_long1 %>%
   mutate(gene_label = paste0("italic(", gene, ")")) %>%
-  left_join(kw_df[, c("gene", "label")], by = "gene")
+  left_join(kw_df1[, c("gene", "label")], by = "gene")
 #plot
 # Step 3: Plot with Kruskal-Wallis p-values
-ggplot(age_long, aes(x = AGE2, y = expression)) +
+ggplot(age_long1, aes(x = AGE2, y = expression)) +
   geom_boxplot() +
   geom_text(
-    data = kw_df,
+    data = kw_df1,
     aes(x = 1, y = Inf, label = label),
     inherit.aes = FALSE,
     parse = TRUE,
@@ -173,7 +199,7 @@ sig_pairs <- dunn_sig %>%
 
 # Step 2: Add y.position for each gene to avoid label overlap
 # Use max expression per gene from age_long to space labels properly
-y_positions <- age_long %>%
+y_positions <- age_long1 %>%
   group_by(gene) %>%
   summarize(max_expr = max(expression, na.rm = TRUE))
 
@@ -194,10 +220,30 @@ sig_pairs <- sig_pairs %>%
 # Step 4: Add gene_label for facet matching (italic gene names)
 sig_pairs <- sig_pairs %>%
   mutate(gene_label = paste0("italic(", gene, ")"))
+
+# Step 5: change label
+sig_pairs <- sig_pairs %>%
+  mutate(
+    label = ifelse(
+      P.adj < 0.001,
+      "p < 0.001",
+      paste0("p = ", format(round(P.adj, 3), nsmall = 3))
+    )
+  )
+# Step 6: change label to *
+sig_pairs <- sig_pairs %>%
+  mutate(
+    label = case_when(
+      P.adj < 0.001 ~ "***",
+      P.adj < 0.01  ~ "**",
+      P.adj < 0.05  ~ "*",
+      TRUE          ~ ""  # no star for non-significant
+    )
+  )
 # FINAL plot
-age_train_plot <- ggplot(age_long, aes(x = AGE2, y = expression)) +
+age_train_plot <- ggplot(age_long1, aes(x = AGE2, y = expression)) +
   geom_boxplot(outlier.shape = NA, aes(fill = AGE2), alpha = 0.6) +   # colored boxes
-  geom_jitter(aes(color = AGE2), width = 0.2, alpha = 0.8, size = 1.5) +  # colored points
+  geom_jitter(aes(color = AGE2), width = 0.2, alpha = 0.8, size = 1) +  # colored points
   facet_wrap(~ gene_label, scales = "free_y", labeller = label_parsed, , nrow = 2, ncol = 5) +
   theme_minimal() +
   labs(title = "Genų raiškos sąsaja su amžiumi mokymosi imtyje",
@@ -212,29 +258,28 @@ age_train_plot <- ggplot(age_long, aes(x = AGE2, y = expression)) +
     y.position = "y.position",
     parse = FALSE,
     tip.length = 0.01,
-    size = 3
+    size = 5
   ) +
-  theme(legend.position = "bottom")+  # put legend below for clarity
+  theme(legend.position = "bottom", 
+        axis.text.x = element_text(angle = 45, hjust = 1),
+        plot.title = element_text(hjust = 0.5, size = 12, face = "bold"))+  # put legend below for clarity
   scale_fill_brewer(palette = "Pastel2") +
   scale_color_brewer(palette = "Pastel2") 
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontrain20260121.png",
-    width = 32, height = 29, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontrain20260127.png",
+    width = 15, height = 15, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 age_train_plot #
 grid.text("A", x = unit(0.02, "npc"), y = unit(0.98, "npc"),
           gp = gpar(fontsize = 18, fontface = "bold"))
 dev.off() # Close the PNG device
 
-#do this after train plots are already generated 
- img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontest20260121.png")
- img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontrain20260121.png")
+#PLOT TOGETHER##########################
+# Read images
+img1 <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontrain20260127.png")
+img2 <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/age_groups_vs_expressiontest20260127.png")
 
-combined_vertical <- image_append(
-  c(img_top, img_bottom),
-  stack = TRUE
-)
+# Stack vertically
+stacked <- image_append(c(img1, img2), stack = TRUE)  # stack=TRUE → vertical
 
-image_write(
-  combined_vertical,
-  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_AGE20260121.png"
-)
+# Save result
+image_write(stacked, "C:/Users/Ieva/rprojects/outputs_all/DISS/combined_age_plots20260127.png")

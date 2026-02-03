@@ -114,14 +114,29 @@ gtex_plot <- ggplot(gtcga_table_full, aes(x=group , y=value, fill = variable)) +
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors) +
   scale_color_manual(values = custom_colors) +
-  ggtitle("Genų raiška testavimo imtyje")
+  ggtitle("Genų raiška testavimo imtyje")+
+  coord_cartesian(clip = "off")  
+
 #show plot
 gtex_plot
+#save short
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_barplot_20260127.png",
+    width = 15, height = 10, res = 300, units = "cm") 
+gtex_plot +
+  theme(
+    strip.text.x = element_text(size = 8, face = "bold.italic"),
+    axis.text = element_text(size = 7),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_text(size = 9, hjust = 0.5),
+    plot.margin = margin(5, 5, 5, 5)
+  )
+dev.off() 
+
 #save gtex vs tca test plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_barplot_20260121.png",
-    width = 18, height = 17, res = 500, units = "cm") # width and height in pixels, resolution in dpi
-gtex_plot #
-dev.off() # Close the PNG device
+# png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_barplot_20260121.png",
+#     width = 18, height = 17, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+# gtex_plot #
+# dev.off() # Close the PNG device
 
 # Load cox model ###################################
 cvfit <- readRDS("coxnet_cvfit_2025.RDS")
@@ -703,27 +718,31 @@ stgae_plot <- ggplot(stage_table_full, aes(x=clinicalstage2 , y=value, fill = va
   facet_wrap(.~ factor(variable), nrow = 2, scales = "free") +
   theme_minimal()+
   theme(
-    strip.text.x = element_text(
-      size = 12, face = "bold.italic"
-    ),
+    strip.text.x = element_text( size = 12, face = "bold.italic"),
+    axis.text.x = element_text(angle = 45, hjust = 1),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_stage) +
   scale_color_manual(values = custom_colors_stage) +
-  ggtitle("Genų raiška pagal su stadiją testavimo imtyje")
+  ggtitle("Genų raiška pagal su stadiją testavimo imtyje")+
+  coord_cartesian(clip = "off")  
 
 stgae_plot
 
 stage_plot2 <- ggdraw(stgae_plot) +
   draw_plot_label(label = "B", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
-
+#save short
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_stage_barplot_20260129.png",
+    width = 15, height = 11, res = 300, units = "cm") 
+stage_plot2 
+dev.off() 
 #save stage boxplot 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_stage_barplot_20260121.png",
-    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
-stage_plot2 #
-dev.off() # Close the PNG device
+# png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_stage_barplot_20260121.png",
+#     width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+# stage_plot2 #
+# dev.off() # Close the PNG device
 
 #TCGA - grade, boxplot ###########################
 #CREATE GROUPINGS ACCORDING TO DATA#
@@ -784,20 +803,24 @@ grade_plot <- ggplot(grade_table_full, aes(x=neoplasmhistologicgrade , y=value, 
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_stage) +
   scale_color_manual(values = custom_colors_stage) +
-  ggtitle("Genų raiška pagal su naviko diferenciacijos laipsnį testavimo imtyje")
-
+  ggtitle("Genų raiška pagal su naviko diferenciacijos laipsnį testavimo imtyje")+
+  coord_cartesian(clip = "off")  
 grade_plot
-
 
 grade_plot2 <- ggdraw(grade_plot) +
   draw_plot_label(label = "B", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
 
 grade_plot2
+#save short
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_grade_barplot_20260129.png",
+    width = 15, height = 11, res = 300, units = "cm") 
+grade_plot2
+dev.off() 
 #save grade boxplot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_grade_barplot_20260121.png",
-    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
-grade_plot2 #
-dev.off() # Close the PNG device
+# png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_grade_barplot_20260121.png",
+#     width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+# grade_plot2 #
+# dev.off() # Close the PNG device
 
 #Coreliation with age#################
 table(clin_df_joined_test$age_at_diagnosis, useNA ="a")
@@ -880,16 +903,17 @@ lymph_plot <- ggplot(lymph_table_full, aes(x=lymphaticinvasion , y=value, fill =
   add_pvalue(lymph_test_lymph_tibble, label = "p") + #pvalue
   theme_minimal()+
   theme(
-    strip.text.x = element_text(
-      size = 12, face = "bold.italic"
-    ),
+    strip.text.x = element_text( size = 12, face = "bold.italic"),
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 8),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_lymph) +
   scale_color_manual(values = custom_colors_lymph) +
-  ggtitle("Genų raiška pagal su invaziją į limfmazgius testavimo imtyje")
+  ggtitle("Genų raiška pagal su invaziją į limfmazgius testavimo imtyje")+
+  coord_cartesian(clip = "off")  
+
 #show
 lymph_plot
 
@@ -897,11 +921,17 @@ lymph_plot2 <- ggdraw(lymph_plot) +
   draw_plot_label(label = "B", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
 
 lymph_plot2
+
+#save short
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_lymph_barplot_20260129.png",
+    width = 15, height = 11, res = 300, units = "cm") 
+lymph_plot2 
+dev.off() 
 #save lymphatic invasion plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_lymph_barplot_20260121.png",
-    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
-lymph_plot2 #
-dev.off() # Close the PNG device
+# png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_lymph_barplot_20260121.png",
+#     width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+# lymph_plot2 #
+# dev.off() # Close the PNG device
 
 #TCGA - residual disease, barplot #######################
 table(clin_df_joined_test$tumorresidualdisease, useNA ="a")
@@ -985,7 +1015,7 @@ kruskal_results2# not significant
 t.test_res_tibble <-  tibble::tribble(
   ~group1, ~group2, ~p,   ~y.position, ~variable,
   "Be likutinio naviko",   ">20 mm", 0.0377, 5, "PPT2", #tukey
-  "11-20 mm",   ">20 mm", 0.02, 5.5, "VPS33B", #Games-Howell
+  "11-20 mm",   ">20 mm", 0.02, 6, "VPS33B", #Games-Howell
   "1-10 mm ",   "11-20 mm", 0.037 , 5, "VPS33B", #Games-Howell
   "Be likutinio naviko",   "11-20 mm", 0.014 , 4, "VPS33B", #Games-Howell
 )
@@ -1016,12 +1046,13 @@ res_plot <- ggplot(residual_table_full, aes(x=tumorresidualdisease , y=value, fi
     ),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5),
-    axis.text.x = element_text(angle = 45, hjust = 1) )+
+    axis.text.x = element_text(angle = 45, hjust = 1, size = 7) )+
   labs(x=NULL)+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_res) +
   scale_color_manual(values = custom_colors_res) +
-  ggtitle("Genų raiška pagal likutinį naviką testavimo imtyje")
+  ggtitle("Genų raiška pagal likutinį naviką testavimo imtyje")+
+  coord_cartesian(clip = "off")  
 #show
 res_plot
 
@@ -1029,11 +1060,16 @@ res_plot2 <- ggdraw(res_plot) +
   draw_plot_label(label = "B", x = 0, y = 1, hjust = 0, vjust = 1, size = 20, fontface = "bold")
 
 res_plot2
+#save short
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_res_barplot_20260129.png",
+    width = 15, height = 12, res = 300, units = "cm") 
+res_plot2 
+dev.off() 
 #save residual disease plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_res_barplot_20260121.png",
-    width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
-res_plot2 #
-dev.off() # Close the PNG device
+# png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_res_barplot_20260121.png",
+#     width = 32, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+# res_plot2 #
+# dev.off() # Close the PNG device
 #survival, separate genes ###########################################
 colnames(clin_df_joined_test)
 genes <-  c("EXO1", "RAD50", "PPT2", "LUC7L2", 
@@ -1314,13 +1350,21 @@ gtex_plotEN <- ggplot(gtcga_table_full, aes(x=group , y=value, fill = variable))
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors) +
   scale_color_manual(values = custom_colors) +
-  ggtitle("Gene expression in test dataset")
+  ggtitle("Gene expression in test dataset")+
+  coord_cartesian(clip = "off")  
 #show plot
 gtex_plotEN
 #save gtex vs tca test plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_barplot_EN20260121.png",
-    width = 18, height = 17, res = 500, units = "cm") # width and height in pixels, resolution in dpi
-gtex_plotEN #
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/test_barplot_EN20260130.png",
+    width = 15, height = 10, res = 300, units = "cm") # width and height in pixels, resolution in dpi
+gtex_plotEN +
+  theme(
+    strip.text.x = element_text(size = 8, face = "bold.italic"),
+    axis.text = element_text(size = 7),
+    axis.title.y = element_text(size = 8),
+    plot.title = element_text(size = 9, hjust = 0.5),
+    plot.margin = margin(5, 5, 5, 5)
+  )#
 dev.off() # Close the PNG device
 
 
@@ -1381,8 +1425,8 @@ image_write(
 #SAVE FIGURES TOGETHER WITH TRAIN COHORTS#####################
 #stage
 #do this after train plots are already generated 
-img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_stage_barplot_20260126.png")
-img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_stage_barplot_20260121.png")
+img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_stage_barplot_20260129.png")
+img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_stage_barplot_20260129.png")
 
 combined_vertical <- image_append(
   c(img_top, img_bottom),
@@ -1391,12 +1435,12 @@ combined_vertical <- image_append(
 
 image_write(
   combined_vertical,
-  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_STAGE20260121.png"
+  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_STAGE20260129.png"
 )
 #grade
 #do this after train plots are already generated 
-img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_grade_barplot_20260121.png")
-img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_grade_barplot_20260121.png")
+img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_grade_barplot_20260129.png")
+img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_grade_barplot_20260129.png")
 
 combined_vertical <- image_append(
   c(img_top, img_bottom),
@@ -1405,12 +1449,12 @@ combined_vertical <- image_append(
 
 image_write(
   combined_vertical,
-  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_GRADE20260121.png"
+  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_GRADE20260129.png"
 )
 #lymph nodes
 #do this after train plots are already generated 
-img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_lymph_barplot_20260121.png")
-img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_lymph_barplot_20260121.png")
+img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_lymph_barplot_20260129.png")
+img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_lymph_barplot_20260129.png")
 
 combined_vertical <- image_append(
   c(img_top, img_bottom),
@@ -1419,12 +1463,12 @@ combined_vertical <- image_append(
 
 image_write(
   combined_vertical,
-  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_LYMPH20260121.png"
+  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_LYMPH20260129.png"
 )
 #residual tumor
 #do this after train plots are already generated 
-img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_res_barplot_20260121.png")
-img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_res_barplot_20260121.png")
+img_top <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_res_barplot_20260129.png")
+img_bottom <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_res_barplot_20260129.png")
 
 combined_vertical <- image_append(
   c(img_top, img_bottom),
@@ -1433,5 +1477,24 @@ combined_vertical <- image_append(
 
 image_write(
   combined_vertical,
-  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_RESIDUAL_TUMOR20260121.png"
+  "C:/Users/Ieva/rprojects/outputs_all/DISS/TRAIN_TEST_boxplot_RESIDUAL_TUMOR20260129.png"
 )
+
+# save togerther gtex vs tcga###########
+
+# Import images
+img1 <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_20260127.png")
+img2 <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_barplot_20260127.png")
+
+# Combine vertically and save
+image_append(c(img1, img2), stack = TRUE) %>%
+  image_write("combined_train_test_barplot_20260130.png")
+
+#EN
+# Import images
+img1 <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/train_barplot_EN20260129.png")
+img2 <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/test_barplot_EN20260130.png")
+
+# Combine vertically and save
+image_append(c(img1, img2), stack = TRUE) %>%
+  image_write("C:/Users/Ieva/rprojects/outputs_all/DISS/combined_train_test_barplot_EN20260130.png")
