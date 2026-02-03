@@ -201,13 +201,18 @@ OC_plot <- ggplot(Group3_table_full, aes(x=type , y=value, fill = variable)) +
   add_pvalue(each.vs.ref_sig, label = "p.adj_custom") + #pvalue
   theme_minimal()+
   theme(
-    strip.text.x = element_text(
-      size = 12, face = "bold.italic"
+    strip.text.x = element_text(size = 12, face = "bold.italic"),
+    axis.text.x = element_text( #rotate
+      angle = 45,
+      hjust = 1,
+      vjust = 1,
+      size = 10
     ),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
   stat_boxplot(geom ='errorbar')+
+  coord_cartesian(clip = "off")+
   scale_fill_manual(values = custom_colors) +
   scale_color_manual(values = custom_colors) +
   scale_y_continuous(labels = function(x) 
@@ -215,8 +220,11 @@ OC_plot <- ggplot(Group3_table_full, aes(x=type , y=value, fill = variable)) +
 
 OC_plot
 ##save png 3 groups####################################
-png("10genes_boxplot3groups_20260121.png",
-    width = 27, height = 18, res = 500, units = "cm") 
+png("10genes_boxplot3groups_20260130.png",
+    width = 15,
+    height = 15,
+    units = "cm",
+    res = 300) 
 OC_plot #
 dev.off() # Close the PNG device
 
@@ -269,9 +277,16 @@ OC_plot_en <- ggplot(Group3_table_full_en, aes(x=type , y=value, fill = variable
     strip.text.x = element_text(
       size = 12, face = "bold.italic"
     ),
+    axis.text.x = element_text( #rotate
+      angle = 45,
+      hjust = 1,
+      vjust = 1,
+      size = 10
+    ),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
+  coord_cartesian(clip = "off")+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_en) +
   scale_color_manual(values = custom_colors_en) +
@@ -280,8 +295,12 @@ OC_plot_en <- ggplot(Group3_table_full_en, aes(x=type , y=value, fill = variable
 
 OC_plot_en
 
-png("10genes_boxplot3groups_EN_20260121.png",
-    width = 27, height = 19, res = 500, units = "cm") 
+png("10genes_boxplot3groups_EN_20260130.png",
+    width = 15,
+    height = 15,
+    units = "cm",
+    res = 300
+)
 OC_plot_en #
 dev.off() # Close the PNG device
 #3 groups STAGE, HGSOC ##################################
@@ -401,6 +420,7 @@ Stage_plot <- ggplot(Stage_table_hgsoc, aes(x=Stage4 , y=value, fill = variable)
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL, title = "Genų raiškos sąsaja su stadija HGSOC imtyje")+
   stat_boxplot(geom ='errorbar')+
+  coord_cartesian(clip = "off")+
   scale_fill_manual(values = custom_colors) +
   scale_color_manual(values = custom_colors) +
   scale_y_continuous(labels = function(x) gsub("-", "\u2212", x))+
@@ -409,8 +429,8 @@ Stage_plot <- ggplot(Stage_table_hgsoc, aes(x=Stage4 , y=value, fill = variable)
 
 Stage_plot
 ##save png hgsoc stage####################################
-png("10_gene_stage20260121.png",
-    width = 20, height = 17, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+png("10_gene_stage20260130.png",
+    width = 15, height = 15, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 Stage_plot #
 dev.off() # Close the PNG device
 
@@ -452,6 +472,7 @@ stage2plot <- ggplot(Stage_table_hgsoc, aes(x=Stage4 , y=value, fill = variable)
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
+  coord_cartesian(clip = "off")+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors) +
   scale_color_manual(values = custom_colors) +
@@ -460,8 +481,8 @@ stage2plot <- ggplot(Stage_table_hgsoc, aes(x=Stage4 , y=value, fill = variable)
     gsub("-", "\u2212", as.character(x))) #add long "-" signs
 stage2plot
 
-png("10_gene_stage20260121EN.png",
-    width = 20, height = 17, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+png("10_gene_stage20260130EN.png",
+    width = 15, height = 15, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 stage2plot #
 dev.off() # Close the PNG device
 

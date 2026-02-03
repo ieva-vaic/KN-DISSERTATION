@@ -147,8 +147,8 @@ test_survplot$plot <- test_survplot$plot +
   )
 print(test_survplot)
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_sig_20260120LT.png",
-    width = 1100, height = 600, res = 100) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_sig_20260130LT.png",
+    width = 15, height = 14, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 test_survplot #
 dev.off() # Close the PNG device
 
@@ -267,8 +267,8 @@ test_survplot2$plot <- test_survplot2$plot +
 
 test_survplot2
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_OCa_20260120short.png",
-    width = 800, height = 620, res = 120) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_OCa_20260130short.png",
+    width = 15, height = 13, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 test_survplot2 #
 dev.off() # Close the PNG device
 
@@ -549,18 +549,18 @@ gt_table_roc_60 <- roc_table_display %>%
 gt_table_roc_60
 
 #there is no other convenient way to save gt outputs
-gtsave(gt_table_roc_60,
-       filename = "10genetimeroc_table_20260121.png")
+gtsave(gt_table_roc_60,  vwidth = 600, 
+       filename = "10genetimeroc_table_20260130.png")
 
 #Combine the images
 roc_image <- image_read("tissues_OCtimeROC_test20260122LT.png")
-table_image <- image_read("10genetimeroc_table_20260121.png")
+table_image <- image_read("10genetimeroc_table_20260130.png")
 
 combined_image <- image_append(c(roc_image, table_image), stack = F)
 
 # Save the combined image
 image_write(combined_image, 
-            "tissues_OCtimeROCw_table_test20260121.png")
+            "tissues_OCtimeROCw_table_test20260130.png")
 
 
 
@@ -710,8 +710,8 @@ test_survplot2EN$plot <- test_survplot2EN$plot +
 
 test_survplot2EN
 #save
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_OCa_20260120ENshort.png",
-    width = 800, height = 600, res = 120) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/KM_10_gene_OCa_20260130ENshort.png",
+    width = 17, height = 13, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 test_survplot2EN #
 dev.off() # Close the PNG device
 
@@ -720,8 +720,8 @@ dev.off() # Close the PNG device
 target_time <- 60
 time_index <- which(rez_list[[1]]$times == target_time)
 
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test20260121EN.png",
-    width = 1200, height = 1200, res = 200)
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/tissues_OCtimeROC_test20260130EN.png",
+    width = 1000, height = 1000, res = 200)
 
 par(pty = "s")
 
@@ -857,16 +857,16 @@ gt_table_roc_60 <- roc_table_display %>%
 gt_table_roc_60
 
 #there is no other convenient way to save gt outputs
-gtsave(gt_table_roc_60,
-       filename = "10genetimeroc_table_20260121EN.png")
+gtsave(gt_table_roc_60,vwidth = 600,
+       filename = "10genetimeroc_table_20260130EN.png")
 
 #Combine the images
-roc_image <- image_read("tissues_OCtimeROC_test20260121EN.png")
-table_image <- image_read("10genetimeroc_table_20260121EN.png")
+roc_image <- image_read("tissues_OCtimeROC_test20260130EN.png")
+table_image <- image_read("10genetimeroc_table_20260130EN.png")
 
 combined_image <- image_append(c(roc_image, table_image), stack = F)
 
 # Save the combined image
 image_write(combined_image, 
-            "tissues_OCtimeROCw_table_test20260121EN.png")
+            "tissues_OCtimeROCw_table_test20260130EN.png")
 

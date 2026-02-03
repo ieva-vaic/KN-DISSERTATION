@@ -40,7 +40,7 @@ auc_values_tumor #extracted aucs
 roc_plot <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor[["EXO1"]], print.auc = F, col = "#dcbeff",
-           cex.main=0.8, 
+           cex.main=0.9, 
            main ="Gerybinių pakitimų atskyrimas nuo HGSOC",
            xlab = "1 - Specifiškumas", 
            ylab = "Jautrumas", 
@@ -75,8 +75,8 @@ roc_plot <- function() {
 
 roc_plot()
 ## Save the plot as a PNG file
-png("10_genes_roc_hgsoc_benign_20251121.png",
-    width = 15, height = 15, res = 510, units = "cm")
+png("10_genes_roc_hgsoc_benign_20251130.png",
+    width = 10, height = 10, res = 310, units = "cm")
 roc_plot()
 dev.off()
 
@@ -129,7 +129,7 @@ gtsave(gt_table_tumor,
 
 #Combine the images
 #Combine the images
-roc_image2   <- image_read("10_genes_roc_hgsoc_benign_20251121.png")
+roc_image2   <- image_read("10_genes_roc_hgsoc_benign_20251130.png")
 table_image2 <- image_read("10_genes_roc_table_hgsoc_benign_20250122.png")
 
 # Get height of ROC image
@@ -148,7 +148,7 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "10_genes_roc_combined_hgsoc_benign_20260121.png"
+  "10_genes_roc_combined_hgsoc_benign_20260130.png"
 )
 
 ##CA125 ROC HGSOC vs benign for comparison###################################
@@ -190,7 +190,7 @@ auc_values_tumor_others #extracted aucs
 roc_plot2 <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor_others[["EXO1"]], print.auc = F, col = "#dcbeff",
-           cex.main=0.8, 
+           cex.main=0.9, 
            main ="HGSOC navikų atskyrimas nuo kitų KV atvejų",
            xlab = "1 - Specifiškumas", 
            ylab = "Jautrumas", 
@@ -220,13 +220,13 @@ roc_plot2 <- function() {
   
   col = c("#dcbeff", "#911eb4", "#ffd8b1", "#42d4f4", "#fabed4",
           "#f032e6", "#f58231", "#a9a9a9", "#469990", "#808000"), lty = 1, 
-  cex = 0.7, lwd =3)
+  cex = 0.55, lwd =3)
 }
 
 roc_plot2()
 ## Save the plot as a PNG file
-png("10_genes_roc_hgsoc_others_20260121.png",
-    width = 15, height = 15, res = 510, units = "cm")
+png("10_genes_roc_hgsoc_others_20260130.png",
+    width = 10, height = 10, res = 310, units = "cm")
 roc_plot2()
 dev.off()
 
@@ -318,7 +318,7 @@ gtsave(gt_table_tumor_others,
        filename = "10_genes_roc_table_hgsoc_other_20260121.png")
 
 #Combine the images
-roc_image2   <- image_read("10_genes_roc_hgsoc_others_20260121.png")
+roc_image2   <- image_read("10_genes_roc_hgsoc_others_20260130.png")
 table_image2 <- image_read("10_genes_roc_table_hgsoc_other_20260121.png")
 
 # Get height of ROC image
@@ -337,7 +337,7 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "10_genes_roc_combined_hgsoc_others_20260121.png"
+  "10_genes_roc_combined_hgsoc_others_20260130.png"
 )
 
 #ROC OVCa vs benign############################################
@@ -354,7 +354,7 @@ auc_values_tumor_OC #extracted aucs
 roc_plot3 <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor_OC[["EXO1"]], print.auc = F, col = "#dcbeff",
-           cex.main=0.8, 
+           cex.main=0.9, 
            main ="Gerybinių pakitimų atskyrimas nuo KV atvejų", 
            xlab = "1 - Specifiškumas", 
            ylab = "Jautrumas", 
@@ -389,8 +389,8 @@ roc_plot3 <- function() {
 
 roc_plot3()
 ## Save the plot as a PNG file
-png("10_genes_roc_oc_20260121.png",
-    width = 15, height = 15, res = 510, units = "cm")
+png("10_genes_roc_oc_20260130.png",
+    width = 10, height = 10, res = 310, units = "cm")
 roc_plot3()
 dev.off()
 
@@ -465,8 +465,7 @@ gtsave(gt_table_tumor_OC,
        filename = "10_genes_roc_table_oc_20260121.png")
 
 #Combine the images
-#Combine the images
-roc_image2   <- image_read("10_genes_roc_oc_20260121.png")
+roc_image2   <- image_read("10_genes_roc_oc_20260130.png")
 table_image2 <- image_read("10_genes_roc_table_oc_20260121.png")
 
 # Get height of ROC image
@@ -485,7 +484,7 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "10_genes_roc_combined_OC_20260121.png"
+  "10_genes_roc_combined_OC_20260130.png"
 )
 
 # #combine HGSOC vs benign ####################################################
@@ -741,8 +740,8 @@ roc_plot_en <- function() {
 
 roc_plot_en()
 ## Save the plot as a PNG file
-png("10_genes_roc_hgsoc_benign_20260121_en.png",
-    width = 15, height = 15, res = 510, units = "cm")
+png("10_genes_roc_hgsoc_benign_20260130_en.png",
+    width = 10, height = 10, res = 310, units = "cm")
 roc_plot_en()
 dev.off()
 
@@ -792,8 +791,7 @@ gtsave(gt_table_tumor_en,
        filename = "10_genes_roc_table_hgsoc_benign_20260121en.png")
 
 #Combine the images
-#Combine the images
-roc_image2   <- image_read("10_genes_roc_hgsoc_benign_20260121_en.png")
+roc_image2   <- image_read("10_genes_roc_hgsoc_benign_20260130_en.png")
 table_image2 <- image_read("10_genes_roc_table_hgsoc_benign_20260121en.png")
 
 # Get height of ROC image
@@ -812,7 +810,7 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "10_genes_roc_combined_hgsoc_benign_20260121en.png"
+  "10_genes_roc_combined_hgsoc_benign_20260130en.png"
 )
 #EN PLOT roc HGSOC vs others #############################################
 roc_plot2EN <- function() {
@@ -848,13 +846,13 @@ roc_plot2EN <- function() {
   
   col = c("#dcbeff", "#911eb4", "#ffd8b1", "#42d4f4", "#fabed4",
           "#f032e6", "#f58231", "#a9a9a9", "#469990", "#808000"), lty = 1, 
-  cex = 0.7, lwd =3)
+  cex = 0.55, lwd =3)
 }
 
 roc_plot2EN()
 ## Save the plot as a PNG file
-png("10_genes_roc_hgsoc_others_20260121EN.png",
-    width = 15, height = 15, res = 510, units = "cm")
+png("10_genes_roc_hgsoc_others_20260130EN.png",
+    width = 10, height = 10, res = 310, units = "cm")
 roc_plot2EN()
 dev.off()
 
@@ -901,7 +899,7 @@ gtsave(gt_table_tumor_othersEN,
        filename = "10_genes_roc_table_hgsoc_other_20260121EN.png")
 
 #Combine the images
-roc_image2   <- image_read("10_genes_roc_hgsoc_others_20260121EN.png")
+roc_image2   <- image_read("10_genes_roc_hgsoc_others_20260130EN.png")
 table_image2 <- image_read("10_genes_roc_table_hgsoc_other_20260121EN.png")
 
 # Get height of ROC image
@@ -920,14 +918,14 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "10_genes_roc_combined_hgsoc_others_20260121EN.png"
+  "10_genes_roc_combined_hgsoc_others_20260130EN.png"
 )
 
 #EN PLOT roc OVCa vs benign#############################################
 roc_plot3EN <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor_OC[["EXO1"]], print.auc = F, col = "#dcbeff",
-           cex.main=0.8, 
+           cex.main=0.75, 
            main ="Separation of benign ovarian tumors form ovarian cancer", 
            #xlab = "1 - Specifiškumas", 
            #ylab = "Jautrumas", 
@@ -963,8 +961,8 @@ roc_plot3EN <- function() {
 roc_plot3EN()
 
 ## Save the plot as a PNG file
-png("10_genes_roc_oc_20260121EN.png",
-    width = 15, height = 15, res = 510, units = "cm"
+png("10_genes_roc_oc_20260130EN.png",
+    width = 10, height = 10, res = 310, units = "cm"
 )
 roc_plot3EN()
 dev.off()
@@ -1011,7 +1009,7 @@ gtsave(gt_table_results_tumor_OCEN,
        filename = "10_genes_roc_table_oc_20260121EN.png")
 
 #Combine the images
-roc_image2   <- image_read("10_genes_roc_oc_20260121EN.png")
+roc_image2   <- image_read("10_genes_roc_oc_20260130EN.png")
 table_image2 <- image_read("10_genes_roc_table_oc_20260121EN.png")
 
 # Get height of ROC image
@@ -1030,5 +1028,5 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "10_genes_roc_combined_OC_20260121EN.png"
+  "10_genes_roc_combined_OC_20260130EN.png"
 )

@@ -188,6 +188,7 @@ Grade_plot <- ggplot(Grade_table_OC, aes(x=Grade2 , y=value, fill = variable)) +
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
+  coord_cartesian(clip = "off")+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors) +
   scale_color_manual(values = custom_colors) + 
@@ -197,11 +198,10 @@ Grade_plot <- ggplot(Grade_table_OC, aes(x=Grade2 , y=value, fill = variable)) +
 Grade_plot
 
 ##save plot####################################################
-png("10gene_grade_20260121.png"
-    , width = 20, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+png("10gene_grade_20260130.png"
+    , width = 15, height = 13, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 Grade_plot 
 dev.off() # Close the PNG device
-
 
 ##FC GRADE ##################
 expression_df_GRADE <- OC_only[, c("Grade2", expression, "KN")]
@@ -332,11 +332,18 @@ Ca125_plot <- ggplot(CA125_table_OC, aes(x=CA125_f , y=value, fill = variable)) 
   theme_minimal()+
   theme(
     strip.text.x = element_text(
-      size = 12, face = "bold.italic"
+      size = 9, face = "bold.italic"
+    ),
+    axis.text.x = element_text( #rotate
+      angle = 75,
+      hjust = 1,
+      vjust = 1,
+      size = 9
     ),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
+  coord_cartesian(clip = "off")+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors) +
   scale_color_manual(values = custom_colors) + 
@@ -345,8 +352,8 @@ Ca125_plot <- ggplot(CA125_table_OC, aes(x=CA125_f , y=value, fill = variable)) 
 Ca125_plot
 
 ##save plot ca125 pre op######################################
-png("10_gene_boxplot_ca125_20260121.png"
-    , width = 29, height = 19, res = 500, units = "cm")
+png("10_gene_boxplot_ca125_20260130.png"
+    , width = 15, height = 17, res = 300, units = "cm")
 Ca125_plot #
 dev.off() # Close the PNG device
 
@@ -520,11 +527,11 @@ combined_plot <- wrap_plots(plot_list, ncol = 2)
 combined_plot
 ##save age plot to PNG####################
 ggsave(
-  filename = "10_gene_age10genes20260121LT.png",
+  filename = "10_gene_age10genes20260130LT.png",
   plot = combined_plot,
-  width = 25,       # adjust width as needed
-  height = 30,       # adjust height as needed
-  dpi = 500,         # high resolution
+  width = 15,       # adjust width as needed
+  height = 25,       # adjust height as needed
+  dpi = 400,         # high resolution
   units = "cm"
 )
 #ENGLISH PLOTS #####################################
@@ -554,9 +561,16 @@ Ca125_plot <- ggplot(CA125_table_OCEN, aes(x=CA125_f , y=value, fill = variable)
     strip.text.x = element_text(
       size = 12, face = "bold.italic"
     ),
+    axis.text.x = element_text( #rotate
+      angle = 75,
+      hjust = 1,
+      vjust = 1,
+      size = 9
+    ),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
+  coord_cartesian(clip = "off")+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors) +
   scale_color_manual(values = custom_colors) + 
@@ -565,8 +579,8 @@ Ca125_plot <- ggplot(CA125_table_OCEN, aes(x=CA125_f , y=value, fill = variable)
 Ca125_plot
 
 ##save plot ca125 pre op######################################
-png("10_gene_boxplot_ca125_20260121EN.png"
-    , width = 29, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+png("10_gene_boxplot_ca125_20260130EN.png"
+    , width = 15, height = 17, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 Ca125_plot #
 dev.off() # Close the PNG device
 
@@ -633,11 +647,12 @@ combined_plot <- wrap_plots(plot_list, ncol = 2)
 combined_plot
 #save in english
 ggsave(
-  filename = "10_gene_age10genes202501023EN.png",
+  filename = "10_gene_age10genes202501030EN.png",
   plot = combined_plot,
-  width = 8,       # adjust width as needed
-  height = 11,       # adjust height as needed
-  dpi = 500         # high resolution
+  width = 15,       # adjust width as needed
+  height = 25,       # adjust height as needed
+  dpi = 400,         # high resolution
+  units = "cm"     # high resolution
 )
 #EN grade plot #############################
 
@@ -658,12 +673,13 @@ Grade_plotEN <- ggplot(Grade_table_OC, aes(x=Grade2 , y=value, fill = variable))
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors) +
   scale_color_manual(values = custom_colors) + 
+  coord_cartesian(clip = "off")+
   scale_y_continuous(labels = function(x) gsub("-", "\u2212", x))
 
 
 Grade_plotEN
 
-png("10gene_gradeEN_20260121.png"
-    , width = 20, height = 19, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+png("10gene_gradeEN_20260130.png"
+    ,width = 15, height = 13, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 Grade_plotEN
 dev.off() # Cl

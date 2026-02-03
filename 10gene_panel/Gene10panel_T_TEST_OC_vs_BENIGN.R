@@ -115,6 +115,7 @@ tumor_plot <- ggplot(OC_table, aes(x=tumor, y=value, fill = variable)) +
   labs(x=NULL)+
   stat_boxplot(geom ='errorbar')+
   #labs(tag = "A")+ 
+  coord_cartesian(clip = "off")+
   scale_fill_manual(values = custom_colors) +
   scale_color_manual(values = custom_colors) +
   scale_y_continuous(labels = function(x) gsub("-", "\u2212", x))+
@@ -124,8 +125,8 @@ tumor_plot <- ggplot(OC_table, aes(x=tumor, y=value, fill = variable)) +
 tumor_plot #
 
 ##save plot 2 groups ###########################
-png("10genes_boxplot2groups_20260121.png"
-    , width = 18, height = 18, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+png("10genes_boxplot2groups_20260130.png"
+    , width = 16, height = 12, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 tumor_plot #
 dev.off() # Close the PNG device
 
@@ -191,6 +192,7 @@ tumor_plotEN <- ggplot(OC_tableEN, aes(x=tumor, y=value, fill = variable)) +
   stat_boxplot(geom ='errorbar')+
   #labs(tag = "A")+ 
   scale_fill_manual(values = custom_colorsEN) +
+  coord_cartesian(clip = "off")+
   scale_color_manual(values = custom_colorsEN) +
   scale_y_continuous(labels = function(x) gsub("-", "\u2212", x))+
   scale_y_continuous(labels = function(x) 
@@ -199,7 +201,7 @@ tumor_plotEN <- ggplot(OC_tableEN, aes(x=tumor, y=value, fill = variable)) +
 tumor_plotEN #
 
 ##save plot 2 groups ###########################
-png("10genes_boxplot2groupsEN_20260121.png"
-    , width = 18, height = 18, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+png("10genes_boxplot2groupsEN_20260130.png"
+    , width = 16, height = 12, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 tumor_plotEN #
 dev.off() # Close the PNG device

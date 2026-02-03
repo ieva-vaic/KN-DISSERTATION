@@ -251,7 +251,12 @@ for (gene in genes_f) {
     pval = FALSE,
     risk.table = TRUE,
     legend.title = "",
-    palette = c("blue", "red")
+    palette = c("blue", "red"),
+    font.main = 17,        # title
+    font.x = 17,
+    font.y = 17,
+    font.tickslab = 12,
+    font.legend = 17
   )$plot +
     scale_color_manual(
       values = c("blue", "red"),
@@ -264,12 +269,15 @@ for (gene in genes_f) {
       x = "Laikas, mėnesiais"
     ) +
     theme(
-      plot.title = element_text(hjust = 0.5, face = "bold", size = 13),
+      plot.title = element_text(
+        hjust = 0.5, face = "bold", size = 20
+      ),
       plot.subtitle = element_markdown(
-        size = 13,
-        hjust = 0.5,
-        lineheight = 1.3
-      )
+        size = 17, hjust = 0.5, lineheight = 1.3
+      ),
+      axis.title = element_text(size = 17),
+      axis.text = element_text(size = 17),
+      legend.text = element_text(size = 17)
     )
   
   plots2x[[gene]] <- p
@@ -292,24 +300,25 @@ combined_plot_genes_notch_2x <- wrap_plots(plots_genes_notch_2x, ncol = 2)
 nrow <- 5
 ncol <- 2
 
-panel_width  <- 6  # in per panel
-panel_height <- 3.7  # in per panel
+panel_width  <- 8  # in per panel
+panel_height <- 4  # in per panel
 
 ggsave(
-  filename = "KM_combined_plot_w_HR_OC_10_gene_20260121LT.png",  # output file name
+  filename = "KM_combined_plot_w_HR_OC_10_gene_20260130LT.png",  # output file name
   plot = combined_plot_genes10_2x,
   width  = ncol * panel_width,
   height = nrow * panel_height,
-  dpi    = 300  # higher DPI for publication quality
+  dpi    = 400  # higher DPI for publication quality
 )
 #save notch
 ggsave(
-  filename = "KM_combined_plot_w_HR_OC_notch_20260121LT.png",  # output file name
+  filename = "KM_combined_plot_w_HR_OC_notch_20260130LT.png",  # output file name
   plot = combined_plot_genes_notch_2x,               # the patchwork plot object
   width  = ncol * panel_width,
   height = nrow * panel_height,
-  dpi    = 300                           # resolution
+  dpi    = 400                           # resolution
 )
+
 #ENGLISH PLOT, GENES#################################
 #plot with multi
 plots2xEN <- list()
@@ -392,7 +401,12 @@ for (gene in genes_f) {
     pval = FALSE,
     risk.table = TRUE,
     legend.title = "",
-    palette = c("blue", "red")
+    palette = c("blue", "red"),
+    font.main = 17,        # title
+    font.x = 17,
+    font.y = 17,
+    font.tickslab = 12,
+    font.legend = 17
   )$plot +
     scale_color_manual(
       values = c("blue", "red"),
@@ -405,12 +419,15 @@ for (gene in genes_f) {
       x = "Time, months"
     ) +
     theme(
-      plot.title = element_text(hjust = 0.5, face = "bold", size = 13),
+      plot.title = element_text(
+        hjust = 0.5, face = "bold", size = 20
+      ),
       plot.subtitle = element_markdown(
-        size = 13,
-        hjust = 0.5,
-        lineheight = 1.3
-      )
+        size = 18, hjust = 0.5, lineheight = 1.3
+      ),
+      axis.title = element_text(size = 18),
+      axis.text = element_text(size = 18),
+      legend.text = element_text(size = 18)
     )
   
   plots2xEN[[gene]] <- p
@@ -430,19 +447,19 @@ combined_plot_genes_notch_2xEN <- wrap_plots(plots_genes_notch_2xEN, ncol = 2)
 
 #save 10 gene#######################################################
 ggsave(
-  filename = "KM_combined_plot_w_HR_OC_10_gene_20260121EN.png",  # output file name
+  filename = "KM_combined_plot_w_HR_OC_10_gene_20260130EN.png",  # output file name
   plot = combined_plot_genes10_2xEN,               # the patchwork plot object
   width  = ncol * panel_width,
   height = nrow * panel_height,
-  dpi    = 300                              # resolution
+  dpi    = 400                              # resolution
 )
 #save notch
 ggsave(
-  filename = "KM_combined_plot_w_HR_OC_notch_20260121EN.png",  # output file name
+  filename = "KM_combined_plot_w_HR_OC_notch_20260130EN.png",  # output file name
   plot = combined_plot_genes_notch_2xEN,               # the patchwork plot object
   width  = ncol * panel_width,
   height = nrow * panel_height,
-  dpi    = 300                            # resolution
+  dpi    = 400                            # resolution
 )
 
 #METHYLATION, OC cases#################################
@@ -588,11 +605,11 @@ panel_width2  <- 7  # in per panel
 panel_height2 <- 6  # in per panel
 
 ggsave(
-  filename = "KM_combined_methylation_OC_w_HR_multi20260121.png",
+  filename = "KM_combined_methylation_OC_w_HR_multi20260130.png",
   plot = combined_met_plot3,
   width  = ncol2 * panel_width2,
   height = nrow2 * panel_height2,
-  dpi    = 300  
+  dpi    = 400  
 )
 #ENGLISH plot OC METHYLATION ##########################
 plots_met3EN <- list()
@@ -666,11 +683,11 @@ combined_met_plot3EN <- wrap_plots(plots_met3EN, ncol = 2)
 
 # Save to file
 ggsave(
-  filename = "KM_combined_methylation_OC_w_HR_multiEN20260121.png",
+  filename = "KM_combined_methylation_OC_w_HR_multiEN20260130.png",
   plot = combined_met_plot3EN,
   width  = ncol2 * panel_width2,
   height = nrow2 * panel_height2,
-  dpi    = 300  
+  dpi    = 400  
 )
 #HGSOC for supplements LITHUANIAN######################################
 ##COX REGRESION, UNIVARIATE, HGSOC only ###################
@@ -779,17 +796,17 @@ for (gene in genes_f) {
   }
   
   ## --- Combine 3 lines in subtitle: Univ HR | Log-rank p | Multiv HR ---
-  # --- Combine 3 lines properly ---
   subtitle_text <- paste0(
     ifelse(is.na(hr_row$HR), "Univ PR = NA", 
-           sprintf("Univ PR = %.2f (95%% PI: %.2f–%.2f)", hr_row$HR, hr_row$lower95, hr_row$upper95)),
-    "\n",
-    ifelse(pval_km < 0.05, 
-           paste0("Log-rank p = ", sprintf("%.3f", pval_km)), 
-           paste0("Log-rank p = ", sprintf("%.3f", pval_km))),
-    "\n",
+           sprintf("Univ PR = %.2f (95%% PI: %.2f–%.2f)",
+                   hr_row$HR, hr_row$lower95, hr_row$upper95)),
+    "<br>",
+    paste0("Log-rank p = ", sprintf("%.3f", pval_km)),
+    "<br>",
     ifelse(is.na(multi_row$HR), "Multiv PR = NA", 
-           sprintf("Multiv PR = %.2f (95%% PI: %.2f–%.2f, N=%d)", multi_row$HR, multi_row$lower95, multi_row$upper95, multi_row$N))
+           sprintf("Multiv PR = %.2f (95%% PI: %.2f–%.2f, N=%d)",
+                   multi_row$HR, multi_row$lower95,
+                   multi_row$upper95, multi_row$N))
   )
   
   ## --- Legend labels ---
@@ -805,7 +822,12 @@ for (gene in genes_f) {
     pval = FALSE,
     risk.table = TRUE,
     legend.title = "",
-    palette = c("blue", "red")
+    palette = c("blue", "red"),
+    font.main = 17,        # title
+    font.x = 17,
+    font.y = 17,
+    font.tickslab = 12,
+    font.legend = 17
   )$plot +
     scale_color_manual(
       values = c("blue", "red"),
@@ -818,9 +840,17 @@ for (gene in genes_f) {
       x = "Laikas, mėnesiais"
     ) +
     theme(
-      plot.title = element_markdown(hjust = 0.5, face = "italic"),  # italic gene name
-      plot.subtitle = element_text(size = 13, hjust = 0.5, lineheight = 1.2)
+      plot.title = element_text(
+        hjust = 0.5, face = "italic", size = 20
+      ),
+      plot.subtitle = element_markdown(
+        size = 18, hjust = 0.5, lineheight = 1.3
+      ),
+      axis.title = element_text(size = 18),
+      axis.text = element_text(size = 18),
+      legend.text = element_text(size = 18)
     )
+  
   plots3x[[gene]] <- p
 }
 
@@ -850,19 +880,19 @@ combined_plot_genes_notch_3x <- wrap_plots(plots_genes_notch_3x, ncol = 2)+
 
 #save 10 gene SUPPLEMENTS########################################
 ggsave(
-  filename = "KM_combined_plot_w_HR_HGSOC_10_gene_20260121.png",  # output file name
+  filename = "KM_combined_plot_w_HR_HGSOC_10_gene_20260130.png",  # output file name
   plot = combined_plot_genes10_3x,               # the patchwork plot object
   width  = ncol * panel_width,
   height = nrow * panel_height,
-  dpi    = 300                           # resolution
+  dpi    = 400                           # resolution
 )
 #save notch
 ggsave(
-  filename = "KM_combined_plot_w_HR_HGSOC_notch_20260121.png",  # output file name
+  filename = "KM_combined_plot_w_HR_HGSOC_notch_20260130.png",  # output file name
   plot = combined_plot_genes_notch_3x,               # the patchwork plot object
   width  = ncol * panel_width,
   height = nrow * panel_height,
-  dpi    = 300                          # resolution
+  dpi    = 400                          # resolution
 )
 
 ##HGSOC METHYLATION COX REGRESION, UNIVARIATE######################
@@ -1009,9 +1039,9 @@ ncol2 <- 2
 panel_width2  <- 8  # in per panel
 panel_height2 <- 4  # in per panel
 ggsave(
-  filename = "KM_combined_methylation_HGSOC_w_HR_multi20260121.png",
+  filename = "KM_combined_methylation_HGSOC_w_HR_multi20260130.png",
   plot = combined_met_plot2,
   width  = ncol2 * panel_width2,
   height = nrow2 * panel_height2,
-  dpi    = 500 
+  dpi    = 400 
 )

@@ -72,19 +72,22 @@ coords_ca2X <- coords(roc_curve_CA2X, "best", ret=c("threshold", "accuracy", "se
 coords_ca2X
 
 ##compare HGSOC vs BENIGN MODELS to ca125 ##################################
-roc.test(roc_curve2, roc_curve_CA2X)
-roc.test(roc_curve10, roc_curve_CA2X)
+#roc.test(roc_curve2, roc_curve_CA2X)
+#roc.test(roc_curve10, roc_curve_CA2X)
 
 ##compare HGSOC vs BENIGN MODELS to tecal4##########################
-roc_curve_tceal4 <- roc(OC_HGSOC_BENIGN$tumor, OC_HGSOC_BENIGN$TCEAL4)
-roc.test(roc_curve_tceal4, roc_curve2)#0.2758 
+#roc_curve_tceal4 <- roc(OC_HGSOC_BENIGN$tumor, OC_HGSOC_BENIGN$TCEAL4)
+#roc.test(roc_curve_tceal4, roc_curve2)#0.2758 
 
 ##FIG: best 3 HGSOC vs benign PLOT ##########################
 #HGSOC vs benign models plot:
 roc_plot_custom <- function() {
-  par(pty = "s") #sets square
+  par(
+    pty = "s",
+    mar = c(4, 4, 3, 2)  # bottom, left, top, right
+  )
   plot.roc(roc_curve2, print.auc = F, col = "deeppink", 
-           cex.main=0.8, main ="Gerybinių pakitimų atskyrimas HGSOC atvejų",
+           cex.main=0.9, main ="Gerybinių pakitimų atskyrimas HGSOC atvejų",
            xlab = "1 - Specifiškumas",   # Custom x-axis label 
            ylab = "Jautrumas",
            legacy.axes = T) #7
@@ -96,14 +99,22 @@ roc_plot_custom <- function() {
                                     expression(italic("Serumo CA125 biožymens statusas")))
          ,
          col = c("deeppink","blue", "grey" ), lty = 1, 
-         cex = 1, lwd =3)
+         cex = 0.7, lwd =3,  bty = "n"  )     # no box (journal-style))
 }
 #show plot
 roc_plot_custom()
 # Save the plot as a PNG file
-png("FIG_best3_HSGOC_BENIGN20260121.png",width = 15, height = 15, res = 510, units = "cm")
+png("FIG_best3_HSGOC_BENIGN20260130.png",
+    width = 10, height = 10, res = 300, units = "cm")
 roc_plot_custom()
-mtext("B", side = 3, adj = 0, line = 2.5, cex = 1.5, font = 2)
+mtext(
+  "B",
+  side = 3,
+  adj = -0.2,
+  line = 1,
+  cex = 1.2,
+  font = 2
+)
 dev.off()
 
 ##TABLE: best 3 HGSOC vs benign #####################
@@ -138,34 +149,59 @@ gt_table_cut <- results_roc_custom %>%
   tab_style(
     style = cell_text(style = "italic"),
     locations = cells_body(columns = vars(Biožymenys))
-  )
+  )%>%
+  # ===== simple font size increase =====
+tab_options(
+  table.font.size = px(20)   # increase all text
+)
 #show
 gt_table_cut
 
 #there is no other convieneat way to save gt outputs
-gtsave(gt_table_cut,vwidth = 1000,
-  filename = "FIG_tabbest3_HGSOC_BENIGN20260121.png")
+gtsave(gt_table_cut,vwidth = 1000,   
+       filename = "FIG_tabbest3_HGSOC_BENIGN20260129.png")
 
-#Combine the images
-roc_image2<- image_read("FIG_best3_HSGOC_BENIGN20260121.png")
-table_image2 <- image_read("FIG_tabbest3_HGSOC_BENIGN20260121.png")
 
-# Match widths (use the larger width to avoid downscaling)
-max_width <- max(image_info(roc_image2)$width,
-                 image_info(table_image2)$width)
+roc_image2   <- image_read("FIG_best3_HSGOC_BENIGN20260129.png")
+table_image2 <- image_read("FIG_tabbest3_HGSOC_BENIGN20260129.png")
 
-roc_image2   <- image_resize(roc_image2,   paste0(max_width, "x"))
-table_image2 <- image_resize(table_image2, paste0(max_width, "x"))
+table_width <- image_info(table_image2)$width
+roc_height  <- image_info(roc_image2)$height
 
-# Append vertically
-combined_image <- image_append(c(roc_image2, table_image2), stack = TRUE)
+# blank image same width as table, same height as ROC figure
+canvas <- image_blank(width = table_width, height = roc_height, color = "white")
 
-# Save with high quality
+# calculate x offset to center ROC
+x_offset <- (table_width - image_info(roc_image2)$width) / 2
+
+roc_centered <- image_composite(canvas, roc_image2, offset = paste0("+", x_offset, "+0"))
+combined_image <- image_append(c(roc_centered, table_image2), stack = TRUE)
 image_write(
   combined_image,
-  path = "FIG_best3_HGSOC_BENIGN_combined20260121.png",
+  path = "FIG_best3_HGSOC_BENIGN_combined20260129.png",
   format = "png"
 )
+
+# #Combine the images old
+# roc_image2<- image_read("FIG_best3_HSGOC_BENIGN20260129.png")
+# table_image2 <- image_read("FIG_tabbest3_HGSOC_BENIGN20260129.png")
+# 
+# # Match widths (use the larger width to avoid downscaling)
+# max_width <- max(image_info(roc_image2)$width,
+#                  image_info(table_image2)$width)
+# 
+# roc_image2   <- image_resize(roc_image2,   paste0(max_width, "x"))
+# table_image2 <- image_resize(table_image2, paste0(max_width, "x"))
+# 
+# # Append vertically
+# combined_image <- image_append(c(roc_image2, table_image2), stack = TRUE)
+# 
+# # Save with high quality
+# image_write(
+#   combined_image,
+#   path = "FIG_best3_HGSOC_BENIGN_combined20260129.png",
+#   format = "png"
+# )
 
 
 #OVCa vs BENIGN MODELS################################################################
@@ -226,17 +262,23 @@ roc_plot_customx <- function() {
                                     expression(italic("Serumo CA125 biožymens statusas")))
          ,
          col = c("lightpink","darkgreen", "grey" ), lty = 1, 
-         cex = 1, lwd =3)
+         cex = 0.7, lwd =3,  bty = "n" )
 }
 # show plot
 roc_plot_customx()
 
 # Save the plot as a PNG file
-png("FIG_best3ocfull_for_genes20260121.png", width = 15, height = 15, res = 510, units = "cm")
+png("FIG_best3ocfull_for_genes20260129.png", width = 10, height = 10, res = 300, units = "cm")
 roc_plot_customx()
-mtext("A", side = 3, adj = 0, line = 2.5, cex = 1.5, font = 2)
+mtext(
+  "A",
+  side = 3,
+  adj = -0.2,
+  line = 2,
+  cex = 1.2,
+  font = 2
+)
 dev.off()
-
 ##TABLE:  best 3 OVCa vs benign #####################
 results_roc_customx <- data.frame(
   Biožymenys = c("GRB7 + TCEAL4", 
@@ -269,40 +311,64 @@ gt_table_cutx <- results_roc_customx %>%
   tab_style(
     style = cell_text(style = "italic"),
     locations = cells_body(columns = vars(Biožymenys))
-  )
+  )%>%
+  #===== simple font size increase =====
+tab_options(
+  table.font.size = px(20)   # increase all text
+)
 #show
 gt_table_cutx
 
 #there is no other convieneat way to save gt outputs
-gtsave(gt_table_cutx,vwidth = 800, 
- filename = "FIG_tabbest3ocfull_for_genes20260121.png")
+gtsave(gt_table_cutx,vwidth = 1000, 
+ filename = "FIG_tabbest3ocfull_for_genes20260129.png")
+#save wide
+roc_image2   <- image_read("FIG_best3ocfull_for_genes20260129.png")
+table_image2 <- image_read("FIG_tabbest3ocfull_for_genes20260129.png")
 
+table_width <- image_info(table_image2)$width
+roc_height  <- image_info(roc_image2)$height
 
-# Save the combined image
-roc_image2<- image_read("FIG_best3ocfull_for_genes20260121.png")
-table_image2 <- image_read("FIG_tabbest3ocfull_for_genes20260121.png")
+# blank image same width as table, same height as ROC figure
+canvas <- image_blank(width = table_width, height = roc_height, color = "white")
 
-# Match widths (use the larger width to avoid downscaling)
-max_width <- max(image_info(roc_image2)$width,
-                 image_info(table_image2)$width)
+# calculate x offset to center ROC
+x_offset <- (table_width - image_info(roc_image2)$width) / 2
 
-roc_image2   <- image_resize(roc_image2,   paste0(max_width, "x"))
-table_image2 <- image_resize(table_image2, paste0(max_width, "x"))
-
-# Append vertically
-combined_image <- image_append(c(roc_image2, table_image2), stack = TRUE)
-
-# Save with high quality
+roc_centered <- image_composite(canvas, roc_image2, offset = paste0("+", x_offset, "+0"))
+combined_image <- image_append(c(roc_centered, table_image2), stack = TRUE)
 image_write(
   combined_image,
-  path = "FIG_COMBINED_forOC_full_genes20260121.png",
+  path = "FIG_COMBINED_forOC_full_genes20260129.png",
   format = "png"
 )
 
 
+# # Save the combined image
+# roc_image2<- image_read("FIG_best3ocfull_for_genes20260121.png")
+# table_image2 <- image_read("FIG_tabbest3ocfull_for_genes20260121.png")
+# 
+# # Match widths (use the larger width to avoid downscaling)
+# max_width <- max(image_info(roc_image2)$width,
+#                  image_info(table_image2)$width)
+# 
+# roc_image2   <- image_resize(roc_image2,   paste0(max_width, "x"))
+# table_image2 <- image_resize(table_image2, paste0(max_width, "x"))
+# 
+# # Append vertically
+# combined_image <- image_append(c(roc_image2, table_image2), stack = TRUE)
+# 
+# # Save with high quality
+# image_write(
+#   combined_image,
+#   path = "FIG_COMBINED_forOC_full_genes20260121.png",
+#   format = "png"
+# )
+
+
 ##COMBINE fig A and B#############################################
-img2 <- image_read("FIG_best3_HGSOC_BENIGN_combined20260121.png")
-img1 <- image_read("FIG_COMBINED_forOC_full_genes20260121.png")
+img2 <- image_read("FIG_best3_HGSOC_BENIGN_combined20260129.png")
+img1 <- image_read("FIG_COMBINED_forOC_full_genes20260129.png")
 
 # Match heights (use the larger height to preserve resolution)
 max_height <- max(image_info(img1)$height,
@@ -317,7 +383,7 @@ combined_horizontal <- image_append(c(img1, img2), stack = FALSE)
 # Save at high quality
 image_write(
   combined_horizontal,
-  path = "FIG_MODELS_horizontal_combined_20260121.png",
+  path = "FIG_MODELS_horizontal_combined_20260129.png",
   format = "png"
 )
 #HGSOC vs OTHERS MODELS###############################
@@ -395,13 +461,14 @@ roc_plot_customo <- function() {
                                     expression(italic("Serumo CA125 biožymens statusas")))
          ,
          col = c("lightpink","darkgreen","darkblue" , "grey" ), lty = 1, 
-         cex = 1, lwd =3)
+         cex = 0.55, lwd =3)
 }
 # Save the plot to a variable
 roc_plot_customo()
 
 # Save the plot as a PNG file
-png("FIG_bestHGSOC_VS_others20260121.png", width = 1000, height = 1000, res = 150)
+png("FIG_bestHGSOC_VS_others20260130.png",
+    width = 10, height = 10, res = 300,units = "cm")
 roc_plot_customo()
 dev.off()
 
@@ -443,26 +510,34 @@ gt_table_cuto <- results_roc_customo %>%
 gt_table_cuto
 
 #there is no other convieneat way to save gt outputs
-gtsave(gt_table_cuto,vwidth = 800, 
-    filename = "FIG_besttableHGSOC_VS_others20260121.png")
+gtsave(gt_table_cuto,vwidth = 500, 
+    filename = "FIG_besttableHGSOC_VS_others20260130.png")
 
-roc_image2<- image_read("FIG_bestHGSOC_VS_others20260121.png")
-table_image2 <- image_read("FIG_besttableHGSOC_VS_others20260121.png")
 
-# Match widths (use the larger width to avoid downscaling)
-max_width <- max(image_info(roc_image2)$width,
-                 image_info(table_image2)$width)
+# Read images
+roc_image2   <- image_read("FIG_bestHGSOC_VS_others20260130.png")
+table_image2 <- image_read("FIG_besttableHGSOC_VS_others20260130.png")
 
-roc_image2   <- image_resize(roc_image2,   paste0(max_width, "x"))
-table_image2 <- image_resize(table_image2, paste0(max_width, "x"))
+# Determine the taller height
+max_height <- max(image_info(roc_image2)$height,
+                  image_info(table_image2)$height)
 
-# Append vertically
-combined_image <- image_append(c(roc_image2, table_image2), stack = TRUE)
+# Resize both images to the same height
+roc_image2   <- image_resize(roc_image2, paste0("x", max_height))
+table_image2 <- image_resize(table_image2, paste0("x", max_height))
 
-# Save with high quality
+# Append images horizontally (figure left, table right)
+combined_image <- image_append(c(roc_image2, table_image2), stack = FALSE)
+
+# Fit final figure into 15 cm width at 300 DPI
+dpi <- 300
+width_px <- round(15 / 2.54 * dpi)
+combined_image <- image_resize(combined_image, paste0(width_px, "x"))
+
+# Save output
 image_write(
   combined_image,
-  path = "FIG_COMBINED_forHGSOC_OTHERS_20260121.png",
+  path = "FIG_COMBINED_HGSOC_vs_table_20260130.png",
   format = "png"
 )
 
@@ -678,13 +753,13 @@ roc_plot_customoEN <- function() {
                                     expression(italic("Serum CA125 status")))
          ,
          col = c("lightpink","darkgreen","darkblue" , "grey" ), lty = 1, 
-         cex = 1, lwd =3)
+         cex = 0.55, lwd =3)
 }
 # Save the plot to a variable
 roc_plot_customoEN()
 
 # Save the plot as a PNG file
-png("FIG_bestHGSOC_VS_others20251218EN.png", width = 1000, height = 1000, res = 150)
+png("FIG_bestHGSOC_VS_others20251230EN.png", width = 10, height = 10, res = 300, units = "cm")
 roc_plot_customoEN()
 dev.off()
 
@@ -726,12 +801,12 @@ gt_table_cutoEN <- results_roc_customoEN %>%
 gt_table_cutoEN
 
 #there is no other convieneat way to save gt outputs
-gtsave(gt_table_cutoEN,vwidth = 1000, 
-       filename = "FIG_besttableHGSOC_VS_others20251218EN.png")
+gtsave(gt_table_cutoEN,vwidth = 500, 
+       filename = "FIG_besttableHGSOC_VS_others20251230EN.png")
 
 #Combine the images
 roc_image2oEN<- image_read("FIG_bestHGSOC_VS_others20251218EN.png")
-table_image2oEN <- image_read("FIG_besttableHGSOC_VS_others20251218EN.png")
+table_image2oEN <- image_read("FIG_besttableHGSOC_VS_others20251230EN.png")
 
 # Find the max width to align both
 roc_infooEN <- image_info(roc_image2oEN)
@@ -752,3 +827,32 @@ combined_image2oEN <- image_append(c(roc_image2_paddedoEN, table_image2_paddedoE
 # Save the combined image
 image_write(combined_image2oEN, 
             "FIG_COMBINED_forHGSOC_others_genes2026122EN.png")
+
+#make horizontal EN PLOT
+
+# Read images
+roc_image2   <- image_read("FIG_bestHGSOC_VS_others20251230EN.png")
+table_image2 <- image_read("FIG_besttableHGSOC_VS_others20251230EN.png")
+
+# Determine the taller height
+max_height <- max(image_info(roc_image2)$height,
+                  image_info(table_image2)$height)
+
+# Resize both images to the same height
+roc_image2   <- image_resize(roc_image2, paste0("x", max_height))
+table_image2 <- image_resize(table_image2, paste0("x", max_height))
+
+# Append images horizontally (figure left, table right)
+combined_image <- image_append(c(roc_image2, table_image2), stack = FALSE)
+
+# Fit final figure into 15 cm width at 300 DPI
+dpi <- 300
+width_px <- round(15 / 2.54 * dpi)
+combined_image <- image_resize(combined_image, paste0(width_px, "x"))
+
+# Save output
+image_write(
+  combined_image,
+  path = "FIG_COMBINED_forHGSOC_others_genes20260203EN.png",
+  format = "png"
+)
