@@ -142,8 +142,8 @@ paste0("Uni PR = 0,32 (95 % PI: 0,12–0,92);\n",
 
 print(test_survplot2_notch)
 #save
-png("KM_plot_notch_arid1a_OC_w_HR20260120short.png",
-    width = 700, height = 600, res = 120)
+png("KM_plot_notch_arid1a_OC_w_HR20260130short.png",
+    width = 15, height = 15, res = 200, units = "cm")
 print(test_survplot2_notch)  # print the full ggsurvplot object
 dev.off()
 
@@ -159,6 +159,7 @@ test_survplot2_notchEN <- ggsurvplot(km_fit2notch, data = surv_df_test2notch,
                                      #ylab = "Išgyvenamumo tikimybė",
                                      palette = c("deeppink", "turquoise"),  # Color palette for groups
                                      #legend.title = "Rizikos grupė", 
+                                     font.main = 14, 
                                      legend.labs = c("High risk score", "Low risk score"))
 # Add subtitle form cox result
 test_survplot2_notchEN$plot <- test_survplot2_notchEN$plot +
@@ -170,8 +171,8 @@ Log-rank p = 0.03, n = 47")
 print(test_survplot2_notchEN)
 
 #save
-png("KM_plot_notch_arid1a_OC_w_HR_EN20260120short.png",
-    width = 800, height = 600, res = 120)
+png("KM_plot_notch_arid1a_OC_w_HR_EN20260130short.png",
+    width = 15, height = 15, res = 200, units = "cm")
 print(test_survplot2_notchEN)  # print the full ggsurvplot object
 dev.off()
 
@@ -226,6 +227,7 @@ test_survplot14<- ggsurvplot(km_fit14, data = surv_df_test14,
                              ylab = "Išgyvenamumo tikimybė",
                              palette = c( "deeppink", "turquoise"),  # Color palette for groups
                              legend.title = "Rizikos grupė", 
+                             font.main = 11, 
                              legend.labs = c( "Didelės rizikos balas", "Mažos rizikos balas")) #changed form "mažs/didelės rizikos balas"
 # Add subtitle form cox result
 test_survplot14$plot <- test_survplot14$plot +
@@ -235,8 +237,8 @@ test_survplot14$plot <- test_survplot14$plot +
 
 print(test_survplot14)
 #save
-png("KM_plot_14_OC_w_HR20260120short.png",
-    width = 700, height = 600, res = 90)
+png("KM_plot_14_OC_w_HR20260130short.png",
+    width = 15, height = 15, res = 200, units = "cm")
 print(test_survplot14)  # print the full ggsurvplot object
 dev.off()
 
@@ -252,6 +254,7 @@ test_survplot14EN<- ggsurvplot(km_fit14, data = surv_df_test14,
                                #ylab = "Išgyvenamumo tikimybė",
                                palette = c( "deeppink", "turquoise"),  # Color palette for groups
                                #legend.title = "Rizikos grupė", 
+                               font.main = 10, 
                                legend.labs = c("High risk score", "Low risk score")) #changed places
 # Add subtitle form cox result
 test_survplot14EN$plot <- test_survplot14EN$plot +
@@ -261,11 +264,10 @@ test_survplot14EN$plot <- test_survplot14EN$plot +
 
 print(test_survplot14EN)
 #save
-png("KM_plot_14_OC_w_HR_en20260120short.png",
-    width = 800, height = 600, res = 90)
+png("KM_plot_14_OC_w_HR_en20260130short.png",
+    width = 15, height = 15, res = 200, units = "cm")
 print(test_survplot14EN)  # print the full ggsurvplot object
 dev.off()
-
 
 #NOTCH2 and HES1 risk score####################################
 #gene_dataNOTCH_HES1 - only OC, notch and hes
@@ -330,8 +332,8 @@ test_survplot_notch_hes$plot <- test_survplot_notch_hes$plot +
 print(test_survplot_notch_hes)
 
 #save
-png("KM_plot_notch_HES_OC_w_HR20260120short.png",
-    width = 700, height = 600, res = 120)
+png("KM_plot_notch_HES_OC_w_HR20260130short.png",
+    width = 15, height = 15, res = 200, units = "cm")
 print(test_survplot_notch_hes)  # print the full ggsurvplot object
 dev.off()
 #EN  C Kaplan-Meier #############################
@@ -356,14 +358,14 @@ test_survplot_notch_hesEN$plot <- test_survplot_notch_hesEN$plot +
 print(test_survplot_notch_hesEN)
 
 #save
-png("KM_plot_notch_HES_OC_w_HREN20260120short.png",
-    width = 800, height = 600, res = 120)
+png("KM_plot_notch_HES_OC_w_HREN20260130short.png",
+    width = 15, height = 15, res = 200, units = "cm")
 print(test_survplot_notch_hesEN)  # print the full ggsurvplot object
 dev.off()
 #COMBINE IMAGES##############################################
-img1 <- image_read("KM_plot_notch_arid1a_OC_w_HR20260120short.png")
-img2 <- image_read("KM_plot_14_OC_w_HR20260120short.png")
-img3 <- image_read("KM_plot_notch_HES_OC_w_HR20260120short.png")
+img1 <- image_read("KM_plot_notch_arid1a_OC_w_HR20260130short.png")
+img2 <- image_read("KM_plot_14_OC_w_HR20260130short.png")
+img3 <- image_read("KM_plot_notch_HES_OC_w_HR20260130short.png")
 
 # Match heights to avoid misalignment
 target_height <- min(
@@ -380,13 +382,75 @@ combined_km <- image_append(c(img1, img2, img3), stack = FALSE)
 
 image_write(
   combined_km,
-  "KM_plots_combined_horizontal_20260121.png"
+  "KM_plots_combined_horizontal_20260130.png"
+)
+
+#COMBINE STAKED IMAGE###############################
+#save
+png("KM_plot_notch_arid1a_OC_w_HR20260131short.png",
+    width = 25, height = 15, res = 200, units = "cm")
+print(test_survplot2_notch)  # print the full ggsurvplot object
+dev.off()
+test_survplot14<- ggsurvplot(km_fit14, data = surv_df_test14, 
+                             #pval = TRUE,  # Show p-value of the log-rank test
+                             risk.table = TRUE,  # Add risk table below the plot
+                             risk.table.title = "Pacienčių skaičius rizikos grupėje",
+                             title = expression(
+                               bold("B ") * "Promotorių metilinimo, Notch, Wnt ir" * italic(" ARID1A") * " genų raiškos kombinacija"
+                             ),
+                             xlab = "Bendras išgyvenamumo laikas, mėnesiais",
+                             ylab = "Išgyvenamumo tikimybė",
+                             palette = c( "deeppink", "turquoise"),  # Color palette for groups
+                             legend.title = "Rizikos grupė", 
+                             font.main = 15, 
+                             legend.labs = c( "Didelės rizikos balas", "Mažos rizikos balas")) #changed form "mažs/didelės rizikos balas"
+# Add subtitle form cox result
+test_survplot14$plot <- test_survplot14$plot +
+  labs(subtitle = paste0("Uni PR =  0.22  (95 % PI: 0,07–0,66);\n",
+                         "Multi PR = 0.22 (95 % PI: 0,06–0,77);\n",
+                         "Log-rank p = 0,003, n = 47") )
+
+print(test_survplot14)
+#save
+png("KM_plot_14_OC_w_HR20260131short.png",
+    width = 25, height = 15, res = 200, units = "cm")
+print(test_survplot14)  # print the full ggsurvplot object
+dev.off()
+#save
+png("KM_plot_notch_HES_OC_w_HR20260131short.png",
+    width = 25, height = 15, res = 200, units = "cm")
+print(test_survplot_notch_hes)  # print the full ggsurvplot object
+dev.off()
+
+# Read images
+img1 <- image_read("KM_plot_notch_arid1a_OC_w_HR20260131short.png")
+img2 <- image_read("KM_plot_14_OC_w_HR20260131short.png")
+img3 <- image_read("KM_plot_notch_HES_OC_w_HR20260131short.png")
+
+# Match widths to avoid misalignment
+target_width <- min(
+  image_info(img1)$width,
+  image_info(img2)$width,
+  image_info(img3)$width
+)
+
+img1 <- image_resize(img1, paste0(target_width, "x"))
+img2 <- image_resize(img2, paste0(target_width, "x"))
+img3 <- image_resize(img3, paste0(target_width, "x"))
+
+# Stack vertically
+combined_km_vertical <- image_append(c(img1, img2, img3), stack = TRUE)
+
+# Save the stacked image
+image_write(
+  combined_km_vertical,
+  "KM_plots_combined_vertical_20260130.png"
 )
 
 ##combine EN image##################
-img1en <- image_read("KM_plot_notch_arid1a_OC_w_HR_EN20260120short.png")
-img2en <- image_read("KM_plot_14_OC_w_HR_en20260120short.png")
-img3en <- image_read("KM_plot_notch_HES_OC_w_HREN20260120short.png")
+img1en <- image_read("KM_plot_notch_arid1a_OC_w_HR_EN20260130short.png")
+img2en <- image_read("KM_plot_14_OC_w_HR_en20260130short.png")
+img3en <- image_read("KM_plot_notch_HES_OC_w_HREN20260130short.png")
 
 # Match heights to avoid misalignment
 target_height <- min(
@@ -403,7 +467,42 @@ combined_kmen <- image_append(c(img1en, img2en, img3en), stack = FALSE)
 
 image_write(
   combined_kmen,
-  "KM_plots_combined_horizontal_EN20260121.png"
+  "KM_plots_combined_horizontal_EN20260130.png"
+)
+
+#staked en image
+# Match heights for all panels
+target_height <- min(
+  image_info(img1en)$height,
+  image_info(img2en)$height,
+  image_info(img3en)$height
+)
+
+img1en <- image_resize(img1en, paste0("x", target_height))
+img2en <- image_resize(img2en, paste0("x", target_height))
+img3en <- image_resize(img3en, paste0("x", target_height))
+
+# Create blank image (same size as one panel)
+panel_width <- image_info(img1en)$width
+blank_panel <- image_blank(
+  width  = panel_width,
+  height = target_height,
+  color  = "white"
+)
+
+# Row 1: two images
+row1 <- image_append(c(img1en, img2en), stack = FALSE)
+
+# Row 2: image + blank space
+row2 <- image_append(c(img3en, blank_panel), stack = FALSE)
+
+# Stack rows
+combined_kmen <- image_append(c(row1, row2), stack = TRUE)
+
+# Save
+image_write(
+  combined_kmen,
+  "KM_plots_combined_2rows_with_space_EN20260130.png"
 )
 #TIME ROC, NOTCH, OC #########################################
 surv_df_notch_oc <- OC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in%
@@ -1022,7 +1121,7 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "roc_notch_all_oc_with_table_20260121.png"
+  "roc_notch_all_oc_with_table_20260130.png"
 )
 
 # ENGLSIH FINAL 5 year plot, no AUCs #######################
@@ -1046,6 +1145,7 @@ plot(
   lwd = 2,
   xlab = "1 - Specificity",
   ylab = "Sensitivity",
+  cex.main = 1.5,  
   main = paste("ROC curves, 5 years form diagnosis, OC group"),
   xlim = c(0, 1),
   ylim = c(0, 1),
@@ -1174,7 +1274,7 @@ gt_table_roc_60EN
 
 
 #there is no other convenient way to save gt outputs
-gtsave(gt_table_roc_60EN,
+gtsave(gt_table_roc_60EN,vwidth = 1000, 
        filename = "timeroc_table_EN20260121.png")
 
 #save images together
@@ -1197,7 +1297,7 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "roc_notch_all_oc_with_table_en20260121.png"
+  "roc_notch_all_oc_with_table_en20260130.png"
 )
 
 

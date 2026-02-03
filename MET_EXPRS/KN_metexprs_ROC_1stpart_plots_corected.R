@@ -76,7 +76,7 @@ auc_values_tumor_met <- sapply(roc_results_tumor_met, function(roc_obj) {auc(roc
 roc_plot <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor[["NOTCH1"]], print.auc = F, col = "#dcbeff",
-           cex.main=0.8,
+           cex.main=1,
            main ="Gerybinių pakitimų atskyrimas nuo visų KV atvejų", 
            xlab = "1 - Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
            ylab = "Jautrumas", 
@@ -115,11 +115,12 @@ roc_plot <- function() {
   col = c("#f032e6", "#f58231","#808000", "#469990", "#42d4f4",
           "#911eb4", "#dcbeff", "#ffd8b1", "#fabed4", "#a9a9a9",
           "black", "red", "darkred", "deeppink"), lty = 1, 
-  cex = 0.7, lwd =3)
+  cex = 0.6, lwd =3)
 }
 roc_plot()
-png("met_exprs_roc_OC_output20260121.png",
-    width = 15, height = 15, res = 510, units = "cm")
+#save
+png("met_exprs_roc_OC_output20260130.png",
+    width = 13, height = 13, res = 400, units = "cm")
 roc_plot()
 dev.off()
 
@@ -182,10 +183,12 @@ gt_table_tumor <- tumor_lentele_atskiru %>%
   )
 #show
 gt_table_tumor
+#there is no other convenient way to save gt outputs
+gtsave(gt_table_tumor, filename = "met_exprs_roctable_OC_output20260130.png")
 
 #save both the same size together
-roc_image2   <- image_read("met_exprs_roc_OC_output20260121.png")
-table_image2 <- image_read("met_exprs_roctable_OC_output20260121.png")
+roc_image2   <- image_read("met_exprs_roc_OC_output20260130.png")
+table_image2 <- image_read("met_exprs_roctable_OC_output20260130.png")
 
 # Get height of ROC image
 roc_height <- image_info(roc_image2)$height
@@ -203,14 +206,14 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "met_exprs_ROC_TABLE_OC_outputs20260121.png"
+  "met_exprs_ROC_TABLE_OC_outputs20260130.png"
 )
 
 ##roc figure OVCa######################################
 roc_plotEN <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor[["NOTCH1"]], print.auc = F, col = "#dcbeff",
-           cex.main=0.8,
+           cex.main=1,
            main ="Separation of benign ovarian tumors form ovarian cancer", 
            xlab = "1 - Specificity",   # Custom x-axis label (e.g., in Lithuanian)
            ylab = "Sensitivity", 
@@ -306,7 +309,7 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "met_exprs_ROC_TABLE_OC_outputsEN20260121.png"
+  "met_exprs_ROC_TABLE_OC_outputsEN20260130.png"
 )
 
 
@@ -332,7 +335,7 @@ auc_values_tumor_bh #extracted aucs
 roc_plot2 <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor_bh[["NOTCH1"]], print.auc = F, col = "#dcbeff",
-           cex.main=0.8, main ="Gerybinių pakitimų atskyrimas nuo HGSOC atvejų", 
+           cex.main=1, main ="Gerybinių pakitimų atskyrimas nuo HGSOC atvejų", 
            xlab = "1 - Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
            ylab = "Jautrumas", 
            legacy.axes = T) #7
@@ -461,14 +464,14 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "met_exrs_ROCTABLE_HGSOC_output20260121.png"
+  "met_exrs_ROCTABLE_HGSOC_output20260130.png"
 )
 
 ## HGSOC vs benign ROC EN version #########################
 roc_plot2EN <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor_bh[["NOTCH1"]], print.auc = F, col = "#dcbeff",
-           cex.main=0.8, main ="Separation of benign ovarian tumors form HGSOC", 
+           cex.main=1, main ="Separation of benign ovarian tumors form HGSOC", 
            xlab = "1 - Specificity",   # Custom x-axis label (e.g., in Lithuanian)
            ylab = "Sensitivity", 
            legacy.axes = T) #7
@@ -560,7 +563,7 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "met_exrs_ROCTABLE_HGSOC_outputEN20260121.png"
+  "met_exrs_ROCTABLE_HGSOC_outputEN20260130.png"
 )
 #ROC HGSOC vs other###########################################
 # HGSOC vs other df
@@ -584,7 +587,7 @@ auc_values_tumor_oh #extracted aucs
 roc_plot3 <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor_oh[["NOTCH1"]], print.auc = F, col = "#dcbeff",
-           cex.main=0.8, main ="HGSOC navikų atskyrimas nuo kitų KV atvejų", 
+           cex.main=1, main ="HGSOC navikų atskyrimas nuo kitų KV atvejų", 
            xlab = "1 - Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
            ylab = "Jautrumas", 
            legacy.axes = T) #7
@@ -716,14 +719,14 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "met_exprs_ROCTABLE_HGSOC_others_output202602121.png"
+  "met_exprs_ROCTABLE_HGSOC_others_output202602130.png"
 )
 
 ##roc figure HGSOC vs others ###################################
 roc_plot3EN <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_results_tumor_oh[["NOTCH1"]], print.auc = F, col = "#dcbeff",
-           cex.main=0.8, main ="Separation of HGSOC form other ovarian cancer cases", 
+           cex.main=1, main ="Separation of HGSOC form other ovarian cancer cases", 
            xlab = "1 - Specificity",   # Custom x-axis label (e.g., in Lithuanian)
            ylab = "Sensitivity", 
            legacy.axes = T) #7
@@ -819,5 +822,5 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "met_exprs_ROCTABLE_HGSOC_others_outputEN202602121.png"
+  "met_exprs_ROCTABLE_HGSOC_others_outputEN202602130.png"
 )

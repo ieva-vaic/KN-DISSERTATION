@@ -145,9 +145,9 @@ pp1
 #set directory for saving plots
 setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
 #save
-png("met_BARPLOT_OVca_output20260121.png",
+png("met_BARPLOT_OVca_output20260130.png",
    #width = 3000, height = 2200, res = 360) #old in px
-   width = 16, height = 15, res = 500, units = "cm")
+   width = 15, height = 12, res = 300, units = "cm")
 pp1# Render the heatmap
 dev.off() # Close the PNG device
 
@@ -220,11 +220,10 @@ p3 <- ggplot(df_perc_group, aes(x = Grupė_Ieva, y = percentage, fill = value)) 
        #title = "Promoter methylation in gynecologic tumors"
   )+
   theme(legend.position = "bottom",  
-        strip.text.x = element_text(
-          size = 15, face = "bold.italic"
-        ),
+        strip.text.x = element_text(size = 12, face = "bold.italic"),
         legend.text = element_text(face = "italic"),
-        plot.title = element_text(hjust = 0.5))+
+        plot.title = element_text(hjust = 0.5),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1))+
   labs(fill = "Promotorių metilinimo statusas") 
 p3
 
@@ -241,7 +240,7 @@ pp3 <- p3+
   geom_text(data = anno, aes(x = xstar,  y = ystar, label = lab))+ #pvalues
   geom_text(aes(label = paste0(round(percentage), "%")), #balti skaiciai
             position = position_stack(vjust = 0.5), 
-            size = 5, 
+            size = 4, 
             color = "white", 
             fontface = "bold") +
   geom_segment(data = anno, aes(x = x1, xend = x1,  #visu 3 reikia nubraizyti brakets
@@ -304,8 +303,8 @@ ppp3
 # ppp3_final
 
 #SAVE PNG 
-png("met_BARPLOT_3GR_output20260121.png", 
-    width = 21, height = 15, res = 510, units = "cm") # width and height in pixels, resolution in dpi
+png("met_BARPLOT_3GR_output20260130.png", 
+    width = 17, height = 14, res = 300, units = "cm") # width and height in pixels, resolution in dpi
 ppp3# Render the heatmap
 dev.off() # Close the PNG device
 
@@ -493,7 +492,7 @@ plot33 <- plot3+
   geom_text(data = anno_plot, aes(x = xstar,  y = ystar, label = lab))+ #pvalues
   geom_text(aes(label = paste0(round(percentage), "%")), #balti skaiciai
             position = position_stack(vjust = 0.5), 
-            size = 5, 
+            size = 3, 
             color = "white", 
             fontface = "bold") +
   geom_segment(data = anno_plot, aes(x = x1, xend = x1,  #visu 3 reikia nubraizyti brakets
@@ -509,8 +508,8 @@ plot33 <- plot3+
 plot33
 
 #SAVE PNG 
-png("met_BARPLOT_HGSOC_FIGO_output20260121.png",
-    width = 21, height = 14, res = 500, units = "cm") # width and height in pixels, resolution in dpi
+png("met_BARPLOT_HGSOC_FIGO_output20260130.png",
+    width = 15, height = 12, res = 400, units = "cm") # width and height in pixels, resolution in dpi
 plot33# Render the heatmap
 dev.off() # Close the PNG device
 
@@ -601,8 +600,8 @@ pp1EN <- p1EN+
 pp1EN
 
 #save
-png("met_exprs_boxplot_OVca_ENoutput20260121.png",
-    width = 16, height = 15, res = 500, units = "cm")
+png("met_exprs_boxplot_OVca_ENoutput20260130.png",
+    width = 15, height = 12, res = 300, units = "cm")
 pp1EN #
 dev.off() # Close the PNG device
 
@@ -651,9 +650,8 @@ p3EN <- ggplot(df_perc_groupEN, aes(x = Grupė_Ieva, y = percentage, fill = valu
        #title = "Promoter methylation in gynecologic tumors"
   )+
   theme(legend.position = "bottom",  
-        strip.text.x = element_text(
-          size = 15, face = "bold.italic"
-        ),
+        strip.text.x = element_text(size = 15, face = "bold.italic"),
+        axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1),
         legend.text = element_text(face = "italic"),
         plot.title = element_text(hjust = 0.5))+
   labs(fill = "Promoter methylation") 
@@ -672,7 +670,7 @@ pp3EN<- p3EN+
   geom_text(data = annoEN, aes(x = xstar,  y = ystar, label = lab))+ #pvalues
   geom_text(aes(label = paste0(round(percentage), "%")), #balti skaiciai
             position = position_stack(vjust = 0.5), 
-            size = 5, 
+            size = 3, 
             color = "white", 
             fontface = "bold") +
   geom_segment(data = annoEN, aes(x = x1, xend = x1,  #visu 3 reikia nubraizyti brakets
@@ -712,8 +710,8 @@ ppp3EN <- pp3EN +
 ppp3EN
 
 #save
-png("met_exprs_boxplot_HGSOC_ENoutput20260121.png",
-    width = 21, height = 15, res = 510, units = "cm") # width and height in pixels, resolution in dpi
+png("met_exprs_boxplot_HGSOC_ENoutput20260130.png",
+    width = 15, height = 14, res = 310, units = "cm") # width and height in pixels, resolution in dpi
 ppp3EN #
 dev.off() # Close the PNG device
 
@@ -787,7 +785,7 @@ plot33EN <- plot3EN+
   geom_text(data = anno_plotEN, aes(x = xstar,  y = ystar, label = lab))+ #pvalues
   geom_text(aes(label = paste0(round(percentage), "%")), #balti skaiciai
             position = position_stack(vjust = 0.5), 
-            size = 5, 
+            size = 3, 
             color = "white", 
             fontface = "bold") +
   geom_segment(data = anno_plotEN, aes(x = x1, xend = x1,  #visu 3 reikia nubraizyti brakets
@@ -803,8 +801,8 @@ plot33EN <- plot3EN+
 plot33EN
 
 #save
-png("met_exprs_boxplot_HGSOCSTAGE_ENoutput20260121.png",
-    width = 21, height = 14, res = 500, units = "cm") 
+png("met_exprs_boxplot_HGSOCSTAGE_ENoutput20260130.png",
+    width = 15, height = 12, res = 300, units = "cm") 
 plot33EN #
 dev.off() # Close the PNG device
 

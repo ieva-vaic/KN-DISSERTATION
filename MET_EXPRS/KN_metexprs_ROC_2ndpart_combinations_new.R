@@ -134,7 +134,7 @@ coords_ca
 roc_plot_3 <- function() {
 par(pty = "s") #sets square
 plot.roc(roc_curve1, print.auc = F, col = "#911eb4",
-         cex.main=0.8, main ="Gerybinių pakitimų atskyrimas nuo KV atvejų",
+         cex.main=1, main ="Gerybinių pakitimų atskyrimas nuo KV atvejų",
          xlab = "1 - Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
          ylab = "Jautrumas", 
          legacy.axes = T) #7
@@ -237,7 +237,7 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "metexprs_roc_combinations_OVCa_horizontal20260121.png"
+  "metexprs_roc_combinations_OVCa_horizontal20260130.png"
 )
 
 ##delong tests with CA125 OVCa#################################
@@ -251,7 +251,7 @@ image_write(
 roc_plot_3EN <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_curve1, print.auc = F, col = "#911eb4",
-           cex.main=0.8, main ="Separation of benign ovarian tumors form ovarian cancer",
+           cex.main=1, main ="Separation of benign ovarian tumors form ovarian cancer",
            xlab = "1 - Specificity",   # Custom x-axis label (e.g., in Lithuanian)
            ylab = "Sensitivity", 
            legacy.axes = T) #7
@@ -276,8 +276,8 @@ roc_plot_3EN <- function() {
 # show plot
 roc_plot_3EN()
 # Save the plot as a PNG file
-png("metexprs_roc_combinations_OVCa_outputEN20260121.png",
-    width = 15, height = 15, res = 510, units = "cm")
+png("metexprs_roc_combinations_OVCa_outputEN20260130.png",
+    width = 15, height = 15, res = 310, units = "cm")
 roc_plot_3EN()
 dev.off()
 
@@ -313,7 +313,7 @@ gtsave(gt_tableEN,
        vwidth = 500)
 
 #Combine the images
-roc_image2   <- image_read("metexprs_roc_combinations_OVCa_outputEN20260121.png")
+roc_image2   <- image_read("metexprs_roc_combinations_OVCa_outputEN20260130.png")
 table_image2 <- image_read("metexprs_table_combinations_OVCa_outputEN20260121.png")
 
 # Get height of ROC image
@@ -332,7 +332,7 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "metexprs_roctable_combinations_OVCa_outputEN20260121.png"
+  "metexprs_roctable_combinations_OVCa_outputEN20260130.png"
 )
 
 #ROC COMBINATIONS HGSOC###################
@@ -430,7 +430,7 @@ coords_ca2
 roc_plot_4 <- function() {
 par(pty = "s") #sets square
 plot.roc(roc_curve2, print.auc = F, col = "#911eb4", lty = 2,
-         cex.main=0.8, main ="Gerybinių pakitimų atskyrimas nuo HGSOC atvejų",
+         cex.main=1, main ="Gerybinių pakitimų atskyrimas nuo HGSOC atvejų",
          xlab = "1 - Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
          ylab = "Jautrumas", 
          legacy.axes = T) #7
@@ -530,7 +530,7 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "metexprs_Roctable_HGSOC_output_horizontal20260121.png"
+  "metexprs_Roctable_HGSOC_output_horizontal20260130.png"
 )
 ##delong tests with CA125 HGSOC##########################
 # roc.test(roc_curve_CA2, roc_curve2)#0.0397 10 genes
@@ -548,7 +548,7 @@ image_write(
 roc_plot_4EN <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_curve2, print.auc = F, col = "#911eb4", lty = 2,
-           cex.main=0.8, main ="Separation of benign ovarian tumors from HGSOC",
+           cex.main=1, main ="Separation of benign ovarian tumors from HGSOC",
            xlab = "1 - Specificity",   # Custom x-axis label (e.g., in Lithuanian)
            ylab = "Sensitivity", 
            legacy.axes = T) #7
@@ -627,7 +627,7 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "metexprs_tableroc_HGSOC_BENIGN_MODELS_outputEN20260121.png"
+  "metexprs_tableroc_HGSOC_BENIGN_MODELS_outputEN20260130.png"
 )
 
 #ROC COMBINATIONS hgsoc vs other #####################
@@ -724,7 +724,7 @@ coords_ca2X
 roc_plot_5 <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_curvex, print.auc = F, col = "#911eb4", 
-           cex.main=0.8, main ="HGSOC atskyrimas nuo kitų KV atvejų",
+           cex.main=1, main ="HGSOC atskyrimas nuo kitų KV atvejų",
            xlab = "1 - Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
            ylab = "Jautrumas", 
            legacy.axes =  T) #7
@@ -825,7 +825,7 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "metexprs_tableroc_HGSOC_OTHERS_MODELS_output20260121.png"
+  "metexprs_tableroc_HGSOC_OTHERS_MODELS_output20260130.png"
 )
 ##delong tests with CA125 for comparisons#########
 # roc.test(roc_curve_CA2X, roc_curvex)#9.907e-12 10 genes
@@ -840,7 +840,7 @@ image_write(
 roc_plot_5EN <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_curvex, print.auc = F, col = "#911eb4", 
-           cex.main=0.8, main ="Separation of HGSOC from other ovarian cancer",
+           cex.main=1, main ="Separation of HGSOC from other ovarian cancer",
            xlab = "1 - Specificity",   # Custom x-axis label (e.g., in Lithuanian)
            ylab = "Sensitivity", 
            legacy.axes =  T) #7
@@ -921,7 +921,7 @@ combined_image2 <- image_append(
 
 image_write(
   combined_image2,
-  "metexprs_tableroc_HGSOC_OTHERS_MODELS_outputEN20260121.png"
+  "metexprs_tableroc_HGSOC_OTHERS_MODELS_outputEN20260130.png"
 )
 #save objects####################################################
 # Save the list

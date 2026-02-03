@@ -24,7 +24,8 @@ metilinimas <- colnames(KN_data[28:31])
 biomarkers <- c(raiska, metilinimas)
 #change tumor
 KN_data$tumor <- recode(KN_data$tumor, OvCa = "OC", Benign ="Benign")
-
+#set directory for saving
+setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
 #EXPR BOXPLOT OVca##############################################
 #melt table for expression
 tumor_table <- reshape2::melt(KN_data, id.vars="tumor",  measure.vars=raiska)
@@ -66,7 +67,7 @@ tumor_plot <- ggplot(tumor_table, aes(x=tumor, y=value, fill = variable)) +
   facet_wrap(.~ variable, nrow = 2, scales = "free") +
   add_pvalue(each.vs.ref_sig_tumor,
              label = "p.adj_custom",
-             size = 10) + #pvalue
+             size = 12) + #pvalue
   theme_minimal()+
   theme(
     strip.text.x = element_text(
@@ -77,6 +78,7 @@ tumor_plot <- ggplot(tumor_table, aes(x=tumor, y=value, fill = variable)) +
   labs(x=NULL)+
   stat_boxplot(geom ='errorbar')+
   #labs(tag = "A")+ 
+  coord_cartesian(clip = "off")+
   scale_fill_manual(values = custom_colors) +
   scale_color_manual(values = custom_colors) +
   scale_y_continuous(labels = function(x) gsub("-", "\u2212", x))+
@@ -86,15 +88,14 @@ tumor_plot <- ggplot(tumor_table, aes(x=tumor, y=value, fill = variable)) +
 tumor_plot #
 
 #SAVE PNG
-#set directory for saving
-setwd("C:/Users/Ieva/rprojects/outputs_all/DISS/")
+
 #save
-png("met_exprs_boxplot_OVca_output20260121.png",
+png("met_exprs_boxplot_OVca_output20260129.png",
 #width = 3000, height = 2700, res = 450
-width = 18,
-height = 16,
+width = 16,
+height = 10,
 units = "cm",
-res = 500
+res = 300
 )
 tumor_plot #
 dev.off() # Close the PNG device
@@ -187,7 +188,7 @@ each.vs.ref_sig_HOB <-
     #"Kiti KV",   "Gerybiniai", 0.057, -1, "NOTCH3", 
     #"Kiti KV",   "Gerybiniai", 0.068 , -2, "NOTCH4", #non-adjusted significnt
     #"Kiti KV",   "Gerybiniai", 0.212, -1, "ARID1A",  
-    "Kiti KV",   "Gerybiniai", 0.002, 0, "CTNNB1",
+    "Kiti KV",   "Gerybiniai", 0.002, 1, "CTNNB1",
     #"Kiti KV",   "Gerybiniai",0.083, -3, "FBXW7",
     #"Kiti KV",   "Gerybiniai",  1, -3, "JAG2",
     #"Kiti KV",   "Gerybiniai", 0.06  , -3, "DLL1",
@@ -206,15 +207,20 @@ HOB_x <- ggplot(HOB_table, aes(x=tumor , y=value, fill = variable)) +
   facet_wrap(.~ variable, nrow = 2, scales = "free") +
   add_pvalue(each.vs.ref_sig_HOB, 
              label = "p.adj_custom",
-             size = 12) + #pvalue
+             size = 13) + #pvalue
   theme_minimal()+
   theme(
-    strip.text.x = element_text(
-      size = 12, face = "bold.italic"
+    strip.text.x = element_text(size = 8, face = "bold.italic"),
+    axis.text.x = element_text( #rotate
+      angle = 45,
+      hjust = 1,
+      vjust = 1,
+      size = 10
     ),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
+  coord_cartesian(clip = "off")+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors) +
   scale_color_manual(values = custom_colors) +
@@ -224,12 +230,12 @@ HOB_x <- ggplot(HOB_table, aes(x=tumor , y=value, fill = variable)) +
 HOB_x
 
 #SAVE PNG
-png("met_exprs_boxplot_3groups_output20260121.png",
+png("met_exprs_boxplot_3groups_output20260129.png",
 #    width = 4200, height = 3000, res = 400 # width and height in pixels, resolution in dpi
-width = 28,
-height = 16,
+width = 15,
+height = 15,
 units = "cm",
-res = 500
+res = 300
     )
 HOB_x #
 dev.off() # Close the PNG device
@@ -325,6 +331,7 @@ grade_plot <- ggplot(grade_table, aes(x=Grade2, y=value, fill = variable)) +
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
+  coord_cartesian(clip = "off")+
   stat_boxplot(geom ='errorbar')+
   #labs(tag = "A")+ 
   scale_fill_manual(values = custom_colors) +
@@ -336,12 +343,12 @@ grade_plot
 
 #SAVE PNG AT THE SAME SIZE
 
-png("metexprs_BOXPLOT_grade_output20260121.png",
+png("metexprs_BOXPLOT_grade_output20260126.png",
 #    width = 3000, height = 2600, res = 400 # width and height in pixels, resolution in dpi
-width = 18,
-height = 16,
+width = 15,
+height = 10,
 units = "cm",
-res = 500
+res = 400
 )
 grade_plot #
 dev.off() # Close the PNG device
@@ -405,7 +412,7 @@ stage4_plot <- ggplot(stage4_table, aes(x=Stage4, y=value, fill = variable)) +
   geom_jitter(aes(color = Stage4), size=2, alpha=0.5) +
   ylab(label = expression("Santykinė raiška, normalizuota pagal " * italic("GAPDH"))) + 
   facet_wrap(.~ variable, nrow = 2, scales = "free") +
-  add_pvalue(each.vs.ref_sig_stage4, label = "p.adj_custom") + #pvalue
+  add_pvalue(each.vs.ref_sig_stage4, label = "p.adj_custom", size = 17) + #pvalue
   theme_minimal()+
   xlab("") +
   theme(
@@ -414,6 +421,7 @@ stage4_plot <- ggplot(stage4_table, aes(x=Stage4, y=value, fill = variable)) +
     ),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
+  coord_cartesian(clip = "off")+
   #labs(x=NULL, title ="Gene expression in relation to FIGO stage in HGSOC")+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors) +
@@ -424,12 +432,12 @@ stage4_plot <- ggplot(stage4_table, aes(x=Stage4, y=value, fill = variable)) +
 stage4_plot #
 
 #SAVE PNG
-png("met_exprs_BOXPLOT_HGSOC_stage_output20260121.png", 
+png("met_exprs_BOXPLOT_HGSOC_stage_output20260129.png", 
     #width = 3000, height = 2700, res = 400 # width and height in pixels, resolution in dpi
-    width = 20,
-    height = 16,
+    width = 15,
+    height = 13,
     units = "cm",
-    res = 500
+    res = 400
 )    
 stage4_plot #
 dev.off() # Close the PNG device
@@ -493,7 +501,7 @@ ca_expr_plot <- ggplot(ca_table, aes(x=CA125_f, y=value)) +
   geom_jitter(aes(color = CA125_f), size=2, alpha=0.5) +
   ylab(label = expression("Santykinė raiška, normalizuota pagal " * italic("GAPDH"))) + 
   facet_wrap(.~ variable, nrow = 2, scales = "free") +
-  add_pvalue(each.vs.ref_sig_ca, label = "p.adj_custom") + #pvalue
+  add_pvalue(each.vs.ref_sig_ca, label = "p.adj_custom", size = 15) + #pvalue
   theme_minimal()+
   theme(
     axis.text.x = element_text(angle = 45, hjust = 1), #turn
@@ -503,6 +511,7 @@ ca_expr_plot <- ggplot(ca_table, aes(x=CA125_f, y=value)) +
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
+  coord_cartesian(clip = "off")+
   stat_boxplot(geom ='errorbar')+
   scale_colour_manual(values = custom_colors4)+
   scale_fill_manual(values = custom_colors4)+
@@ -512,12 +521,12 @@ ca_expr_plot <- ggplot(ca_table, aes(x=CA125_f, y=value)) +
 ca_expr_plot
 
 #SAVE PNG 
-png("met_exprs_BOXPLOT__ca125_output20260121.png",
+png("met_exprs_BOXPLOT__ca125_output20260128.png",
     #width = 3000, height = 2300, res = 300) # width and height in pixels, resolution in dpi
-    width = 18,
-    height = 20,
+    width = 15,
+    height = 14,
     units = "cm",
-    res = 500
+    res = 400
 )
 ca_expr_plot #
 dev.off() # Close the PNG device
@@ -703,20 +712,21 @@ each.vs.ref_sig_tumorEN$p.adj_custom <- ifelse(each.vs.ref_sig_tumorEN$p.adj < 0
 custom_colorsEN <- c("OC" = "#cf5784", "Benign" = "#929cef")
 tumor_plotEN <- ggplot(tumor_tableEN, aes(x=tumor, y=value, fill = variable)) +
   geom_boxplot( outlier.shape = NA , alpha=0.3, aes(fill = tumor)) +
-  geom_jitter(aes(color = tumor), size=2, alpha=0.5) +
-  ylab(label = expression("Relative expression, normalized to " * italic("GAPDH"))) + 
+  geom_jitter(aes(color = tumor), size=1.5, alpha=0.5) +
+  ylab(label = expression("Relative expression, normalized to " * italic(" GAPDH"))) + 
   facet_wrap(.~ variable, nrow = 2, scales = "free") +
   add_pvalue(each.vs.ref_sig_tumorEN, label = "p.adj_custom") + #pvalue
   theme_minimal()+
   theme(
     strip.text.x = element_text(
-      size = 12, face = "bold.italic"
+      size = 10, face = "bold.italic"
     ),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
   stat_boxplot(geom ='errorbar')+
   #labs(tag = "A")+ 
+  coord_cartesian(clip = "off")+
   scale_fill_manual(values = custom_colorsEN) +
   scale_color_manual(values = custom_colorsEN) +
   scale_y_continuous(labels = function(x) gsub("-", "\u2212", x))+
@@ -726,15 +736,14 @@ tumor_plotEN <- ggplot(tumor_tableEN, aes(x=tumor, y=value, fill = variable)) +
 tumor_plotEN #
 
 #SAVE PNG
-png("met_exprs_boxplot_2groups_ENoutput20260121.png",
-    width = 18,
-    height = 16,
+png("met_exprs_boxplot_2groups_ENoutput20260130.png",
+    width = 15,
+    height = 11,
     units = "cm",
-    res = 500
+    res = 300
 )
 tumor_plotEN #
 dev.off() # Close the PNG device
-
 
 ## EN 3 groups ################################
 HOB_tableEN <- HOB_table %>%
@@ -771,11 +780,18 @@ HOB_x_EN <- ggplot(HOB_tableEN, aes(x=tumor , y=value, fill = variable)) +
   theme_minimal()+
   theme(
     strip.text.x = element_text(
-      size = 11, face = "bold.italic"
+      size = 10, face = "bold.italic"
+    ),
+    axis.text.x = element_text( #rotate
+      angle = 45,
+      hjust = 1,
+      vjust = 1,
+      size = 10
     ),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
+  coord_cartesian(clip = "off")+
   stat_boxplot(geom ='errorbar')+
   scale_fill_manual(values = custom_colors_ENN) +
   scale_color_manual(values = custom_colors_ENN) +
@@ -784,13 +800,12 @@ HOB_x_EN <- ggplot(HOB_tableEN, aes(x=tumor , y=value, fill = variable)) +
 
 HOB_x_EN
 
-
 #SAVE PNG
-png("met_exprs_boxplot_3groups_ENoutput20260121.png",
-    width = 28,
-    height = 16,
+png("met_exprs_boxplot_3groups_ENoutput20260130.png",
+    width = 15,
+    height = 13,
     units = "cm",
-    res = 500)
+    res = 400)
 HOB_x_EN #
 dev.off() # Close the PNG device
 
@@ -811,6 +826,7 @@ grade_plotEN <- ggplot(grade_table, aes(x=Grade2, y=value, fill = variable)) +
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
+  coord_cartesian(clip = "off")+
   stat_boxplot(geom ='errorbar')+
   #labs(tag = "A")+ 
   scale_fill_manual(values = custom_colors) +
@@ -821,11 +837,11 @@ grade_plotEN <- ggplot(grade_table, aes(x=Grade2, y=value, fill = variable)) +
 grade_plotEN
 
 #SAVE PNG
-png("met_exprs_boxplot_grade_ENoutput20260121.png",
-    width = 18,
-    height = 16,
+png("met_exprs_boxplot_grade_ENoutput20260130.png",
+    width = 15,
+    height = 10,
     units = "cm",
-    res = 500
+    res = 300
 )
 grade_plotEN #
 dev.off() # Close the PNG device
@@ -841,6 +857,7 @@ stage4_plotEN <- ggplot(stage4_table, aes(x=Stage4, y=value, fill = variable)) +
   add_pvalue(each.vs.ref_sig_stage4, label = "p.adj_custom") + #pvalue
   theme_minimal()+
   xlab("") +
+  coord_cartesian(clip = "off")+
   theme(
     strip.text.x = element_text(
       size = 12, face = "bold.italic"
@@ -857,11 +874,11 @@ stage4_plotEN <- ggplot(stage4_table, aes(x=Stage4, y=value, fill = variable)) +
 stage4_plotEN #
 
 #SAVE PNG
-png("met_exprs_boxplot_HSGOC_STAGE_ENoutput20260121.png",
-    width = 20,
-    height = 16,
+png("met_exprs_boxplot_HSGOC_STAGE_ENoutput20260130.png",
+    width = 15,
+    height = 10,
     units = "cm",
-    res = 500) 
+    res = 300) 
 stage4_plotEN #
 dev.off() # Close the PNG device
 
@@ -900,6 +917,7 @@ ca_expr_plotEN <- ggplot(ca_tableEN, aes(x=CA125_f, y=value)) +
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
   labs(x=NULL)+
+  coord_cartesian(clip = "off")+
   stat_boxplot(geom ='errorbar')+
   scale_colour_manual(values = custom_colors4EN)+
   scale_fill_manual(values = custom_colors4EN)+
@@ -909,11 +927,12 @@ ca_expr_plotEN <- ggplot(ca_tableEN, aes(x=CA125_f, y=value)) +
 ca_expr_plotEN
 
 #SAVE PNG 
-png("met_exprs_BOXPLOT__ca125_ENoutput20260121.png",
-    width = 18,
-    height = 20,
+png("met_exprs_BOXPLOT__ca125_ENoutput20260130.png",
+    width = 15,
+    height = 12,
     units = "cm",
-    res = 500
+    res = 300
 )
 ca_expr_plotEN #
 dev.off() # Close the PNG device
+
