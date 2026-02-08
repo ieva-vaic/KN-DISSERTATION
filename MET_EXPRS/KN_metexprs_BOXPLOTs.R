@@ -12,6 +12,7 @@ library(reshape2)
 library(rstatix) 
 library(ggprism)
 library(gridExtra)
+library(patchwork)
 
 #DATA - FROM THE PUBLICATION MET_EXPRS
 KN_data <- readRDS("C:/Users/Ieva/rprojects/OTHER DATA/KN-DISSERTATION FILES/KN_data1114_essential.rds")

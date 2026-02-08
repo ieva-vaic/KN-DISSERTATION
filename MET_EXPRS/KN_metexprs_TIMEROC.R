@@ -471,6 +471,28 @@ image_write(
 )
 
 #staked en image
+#save
+png("KM_plot_notch_arid1a_OC_w_HR_EN20260205short.png",
+    width = 15, height = 12, res = 200, units = "cm")
+print(test_survplot2_notchEN)  # print the full ggsurvplot object
+dev.off()
+#save
+png("KM_plot_14_OC_w_HR_en20260205short.png",
+    width = 15, height = 12, res = 200, units = "cm")
+print(test_survplot14EN)  # print the full ggsurvplot object
+dev.off()
+#save
+png("KM_plot_notch_HES_OC_w_HREN20260205short.png",
+    width = 15, height = 12, res = 200, units = "cm")
+print(test_survplot_notch_hesEN)  # print the full ggsurvplot object
+dev.off()
+
+#staked en image
+
+
+img1en <- image_read("KM_plot_notch_arid1a_OC_w_HR_EN20260205short.png")
+img2en <- image_read("KM_plot_14_OC_w_HR_en20260205short.png")
+img3en <- image_read("KM_plot_notch_HES_OC_w_HREN20260205short.png")
 # Match heights for all panels
 target_height <- min(
   image_info(img1en)$height,
@@ -502,7 +524,7 @@ combined_kmen <- image_append(c(row1, row2), stack = TRUE)
 # Save
 image_write(
   combined_kmen,
-  "KM_plots_combined_2rows_with_space_EN20260130.png"
+  "KM_plots_combined_2rows_with_space_EN20260205.png"
 )
 #TIME ROC, NOTCH, OC #########################################
 surv_df_notch_oc <- OC_SURV_EXPRESSION[, colnames(OC_SURV_EXPRESSION) %in%
