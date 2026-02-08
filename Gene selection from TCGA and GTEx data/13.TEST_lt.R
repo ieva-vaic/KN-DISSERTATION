@@ -1270,7 +1270,7 @@ extract_coords <- function(roc, gene, timepoint = 1825) {
   tibble(
     gene = gene,
     time = roc$times[idx],
-    auc = roc$AUC[idx] * 100,
+    auc = roc$AUC[idx] , #changed form *100
     sens = sens[best_idx],
     spec = spec[best_idx],
     cutoff = roc$cutoffs[best_idx]
@@ -1320,17 +1320,17 @@ gt_table_roc_60
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_roc_60,
-       filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20251023EN.png")
+       filename = "C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20250205EN.png")
 
 #Combine the images
 roc_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/10_genų_timeROC_test202501215EN.png")
-table_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20251023EN.png")
+table_image <- image_read("C:/Users/Ieva/rprojects/outputs_all/DISS/TEST_timeroc_table_20250205EN.png")
 
 combined_image <- image_append(c(roc_image, table_image), stack = F)
 
 # Save the combined image
 image_write(combined_image, 
-            "C:/Users/Ieva/rprojects/outputs_all/DISS/TESTROC_W_TABLE20251216EN.png")
+            "C:/Users/Ieva/rprojects/outputs_all/DISS/TESTROC_W_TABLE20250605EN.png")
 
 #EN plot TCGA vs GTEx #######################
 gtex_plotEN <- ggplot(gtcga_table_full, aes(x=group , y=value, fill = variable)) +
@@ -1385,11 +1385,10 @@ train_survEN <- ggsurvplot(
 )
 
 #save km plot
-png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_test20251215EN.png",
-    width = 800, height = 600, res = 120) # width and height in pixels, resolution in dpi
+png("C:/Users/Ieva/rprojects/outputs_all/DISS/dis_lt_km_test20260205EN.png",
+    width = 800, height = 800, res = 150) # width and height in pixels, resolution in dpi
 train_survEN #
 dev.off() # Close the PNG device
-
 
 #save boxplots together with the other cohort##############################
 #do this after train plots are already generated 
