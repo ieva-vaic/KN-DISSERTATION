@@ -162,7 +162,7 @@ gtsave(gt_table_cut,vwidth = 1000,
        filename = "FIG_tabbest3_HGSOC_BENIGN20260129.png")
 
 
-roc_image2   <- image_read("FIG_best3_HSGOC_BENIGN20260129.png")
+roc_image2   <- image_read("FIG_best3_HSGOC_BENIGN20260130.png")
 table_image2 <- image_read("FIG_tabbest3_HGSOC_BENIGN20260129.png")
 
 table_width <- image_info(table_image2)$width
@@ -178,7 +178,7 @@ roc_centered <- image_composite(canvas, roc_image2, offset = paste0("+", x_offse
 combined_image <- image_append(c(roc_centered, table_image2), stack = TRUE)
 image_write(
   combined_image,
-  path = "FIG_best3_HGSOC_BENIGN_combined20260129.png",
+  path = "FIG_best3_HGSOC_BENIGN_combined20260204.png",
   format = "png"
 )
 
@@ -284,11 +284,11 @@ results_roc_customx <- data.frame(
   Biožymenys = c("GRB7 + TCEAL4", 
                  "10 genų raiškos kombinacija",
                  "Serumo CA125 biožymens statusas"),
-  `plotas po kreive` = c(roc_curve2$auc, roc_curve10$auc, roc_curve_CA2X$auc), 
-  `slenkstinė vertė` = c(coords2$threshold, coords10$threshold , coords_ca2X$threshold),
-  tikslumas = c(coords2$accuracy, coords10$accuracy , coords_ca2X$accuracy),
-  jautrumas = c(coords2$sensitivity, coords10$sensitivity, coords_ca2X$sensitivity),
-  specifiškumas = c(coords2$specificity, coords10$specificity, coords_ca2X$specificity),
+  `plotas po kreive` = c(roc_curve2x$auc, roc_curve10x$auc, roc_curve_CA2Xx$auc), 
+  `slenkstinė vertė` = c(coords2x$threshold, coords10x$threshold , coords_ca2Xx$threshold),
+  tikslumas = c(coords2x$accuracy, coords10x$accuracy , coords_ca2Xx$accuracy),
+  jautrumas = c(coords2x$sensitivity, coords10x$sensitivity, coords_ca2Xx$sensitivity),
+  specifiškumas = c(coords2x$specificity, coords10x$specificity, coords_ca2Xx$specificity),
   # ppv  = c(coords2$precision, coords10$precision, coords_ca2X$precision),
   # npv  = c(coords2$npv, coords10$npv, coords_ca2X$npv),
   # tpr  = c(coords2$tpr, coords10$tpr, coords_ca2X$tpr),
@@ -321,10 +321,10 @@ gt_table_cutx
 
 #there is no other convieneat way to save gt outputs
 gtsave(gt_table_cutx,vwidth = 1000, 
- filename = "FIG_tabbest3ocfull_for_genes20260129.png")
+ filename = "FIG_tabbest3ocfull_for_genes20260204.png")
 #save wide
 roc_image2   <- image_read("FIG_best3ocfull_for_genes20260129.png")
-table_image2 <- image_read("FIG_tabbest3ocfull_for_genes20260129.png")
+table_image2 <- image_read("FIG_tabbest3ocfull_for_genes20260204.png")
 
 table_width <- image_info(table_image2)$width
 roc_height  <- image_info(roc_image2)$height
@@ -339,7 +339,7 @@ roc_centered <- image_composite(canvas, roc_image2, offset = paste0("+", x_offse
 combined_image <- image_append(c(roc_centered, table_image2), stack = TRUE)
 image_write(
   combined_image,
-  path = "FIG_COMBINED_forOC_full_genes20260129.png",
+  path = "FIG_COMBINED_forOC_full_genes20260204.png",
   format = "png"
 )
 
@@ -367,8 +367,8 @@ image_write(
 
 
 ##COMBINE fig A and B#############################################
-img2 <- image_read("FIG_best3_HGSOC_BENIGN_combined20260129.png")
-img1 <- image_read("FIG_COMBINED_forOC_full_genes20260129.png")
+img2 <- image_read("FIG_best3_HGSOC_BENIGN_combined20260204.png")
+img1 <- image_read("FIG_COMBINED_forOC_full_genes20260204.png")
 
 # Match heights (use the larger height to preserve resolution)
 max_height <- max(image_info(img1)$height,
@@ -383,7 +383,7 @@ combined_horizontal <- image_append(c(img1, img2), stack = FALSE)
 # Save at high quality
 image_write(
   combined_horizontal,
-  path = "FIG_MODELS_horizontal_combined_20260129.png",
+  path = "FIG_MODELS_horizontal_combined_20260204.png",
   format = "png"
 )
 #HGSOC vs OTHERS MODELS###############################
@@ -482,7 +482,7 @@ results_roc_customo <- data.frame(
   `slenkstinė vertė` = c(coords6$threshold, coords22$threshold ,  coords10o$threshold ,coords_ca2Xo$threshold),
   tikslumas = c(coords6$accuracy, coords22$accuracy ,coords10o$accuracy , coords_ca2Xo$accuracy),
   jautrumas = c(coords6$sensitivity, coords22$sensitivity, coords10o$sensitivity, coords_ca2Xo$sensitivity),
-  specifiškumas = c(coords6$specificity, coords22$specificity,  coords10$specificity,coords_ca2X$specificity),
+  specifiškumas = c(coords6$specificity, coords22$specificity,  coords10$specificity,coords_ca2Xo$specificity),
   # ppv  = c(coords6$precision, coords22$precision,coords10o$precision, coords_ca2Xo$precision),
   # npv  = c(coords6$npv, coords22$npv,coords10o$npv, coords_ca2Xo$npv),
   # tpr  = c(coords6$tpr, coords22$tpr, coords10o$tpr, coords_ca2Xo$tpr),
@@ -511,12 +511,12 @@ gt_table_cuto
 
 #there is no other convieneat way to save gt outputs
 gtsave(gt_table_cuto,vwidth = 500, 
-    filename = "FIG_besttableHGSOC_VS_others20260130.png")
+    filename = "FIG_besttableHGSOC_VS_others20260204.png")
 
 
 # Read images
 roc_image2   <- image_read("FIG_bestHGSOC_VS_others20260130.png")
-table_image2 <- image_read("FIG_besttableHGSOC_VS_others20260130.png")
+table_image2 <- image_read("FIG_besttableHGSOC_VS_others20260204.png")
 
 # Determine the taller height
 max_height <- max(image_info(roc_image2)$height,
@@ -537,7 +537,7 @@ combined_image <- image_resize(combined_image, paste0(width_px, "x"))
 # Save output
 image_write(
   combined_image,
-  path = "FIG_COMBINED_HGSOC_vs_table_20260130.png",
+  path = "FIG_COMBINED_HGSOC_vs_table_20260204.png",
   format = "png"
 )
 
@@ -675,11 +675,11 @@ results_roc_customxEN <- data.frame(
   Predictor = c("GRB7 + TCEAL4", 
                 "10 gene expression combination",
                 "Serum CA125 status"),
-  AUC = c(roc_curve2$auc, roc_curve10$auc, roc_curve_CA2X$auc), 
-  threshold = c(coords2$threshold, coords10$threshold , coords_ca2X$threshold),
-  accuracy = c(coords2$accuracy, coords10$accuracy , coords_ca2X$accuracy),
-  sensitivity = c(coords2$sensitivity, coords10$sensitivity, coords_ca2X$sensitivity),
-  specificity = c(coords2$specificity, coords10$specificity, coords_ca2X$specificity),
+  AUC = c(roc_curve2x$auc, roc_curve10x$auc, roc_curve_CA2Xx$auc), 
+  threshold = c(coords2x$threshold, coords10x$threshold , coords_ca2Xx$threshold),
+  accuracy = c(coords2x$accuracy, coords10x$accuracy , coords_ca2Xx$accuracy),
+  sensitivity = c(coords2x$sensitivity, coords10x$sensitivity, coords_ca2Xx$sensitivity),
+  specificity = c(coords2x$specificity, coords10x$specificity, coords_ca2Xx$specificity),
   # ppv  = c(coords2$precision, coords10$precision, coords_ca2X$precision),
   # npv  = c(coords2$npv, coords10$npv, coords_ca2X$npv),
   # tpr  = c(coords2$tpr, coords10$tpr, coords_ca2X$tpr),
@@ -708,11 +708,11 @@ gt_table_cutxEN
 
 #there is no other convieneat way to save gt outputs
 gtsave(gt_table_cutxEN,vwidth = 800, 
-       filename = "FIG_tabbest3ocfull_for_genes20251218EN.png")
+       filename = "FIG_tabbest3ocfull_for_genes20260204EN.png")
 
 #Combine the images
 roc_image2xEN<- image_read("FIG_best3ocfull_for_genes20251218EN.png")
-table_image2xEN <- image_read("FIG_tabbest3ocfull_for_genes20251218EN.png")
+table_image2xEN <- image_read("FIG_tabbest3ocfull_for_genes20260204EN.png")
 
 # Find the max width to align both
 roc_infoxEN <- image_info(roc_image2xEN)
@@ -732,7 +732,7 @@ combined_image2xEN <- image_append(c(roc_image2_paddedxEN, table_image2_paddedxE
 
 # Save the combined image
 image_write(combined_image2xEN, 
-            "FIG_COMBINED_forOC_full_genes20251218EN.png")
+            "FIG_COMBINED_forOC_full_genes20251204EN.png")
 
 ##EN FIG: HGSOC vs OTHERS PLOT####################
 roc_plot_customoEN <- function() {
@@ -759,7 +759,7 @@ roc_plot_customoEN <- function() {
 roc_plot_customoEN()
 
 # Save the plot as a PNG file
-png("FIG_bestHGSOC_VS_others20251230EN.png", width = 10, height = 10, res = 300, units = "cm")
+png("FIG_bestHGSOC_VS_others20260204EN.png", width = 10, height = 10, res = 300, units = "cm")
 roc_plot_customoEN()
 dev.off()
 
@@ -773,7 +773,7 @@ results_roc_customoEN <- data.frame(
   threshold = c(coords6$threshold, coords22$threshold ,  coords10o$threshold ,coords_ca2Xo$threshold),
   accuracy = c(coords6$accuracy, coords22$accuracy ,coords10o$accuracy , coords_ca2Xo$accuracy),
   sensitivity = c(coords6$sensitivity, coords22$sensitivity, coords10o$sensitivity, coords_ca2Xo$sensitivity),
-  specificity = c(coords6$specificity, coords22$specificity,  coords10$specificity,coords_ca2X$specificity),
+  specificity = c(coords6$specificity, coords22$specificity,  coords10$specificity,coords_ca2Xo$specificity),
   # ppv  = c(coords6$precision, coords22$precision,coords10o$precision, coords_ca2Xo$precision),
   # npv  = c(coords6$npv, coords22$npv,coords10o$npv, coords_ca2Xo$npv),
   # tpr  = c(coords6$tpr, coords22$tpr, coords10o$tpr, coords_ca2Xo$tpr),
@@ -802,7 +802,7 @@ gt_table_cutoEN
 
 #there is no other convieneat way to save gt outputs
 gtsave(gt_table_cutoEN,vwidth = 500, 
-       filename = "FIG_besttableHGSOC_VS_others20251230EN.png")
+       filename = "FIG_besttableHGSOC_VS_others20260104EN.png")
 
 #Combine the images
 roc_image2oEN<- image_read("FIG_bestHGSOC_VS_others20251218EN.png")
@@ -832,7 +832,7 @@ image_write(combined_image2oEN,
 
 # Read images
 roc_image2   <- image_read("FIG_bestHGSOC_VS_others20251230EN.png")
-table_image2 <- image_read("FIG_besttableHGSOC_VS_others20251230EN.png")
+table_image2 <- image_read("FIG_besttableHGSOC_VS_others20260104EN.png")
 
 # Determine the taller height
 max_height <- max(image_info(roc_image2)$height,
@@ -853,6 +853,6 @@ combined_image <- image_resize(combined_image, paste0(width_px, "x"))
 # Save output
 image_write(
   combined_image,
-  path = "FIG_COMBINED_forHGSOC_others_genes20260203EN.png",
+  path = "FIG_COMBINED_forHGSOC_others_genes20260204EN.png",
   format = "png"
 )

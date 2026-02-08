@@ -789,7 +789,7 @@ best_idx_risk <- which.max(youden_risk)
 risk_score_row <- tibble(
   gene = "Risk score",
   time = roc_result$times[which(roc_result$times == 60)],
-  auc = roc_result$AUC[which(roc_result$times == 60)]*100,
+  auc = roc_result$AUC[which(roc_result$times == 60)], #changed here
   sens = sens_60_risk[best_idx_risk],
   spec = spec_60_risk[best_idx_risk],
   cutoff = roc_result$cutoffs[best_idx_risk]
@@ -813,7 +813,7 @@ sens_spec_auc_60 <- map_dfr(names(rez_list), function(gene) {
   tibble(
     gene = gene,
     time = roc$times[idx_60],
-    auc = roc$AUC[idx_60]*100,
+    auc = roc$AUC[idx_60], #changed form *100
     sens = sens_60[best_idx],
     spec = spec_60[best_idx],
     cutoff = roc$cutoffs[best_idx]
@@ -858,15 +858,15 @@ gt_table_roc_60
 
 #there is no other convenient way to save gt outputs
 gtsave(gt_table_roc_60,vwidth = 600,
-       filename = "10genetimeroc_table_20260130EN.png")
+       filename = "10genetimeroc_table_20260208EN.png")
 
 #Combine the images
 roc_image <- image_read("tissues_OCtimeROC_test20260130EN.png")
-table_image <- image_read("10genetimeroc_table_20260130EN.png")
+table_image <- image_read("10genetimeroc_table_20260208EN.png")
 
 combined_image <- image_append(c(roc_image, table_image), stack = F)
 
 # Save the combined image
 image_write(combined_image, 
-            "tissues_OCtimeROCw_table_test20260130EN.png")
+            "tissues_OCtimeROCw_table_test20260208EN.png")
 
