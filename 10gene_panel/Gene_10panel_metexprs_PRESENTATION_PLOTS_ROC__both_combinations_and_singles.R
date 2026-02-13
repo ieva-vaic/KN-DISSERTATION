@@ -48,9 +48,10 @@ load("roc_list20250826.RData")
 roc_plot_4 <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_curve2, print.auc = F, col = "#911eb4", lty = 2,
-           cex.main=0.8, main ="Gerybinių pakitimų atskyrimas nuo HGSOC atvejų",
-           xlab = "Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
-           ylab = "Jautrumas") #7
+           cex.main=1, main ="Gerybinių pakitimų atskyrimas nuo HGSOC atvejų",
+           xlab = "1 - Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
+           ylab = "Jautrumas", 
+           legacy.axes = T) #7
   lines(roc_curve2.2, col = "#dcbeff", lwd =2 ) #6
   lines(roc_curve2.3, col ="#fabed4", lwd =2, lty = 4) #8
   lines(roc_curve2.4, col ="darkred", lwd =2, lty = 3) 
@@ -78,7 +79,7 @@ roc_plot_4 <- function() {
          cex = 0.7, lwd =3)
 }
 # Save the plot as a PNG file
-png("metexprs_roc_HGSOC_output20260126.png",width = 15, height = 15, res = 510, units = "cm")
+png("metexprs_roc_HGSOC_output20260210.png",width = 15, height = 15, res = 510, units = "cm")
 roc_plot_4()
 dev.off()
 
@@ -140,15 +141,16 @@ coords2.5 <- coords(roc_curve2.5, "best",
 #MAKE ONE DF
 results_roc2<- data.frame(
   Biožymenys = c("Genų raiškos žymenų kombinacija", 
-                 "Promotorių metilinimo statuso kombinacija",
+                 
                  "Genų raiškos žymenų + promotorių metilinimo statuso kombinacija", 
                  "NOTCH genų raiškos žymenų kombinacija",
+                 "Promotorių metilinimo statuso kombinacija",
                  "HOX promotorių metilinimo statuso kombinacija",
                  "CTNNB1 raiška",
                  "FBXW7 raiška",
                  "HES1 raiška",
                  "Serumo CA125 biožymens statusas"),
-  `plotas po kreive` = c(roc_curve2$auc, roc_curve2.2$auc, roc_curve2.3$auc, roc_curve2.4$auc, roc_curve2.5$auc,
+  `plotas po kreive` = c(roc_curve2$auc, roc_curve2.3$auc, roc_curve2.4$auc, roc_curve2.2$auc, roc_curve2.5$auc,
                          roc_results_tumor_bh[["CTNNB1"]]$auc, roc_results_tumor_bh[["FBXW7"]]$auc,roc_results_tumor_bh[["HES1"]]$auc,
                          roc_curve_CA2$auc), 
   `slenkstinė vertė` = c(coords2$threshold, coords2.2$threshold , coords2.3$threshold,
@@ -157,20 +159,20 @@ results_roc2<- data.frame(
                          coords_results_tumor_bh[["FBXW7"]]$threshold,
                          coords_results_tumor_bh[["HES1"]]$threshold,
                          coords_ca2$threshold ),
-  tikslumas = c(coords2$accuracy, coords2.2$accuracy , coords2.3$accuracy,
-                coords2.4$accuracy, coords2.5$accuracy,
+  tikslumas = c(coords2$accuracy,  coords2.3$accuracy,
+                coords2.4$accuracy, coords2.2$accuracy ,coords2.5$accuracy,
                 coords_results_tumor_bh[["CTNNB1"]]$accuracy,
                 coords_results_tumor_bh[["FBXW7"]]$accuracy,
                 coords_results_tumor_bh[["HES1"]]$accuracy,
                 coords_ca2$accuracy ),
-  jautrumas = c(coords2$sensitivity, coords2.2$sensitivity, coords2.3$sensitivity,
-                coords2.4$sensitivity, coords2.5$sensitivity,
+  jautrumas = c(coords2$sensitivity,  coords2.3$sensitivity,
+                coords2.4$sensitivity, coords2.2$sensitivity, coords2.5$sensitivity,
                 coords_results_tumor_bh[["CTNNB1"]]$sensitivity,
                 coords_results_tumor_bh[["FBXW7"]]$sensitivity,
                 coords_results_tumor_bh[["HES1"]]$sensitivity,
                 coords_ca2$sensitivity),
-  specifiškumas = c(coords2$specificity, coords2.2$specificity, coords2.3$specificity,
-                    coords2.4$specificity, coords2.5$specificity,
+  specifiškumas = c(coords2$specificity,  coords2.3$specificity,
+                    coords2.4$specificity, coords2.2$specificity, coords2.5$specificity,
                     coords_results_tumor_bh[["CTNNB1"]]$specificity,
                     coords_results_tumor_bh[["FBXW7"]]$specificity,
                     coords_results_tumor_bh[["HES1"]]$specificity,
@@ -222,12 +224,12 @@ gt_table2 <- results_roc2 %>%
 gt_table2
 
 #there is no other convenient way to save gt outputs
-gtsave(gt_table2,vwidth = 700,
-       filename = "metexprs_table_HGSOC_output20260126.png")
+gtsave(gt_table2,vwidth = 780,
+       filename = "metexprs_table_HGSOC_output20260210.png")
 
 #Combine the images
-img1 <- image_read("metexprs_roc_HGSOC_output20260126.png")
-img2 <- image_read("metexprs_table_HGSOC_output20260126.png")
+img1 <- image_read("metexprs_roc_HGSOC_output20260210.png")
+img2 <- image_read("metexprs_table_HGSOC_output20260210.png")
 
 # Match heights (use the larger height to preserve resolution)
 max_height <- max(image_info(img1)$height,
@@ -242,7 +244,7 @@ combined_horizontal <- image_append(c(img1, img2), stack = FALSE)
 # Save at high quality
 image_write(
   combined_horizontal,
-  path = "PRESENTATIONmetexprs_Roctable_HGSOC_output20260126.png",
+  path = "PRESENTATIONmetexprs_Roctable_HGSOC_output20260210.png",
   format = "png"
 )
 
@@ -250,9 +252,10 @@ image_write(
 roc_plot_5 <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_curvex, print.auc = F, col = "#911eb4", 
-           cex.main=0.8, main ="HGSOC atskyrimas nuo kitų KV atvejų",
-           xlab = "Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
-           ylab = "Jautrumas") #7
+           cex.main=1, main ="HGSOC atskyrimas nuo kitų KV atvejų",
+           xlab = "1 -Specifiškumas",   # Custom x-axis label (e.g., in Lithuanian)
+           ylab = "Jautrumas",
+           legacy.axes = T) #7
   lines(roc_curvex.1, col = "#dcbeff", lwd =2 ) #6
   lines(roc_curvex.3, col ="#fabed4", lwd =2) #8
   lines(roc_curvex.4, col ="darkred", lwd =2 ) 
@@ -275,7 +278,7 @@ roc_plot_5 <- function() {
 }
 
 # Save the plot as a PNG file
-png("metexprs_roc_HGSOC_OTHERS_MODELS_output20260126.png", 
+png("metexprs_roc_HGSOC_OTHERS_MODELS_output20260210.png", 
     ,width = 15, height = 15, res = 510, units = "cm")
 roc_plot_5()
 dev.off()
@@ -366,11 +369,11 @@ gt_tablex
 
 #there is no other convieneat way to save gt outputs
 gtsave(gt_tablex,vwidth = 700,
-       filename = "metexprs_table_HGSOC_OTHERS_MODELS_output20260126.png")
+       filename = "metexprs_table_HGSOC_OTHERS_MODELS_output20260210.png")
 
 #Combine the images
-img1 <- image_read("metexprs_roc_HGSOC_OTHERS_MODELS_output20260126.png")
-img2 <- image_read("metexprs_table_HGSOC_OTHERS_MODELS_output20260126.png")
+img1 <- image_read("metexprs_roc_HGSOC_OTHERS_MODELS_output20260210.png")
+img2 <- image_read("metexprs_table_HGSOC_OTHERS_MODELS_output20260210.png")
 
 # Match heights (use the larger height to preserve resolution)
 max_height <- max(image_info(img1)$height,
@@ -385,7 +388,7 @@ combined_horizontal <- image_append(c(img1, img2), stack = FALSE)
 # Save at high quality
 image_write(
   combined_horizontal,
-  path = "metexprs_tableroc_HGSOC_OTHERS_MODELS_output20260126.png",
+  path = "PRESENTATIONmetexprs_tableroc_HGSOC_OTHERS_MODELS_output20260210.png",
   format = "png"
 )
 #STATISTICAL MODEL GENES #################################
@@ -436,9 +439,10 @@ coords_results_tumor
 roc_plot_custom <- function() {
   par(pty = "s") #sets square
   plot.roc(roc_curve2, print.auc = F, col = "deeppink", 
-           cex.main=0.8, main ="Gerybinių pakitimų atskyrimas HGSOC atvejų",
-           xlab = "Specifiškumas",   # Custom x-axis label 
-           ylab = "Jautrumas") #7
+           cex.main=1, main ="Gerybinių pakitimų atskyrimas HGSOC atvejų",
+           xlab = "1 - Specifiškumas",   # Custom x-axis label 
+           ylab = "Jautrumas", 
+           legacy.axes = T) #7
   lines(roc_curve10, col = "blue", lwd =2, lty = 2 ) #6
   lines(roc_results_tumor[["GRB7"]], col = "#469990", lwd =2) 
   lines(roc_results_tumor[["TCEAL4"]], col = "#808000", lwd =2)
@@ -456,7 +460,7 @@ roc_plot_custom <- function() {
 #show plot
 roc_plot_custom()
 # Save the plot as a PNG file
-png("FIG_best3_HSGOC_BENIGN20260126.png", width = 15, height = 15, res = 510, units = "cm")
+png("FIG_best3_HSGOC_BENIGN20260210.png", width = 15, height = 15, res = 510, units = "cm")
 roc_plot_custom()
 #mtext("B", side = 3, adj = 0, line = 2.5, cex = 1.5, font = 2)
 dev.off()
@@ -469,21 +473,21 @@ results_roc_custom <- data.frame(
                  "TCEAL4 raiška",
                  "Serumo CA125 biožymens statusas"),
   `plotas po kreive` = c(roc_curve2$auc, roc_curve10$auc, roc_results_tumor[["GRB7"]]$auc,
-                         roc_results_tumor[["TCEAL4"]]$auc, roc_curve_CA2X$auc), 
+                         roc_results_tumor[["TCEAL4"]]$auc, roc_curve_CA2$auc), 
   `slenkstinė vertė` = c(coords2$threshold, coords10$threshold ,
                          coords_results_tumor[["GRB7"]]$threshold,
                          coords_results_tumor[["TCEAL4"]]$threshold,
-                         coords_ca2X$threshold),
+                         coords_ca2$threshold),
   tikslumas = c(coords2$accuracy, coords10$accuracy ,
                 coords_results_tumor[["GRB7"]]$accuracy,
-                coords_results_tumor[["TCEAL4"]]$accuracy, coords_ca2X$accuracy),
+                coords_results_tumor[["TCEAL4"]]$accuracy, coords_ca2$accuracy),
   jautrumas = c(coords2$sensitivity, coords10$sensitivity,
                 coords_results_tumor[["GRB7"]]$sensitivity,
-                coords_results_tumor[["TCEAL4"]]$sensitivity, coords_ca2X$sensitivity),
+                coords_results_tumor[["TCEAL4"]]$sensitivity, coords_ca2$sensitivity),
   specifiškumas = c(coords2$specificity, coords10$specificity,
                     coords_results_tumor[["GRB7"]]$specificity,
                     coords_results_tumor[["TCEAL4"]]$specificity,
-                    coords_ca2X$specificity),
+                    coords_ca2$specificity),
   # ppv  = c(coords2$precision, coords10$precision, 
   #          coords_results_tumor[["GRB7"]]$precision,
   #          coords_results_tumor[["TCEAL4"]]$precision, coords_ca2X$precision),
@@ -524,7 +528,7 @@ gtsave(gt_table_cut,vwidth = 500,
 
 #Combine the images
 
-img1 <- image_read("FIG_best3_HSGOC_BENIGN20260126.png")
+img1 <- image_read("FIG_best3_HSGOC_BENIGN20260210.png")
 img2 <- image_read("FIG_tabbest3_HGSOC_BENIGN20260126.png")
 
 # Match heights (use the larger height to preserve resolution)
@@ -540,6 +544,6 @@ combined_horizontal <- image_append(c(img1, img2), stack = FALSE)
 # Save at high quality
 image_write(
   combined_horizontal,
-  path = "PRESENTATION_FIG_COMBINED_best3_HGSOC_BENIGN20260126.png",
+  path = "PRESENTATION_FIG_COMBINED_best3_HGSOC_BENIGN20260210.png",
   format = "png"
 )

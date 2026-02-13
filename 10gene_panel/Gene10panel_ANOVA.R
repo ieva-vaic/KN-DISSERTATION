@@ -383,8 +383,8 @@ tukey_results2
 each.vs.ref_sig_stage <- tibble::tribble(
   ~group1, ~group2, ~p.adj,   ~y.position, ~variable,
   "II",   "III", 0.02671, -2, "RAD50", #tukey's
-  "II",   "IV", 0.00385 , -1.5, "RAD50", #tukey's
-  "III",   "IV", 0.040, -2.5, "RAD50", #tukey's
+  "II",   "IV", 0.00385 , -2.5, "RAD50", #tukey's
+  "III",   "IV", 0.040, -3, "RAD50", #tukey's
   "II",   "III", 0.00910 , -4, "VPS33B", #tukey's
   "II",   "IV", 1e-04 , -3, "VPS33B", #tukey's
   "III",   "IV", 0.00877 , -5, "VPS33B", #tukey's

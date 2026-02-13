@@ -183,7 +183,7 @@ Grade_plot <- ggplot(Grade_table_OC, aes(x=Grade2 , y=value, fill = variable)) +
   theme_minimal()+
   theme(
     strip.text.x = element_text(
-      size = 12, face = "bold.italic"
+      size = 11, face = "bold.italic"
     ),
     legend.position = "none",
     plot.title = element_text(hjust = 0.5))+
@@ -198,10 +198,13 @@ Grade_plot <- ggplot(Grade_table_OC, aes(x=Grade2 , y=value, fill = variable)) +
 Grade_plot
 
 ##save plot####################################################
-png("10gene_grade_20260130.png"
-    , width = 15, height = 13, res = 300, units = "cm") # width and height in pixels, resolution in dpi
+
+#for phd
+png("10gene_grade_20260211.png"
+    , width = 15, height = 9.5, res = 180, units = "cm") # width and height in pixels, resolution in dpi
 Grade_plot 
 dev.off() # Close the PNG device
+
 
 ##FC GRADE ##################
 expression_df_GRADE <- OC_only[, c("Grade2", expression, "KN")]
