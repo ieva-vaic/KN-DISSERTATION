@@ -331,7 +331,7 @@ png("heatmap_mut20260130EN.png", width = 15, height = 17,
 draw(heatmap_raiskaEN )# Render the heatmap
 dev.off() # Close the PNG device
 
-#horizontal LT for ##########################################
+#horizontal LT ##########################################
 top_ha <- HeatmapAnnotation(
   `ARID1A mutacija`      = ARID1A_df$ARID1A_tumor_type2,
   `CTNNB1 mutacija`      = ARID1A_df$CTNNB1_tumor_mut2,
@@ -427,3 +427,89 @@ draw(
 )
 
 dev.off() # Close the PNG device
+
+#horizontal EN  ##########################################
+top_haen <- HeatmapAnnotation(
+  `ARID1A mutation`      = ARID1A_dfEN$ARID1A_tumor_type2,
+  `CTNNB1 mutation`      = ARID1A_dfEN$CTNNB1_tumor_mut2,
+  `ARID1A methylation`   = ARID1A_dfEN$ARID1A_met,
+  # Histologija            = ARID1A_df$Histology,
+  Tumor                = ARID1A_dfEN$Grupė_Ieva,
+  
+  col = list(
+    # Histologija = c(
+    #   "Šviesių lastelių" = "lightblue",
+    #   "Cista" = "lightgreen",
+    #   "Endometrioidinis" = "green",
+    #   "Endometriozė" = "darkgreen",
+    #   "Granulosa" = "turquoise",
+    #   "HGSOC" = "deeppink",
+    #   "Mioma" = "red",
+    #   "Mucininis" = "yellow",
+    #   "Riziką mažinanti operacija" = "orange",
+    #   "Serozinis" = "lightpink"
+    # ),
+    Tumor = c(
+      "HGSOC" = "#a89cd4",
+      "Benign" = "#d49cac",
+      "Other" = "darkblue"
+    ),
+    `ARID1A methylation` = c("Not methylated" = "#9cd4c4",  
+                             "Methylated" = "#c8d49c"), 
+    `ARID1A mutation` = c("No mutations"="#9cd4c4", 
+                          "missense" = "#a89cd4", 
+                          "nonsense" = "darkblue",
+                          "Frameshift Deletion" = "maroon",
+                          "NA" = "grey"),
+    `CTNNB1 mutation` = c("No mutations"="#9cd4c4", 
+                          "Missense" = "#a89cd4",
+                          "NA" = "grey")
+  ),
+  
+  annotation_legend_param = list(
+    # Histologija = list(title_gp = gpar(fontface = "italic")),
+    Tumor = list(title_gp = gpar(fontface = "italic")),
+    `ARID1A methylation` = list(title_gp = gpar(fontface = "italic")),
+    `ARID1A mutation` = list(title_gp = gpar(fontface = "italic")),
+    `CTNNB1 mutation` = list(title_gp = gpar(fontface = "italic"))
+  ),
+  
+  annotation_name_gp = gpar(fontface = "italic")
+)
+
+heatmap_raiska_hen <- Heatmap(
+  t(as.matrix(Heat_data)),          # TRANSPOSE
+  cluster_rows = FALSE,
+  cluster_columns = FALSE,
+  col = col_fun,
+  
+  top_annotation = top_haen,           # was right_annotation
+  column_split = row_group,          # was row_split
+  
+  column_title_gp = gpar(fontface = "italic", fontsize = 12),
+  name = "Relative gene expression",
+  
+  row_names_gp = gpar(fontface = "italic"),   # was column_names_gp
+  column_names_gp = gpar(fontsize = 8),        # was row_names_gp
+  
+  heatmap_legend_param = list(
+    at = c(0, -5, -9),
+    labels = labels,
+    title_gp = gpar(fontface = "italic")
+  )
+)
+
+#save png
+png("heatmap_mut20260218EN.png", width = 30, height = 14,
+    res = 500, units = "cm", pointsize = 11) # width and height in pixels, resolution in dpi
+draw(
+  heatmap_raiska_hen,
+  heatmap_legend_side = "bottom",
+  annotation_legend_side = "bottom",
+  merge_legends = TRUE
+)
+
+dev.off() # Close the PNG device
+
+
+
