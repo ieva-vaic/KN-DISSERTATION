@@ -248,6 +248,82 @@ image_write(
   format = "png"
 )
 
+
+
+##PLOT ROC COMBINATIONS HGSOC EN##########################
+#HGSOC vs benign models
+roc_plot_4en <- function() {
+  par(pty = "s") #sets square
+  plot.roc(roc_curve2, print.auc = F, col = "#911eb4", lty = 2,
+           cex.main=1, main ="Separation of HGSOC form benign cases",
+           xlab = "1 - Specificity",   # Custom x-axis label (e.g., in Lithuanian)
+           ylab = "Sensitivity", 
+           legacy.axes = T) #7
+  lines(roc_curve2.2, col = "#dcbeff", lwd =2 ) #6
+  lines(roc_curve2.3, col ="#fabed4", lwd =2, lty = 4) #8
+  lines(roc_curve2.4, col ="darkred", lwd =2, lty = 3) 
+  lines(roc_curve2.5, col ="deeppink", lwd =2) 
+  lines(roc_results_tumor_bh$CTNNB1, col ="darkgreen", lwd =2)  #ctnnb1
+  lines(roc_results_tumor_bh$FBXW7, col ="darkblue", lwd =2) #FBXW7
+  lines(roc_results_tumor_bh$HES1, col ="lightblue", lwd =2) #NOTCH2
+  lines(roc_curve_CA2, col = "grey", lwd = 2)
+  
+  # Add legend
+  legend("bottomright", legend = c( expression(italic("Gene expression combination")), 
+                                    expression(italic("Promoter methylation status combination")),
+                                    expression(italic("Gene expression + promoter methylation status combination ")), 
+                                    expression(italic("NOTCH gene expression combination ")),
+                                    expression(italic("HOX promoter methtlation combination")),
+                                    
+                                    expression(italic("CTNNB1 expression")),
+                                    expression(italic("FBXW7 expression")),
+                                    expression(italic("HES1 expression")),
+                                    
+                                    expression(italic("Serum CA125 biomarker status")))
+         ,
+         col = c("#911eb4","#dcbeff", "#fabed4", "darkred",
+                 "deeppink","darkgreen", "darkblue","lightblue", "grey" ), lty = 1, 
+         cex = 0.7, lwd =3)
+}
+# Save the plot as a PNG file
+png("metexprs_roc_HGSOC_output20260218.png",width = 15, height = 15, res = 510, units = "cm")
+roc_plot_4en()
+dev.off()
+
+results_roc2en <- results_roc2
+colnames(results_roc2en) <- c("Predictor", "AUC", "threshold", "accuracy", "sensitivity", "specificity")
+results_roc2en$Predictor <- c("Gene expression combination",
+                              "Gene expression + promoter methylation status combination ",
+                              "NOTCH gene expression combination ",
+                              "Promoter methylation status combination",
+                              "HOX promoter methtlation combination",
+                              "CTNNB1 expression",
+                              "FBXW7 expression",
+                              "HES1 expression",
+                              "Serum CA125 biomarker status"
+)
+
+gt_table2en <- results_roc2en %>%
+  gt() %>%
+  tab_header(
+    title = "ROC metrics", 
+    subtitle = "Separation of HGSOC form benign cases",
+  ) %>%
+  fmt_number(
+    columns = everything(),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Predictor))
+  )
+#show
+gt_table2en
+
+#there is no other convenient way to save gt outputs
+gtsave(gt_table2en,vwidth = 780,
+       filename = "metexprs_table_HGSOC_output20260218.png")
+
 #PLOT ROC COMBINATIONS HGSOC vs OTHERS##########################
 roc_plot_5 <- function() {
   par(pty = "s") #sets square
@@ -391,6 +467,77 @@ image_write(
   path = "PRESENTATIONmetexprs_tableroc_HGSOC_OTHERS_MODELS_output20260210.png",
   format = "png"
 )
+
+#PLOT ROC COMBINATIONS HGSOC vs OTHERS EN##########################
+roc_plot_5en <- function() {
+  par(pty = "s") #sets square
+  plot.roc(roc_curvex, print.auc = F, col = "#911eb4", 
+           cex.main=1, main ="Separation of HGSOC from other OC",
+           xlab = "1 - Specificity",   # Custom x-axis label (e.g., in Lithuanian)
+           ylab = "Sensitivity",
+           legacy.axes = T) #7
+  lines(roc_curvex.1, col = "#dcbeff", lwd =2 ) #6
+  lines(roc_curvex.3, col ="#fabed4", lwd =2) #8
+  lines(roc_curvex.4, col ="darkred", lwd =2 ) 
+  lines(roc_curveX.5, col ="deeppink", lwd =2) 
+  lines(roc_results_tumor_oh[["HES1"]], col = "#808000", lwd =2) #2-3
+  lines(roc_curve_CA2X, col = "grey", lwd = 2)
+  
+  # Add legend
+  legend("bottomright", legend = c( expression(italic("Gene expression combination")), 
+                                    expression(italic("Promoter methylation status combination")),
+                                    expression(italic("Gene expression + promoter methylation status combination ")), 
+                                    expression(italic("NOTCH gene expression combination")),
+                                    expression(italic("HOX promoter methtlation combination")),
+                                    expression(italic("HES1 expression")),
+                                    expression(italic("Serum CA125 biomarker status")))
+         ,
+         col = c("#911eb4","#dcbeff", "#fabed4", "darkred",
+                 "deeppink", "#808000", "grey" ), lty = 1, 
+         cex = 0.7, lwd =3)
+}
+
+# Save the plot as a PNG file
+png("metexprs_roc_HGSOC_OTHERS_MODELS_output20260218.png", 
+    ,width = 15, height = 15, res = 510, units = "cm")
+roc_plot_5en()
+dev.off()
+
+results_rocxen <- results_rocx
+
+colnames(results_rocxen) <- c("Predictor", "AUC", "threshold", "accuracy", "sensitivity", "specificity")
+results_rocxen$Predictor <- c("Gene expression combination",
+                              "Promoter methylation status combination",
+                              "Gene expression + promoter methylation status combination ",
+                              "NOTCH gene expression combination ",
+                              "HOX promoter methtlation combination",
+                              "HES1 expression",
+                              "Serum CA125 biomarker status"
+)
+
+
+
+
+gt_tablexen <- results_rocxen %>%
+  gt() %>%
+  tab_header(
+    title = "ROC metrics",
+    subtitle = "Separation of HGSOC from other OC",
+  ) %>%
+  fmt_number(
+    columns = everything(),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Predictor))
+  )
+#show
+gt_tablexen
+
+#there is no other convieneat way to save gt outputs
+gtsave(gt_tablexen,vwidth = 700,
+       filename = "metexprs_table_HGSOC_OTHERS_MODELS_output20260218.png")
 #STATISTICAL MODEL GENES #################################
 OC_full <- readRDS("C:/Users/Ieva/rprojects/OTHER DATA/KN-DISSERTATION FILES//OC_10_genes_clean_2025_02_14.RDS")
 OC_full <- OC_full[c(OC_full$KN != "KN-100"), ]
@@ -547,3 +694,67 @@ image_write(
   path = "PRESENTATION_FIG_COMBINED_best3_HGSOC_BENIGN20260210.png",
   format = "png"
 )
+
+##FIG: best 3 HGSOC vs benign PLOT EN##########################
+#HGSOC vs benign models plot:
+roc_plot_customen <- function() {
+  par(pty = "s") #sets square
+  plot.roc(roc_curve2, print.auc = F, col = "deeppink", 
+           cex.main=1, main ="Separation of HGSOC form benign cases",
+           xlab = "1 - Specificity",   # Custom x-axis label 
+           ylab = "Sensitivity", 
+           legacy.axes = T) #7
+  lines(roc_curve10, col = "blue", lwd =2, lty = 2 ) #6
+  lines(roc_results_tumor[["GRB7"]], col = "#469990", lwd =2) 
+  lines(roc_results_tumor[["TCEAL4"]], col = "#808000", lwd =2)
+  lines(roc_curve_CA2X, col = "grey", lwd = 2)
+  # Add legend
+  legend("bottomright", legend = c( expression(italic("GRB7 + TCEAL4")), 
+                                    expression(italic("10 Gene expression combination")),
+                                    expression(italic("GRB7 expression")),
+                                    expression(italic("TCEAL4 expression")),
+                                    expression(italic("Serum CA125 biomarker status")))
+         ,
+         col = c("deeppink","blue","#469990", "#808000", "grey" ), lty = 1, 
+         cex = 1, lwd =3)
+}
+#show plot
+roc_plot_customen()
+# Save the plot as a PNG file
+png("FIG_best3_HSGOC_BENIGN20260218.png", width = 15, height = 15, res = 510, units = "cm")
+roc_plot_customen()
+#mtext("B", side = 3, adj = 0, line = 2.5, cex = 1.5, font = 2)
+dev.off()
+
+
+
+results_roc_customen <- results_roc_custom
+
+colnames(results_roc_customen) <- c("Predictor", "AUC", "threshold", "accuracy", "sensitivity", "specificity")
+results_roc_customen$Predictor <- c("GRB7 + TCEAL4 combination", "10 Gene expression combination",
+                                    "GRB7 expression", "TCEAL4 expression",
+                                    "Serum CA125 biomarker status"
+)
+
+
+
+gt_table_cuten <- results_roc_customen %>%
+  gt() %>%
+  tab_header(
+    title = "ROC metrics",
+    subtitle = "Separation of HGSOC form benign cases",
+  ) %>%
+  fmt_number(
+    columns = everything(),
+    decimals = 3
+  ) %>%
+  tab_style(
+    style = cell_text(style = "italic"),
+    locations = cells_body(columns = vars(Predictor))
+  )
+#show
+gt_table_cuten
+
+#there is no other convieneat way to save gt outputs
+gtsave(gt_table_cuten,vwidth = 500,
+       filename = "FIG_tabbest3_HGSOC_BENIGN20260218.png")

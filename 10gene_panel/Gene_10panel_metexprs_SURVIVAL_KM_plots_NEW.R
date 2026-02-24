@@ -445,7 +445,7 @@ combined_plot_genes10_2xEN <- wrap_plots(plots_genes10_2xEN, ncol = 2)
 
 combined_plot_genes_notch_2xEN <- wrap_plots(plots_genes_notch_2xEN, ncol = 2)
 
-#save 10 gene#######################################################
+##save 10 gene#######################################################
 ggsave(
   filename = "KM_combined_plot_w_HR_OC_10_gene_20260130EN.png",  # output file name
   plot = combined_plot_genes10_2xEN,               # the patchwork plot object
@@ -460,6 +460,33 @@ ggsave(
   width  = ncol * panel_width,
   height = nrow * panel_height,
   dpi    = 400                            # resolution
+)
+## Combine separately EN HOROZONTAL##########################################
+combined_plot_genes10_2xEN <- wrap_plots(plots_genes10_2xEN, ncol = 5)
+
+combined_plot_genes_notch_2xEN <- wrap_plots(plots_genes_notch_2xEN, ncol = 5)
+
+# 5 rows, 2 columns
+nrow <- 2
+ncol <- 5
+
+panel_width  <- 7  # in per panel
+panel_height <- 6 # in per panel
+#save 10 gene
+ggsave(
+  filename = "KM_combined_plot_w_HR_OC_10_gene_20260218EN.png",  # output file name
+  plot = combined_plot_genes10_2xEN,               # the patchwork plot object
+  width  = ncol * panel_width,
+  height = nrow * panel_height,
+  dpi    = 300                              # resolution
+)
+#save notch
+ggsave(
+  filename = "KM_combined_plot_w_HR_OC_notch_20260218EN.png",  # output file name
+  plot = combined_plot_genes_notch_2xEN,               # the patchwork plot object
+  width  = ncol * panel_width,
+  height = nrow * panel_height,
+  dpi    = 300                            # resolution
 )
 
 #METHYLATION, OC cases#################################
